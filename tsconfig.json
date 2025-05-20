@@ -1,0 +1,127 @@
+// {
+//   "compilerOptions": {
+//     // 🚫 Disables errors for unused variables/functions (e.g., `const x = 10;`).
+//     // Useful for prototypes but hides potential dead code.
+//     "noUnusedLocals": true,
+
+//     // 🚫 Disables errors for unused function parameters (e.g., `(a: string, b: number)` where `b` isn't used).
+//     // Helpful for frameworks (e.g., React event handlers) but can hide typos.
+//     "noUnusedParameters": true,
+
+//     // ⚠️ Prevents compilation if there are errors (ensures clean builds).
+//     "noEmitOnError": true,
+
+//     // ✅ Allows default imports (e.g., `import React from 'react'`) even if modules don’t have a default export.
+//     "allowSyntheticDefaultImports": true,
+
+//     // 📁 Custom type directories (your local types + Node.js types).
+//     "typeRoots": ["./types", "./node_modules/@types"],
+
+//     // 🧠 Target JavaScript version (ES2017 for modern browsers).
+//     "target": "ES2017",
+
+//     // 🧪 Includes DOM and ESNext types for advanced features (e.g., `Map`, `Set`).
+//     "lib": ["dom", "dom.iterable", "esnext"],
+
+//     // 📜 Allows JavaScript files in the project (mixed TS/JS projects).
+//     "allowJs": true,
+
+//     // ⚡ Skips checking `.d.ts` files for faster builds.
+//     "skipLibCheck": true,
+
+//     // 🔍 Enables strict type-checking (null safety, implicit `any` errors).
+//     "strict": true,
+
+//     // 🚫 No output files (used for type-only projects or JSDoc).
+//     "noEmit": true,
+
+//     // 🔄 Enables compatibility with CommonJS/ESM interop (required for Next.js).
+//     "esModuleInterop": true,
+
+//     // 📦 Uses modern ES module syntax.
+//     "module": "esnext",
+
+//     // 🧩 Uses bundler-style module resolution (Vite/Next.js specific).
+//     "moduleResolution": "bundler",
+
+//     // 📄 Allows importing JSON files as modules.
+//     "resolveJsonModule": true,
+
+//     // 🛠️ Ensures files can be compiled independently (required for Babel).
+//     "isolatedModules": true,
+
+//     // 📱 Preserves JSX syntax for framework processing (Next.js specific).
+//     "jsx": "preserve",
+
+//     // ⏱️ Speeds up rebuilds by tracking changes incrementally.
+//     "incremental": true,
+
+//     // 🧩 Enables Next.js-specific features (e.g., dynamic imports).
+//     "plugins": [
+//       {
+//         "name": "next"
+//       }
+//     ],
+
+//     // 🔄 Path aliases for cleaner imports (e.g., `@/components` instead of relative paths).
+//     "paths": {
+//       "@/*": ["./*"]
+//     }
+//   },
+//   "include": [
+//     // 📄 Next.js environment types.
+//     "next-env.d.ts",
+    
+//     // 📁 All TypeScript files.
+//     "**/*.ts",
+//     "**/*.tsx",
+    
+//     // 🧪 Auto-generated types from Next.js.
+//     ".next/types/**/*.ts",
+    
+//     // 📁 Specific component files (keep this minimal unless necessary).
+//     "app/dashboard/porductmangment/itemdetail/[id]/component/UpdateProductForm.tsx",
+//     "app/(e-comm)/homepage/component/product/ProducCategory.tsx"
+//   ],
+//   "exclude": [
+//     // 🚫 Excludes Node.js dependencies.
+//     "node_modules"
+//   ]
+// }
+
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["es2022", "dom", "dom.iterable"],
+    "jsx": "preserve",
+    "jsxImportSource": "react",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noEmit": false, // Enable for production builds
+    "incremental": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowJs": true,
+    "downlevelIteration": true,
+    "baseUrl": ".",
+    "types": ["next", "next/types", "tailwindcss"],
+    "plugins": [{ "name": "next" }],
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "tailwind.config.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}
