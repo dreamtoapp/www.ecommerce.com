@@ -9,13 +9,13 @@ import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 
-import { Company } from '../../../types/company';
 import { fetchCompany } from './actions/fetchCompany';
 import { saveCompany } from './actions/saveCompnay';
 import GeneralInfoSection from './component/GeneralInfoSection';
 import LocationSection from './component/LocationSection';
 import SettingsSkeleton from './component/SettingsSkeleton';
 import SocialMediaSection from './component/SocialMediaSection';
+import { Company } from '@/types/databaseTypes';
 
 // Main Component
 export default function SettingsPage() {

@@ -2,7 +2,7 @@
 import nodemailer from 'nodemailer';
 
 import db from '@/lib/prisma';
-import { Company } from '@/types/company';
+import { Company } from '@/types/databaseTypes';
 
 interface EmailOptions {
   to: string;

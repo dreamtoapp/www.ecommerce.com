@@ -1,5 +1,6 @@
+import { Product } from '@/types/databaseTypes';
 import CartItem from './CartItem';
-import { Product } from '@/types/product'; // Import Product type
+
 
 // Define types for cart structure
 interface CartItemData {
@@ -26,25 +27,25 @@ const CartItemsList = ({ cart, isLoading }: { cart: CartState; isLoading: boolea
           </div>
         ))
         : Object.values(cart).map(({ product, quantity }) => {
-            // Map product to expected CartItemProps type
-            const safeProduct = {
-              id: product.id,
-              name: product.name,
-              price: product.price,
-              type: product.type,
-              imageUrl: product.imageUrl ?? null,
-              details: product.details ?? null,
-            };
-            return (
-              <CartItem
-                key={product.id}
-                product={safeProduct}
-                quantity={quantity}
-              />
-            );
-          })
-        }
-      </div>
+          // Map product to expected CartItemProps type
+          const safeProduct = {
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            type: product.type,
+            imageUrl: product.imageUrl ?? null,
+            details: product.details ?? null,
+          };
+          return (
+            <CartItem
+              key={product.id}
+              product={safeProduct}
+              quantity={quantity}
+            />
+          );
+        })
+      }
+    </div>
   );
 };
 export default CartItemsList;

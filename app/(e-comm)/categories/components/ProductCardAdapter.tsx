@@ -7,7 +7,7 @@ import {
 
 import ProductCard from '@/components/product/ProductCard';
 import { useCartContext } from '@/providers/cart-provider';
-import { Product } from '@/types/product';
+import { Product } from '@/types/databaseTypes';;
 
 import { DiscountedProduct } from '../../promotions/actions/promotionService';
 

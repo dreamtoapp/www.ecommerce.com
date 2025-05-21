@@ -1,7 +1,7 @@
 'use server';
 import db from '@/lib/prisma';
 import { ImageToCloudinary } from '@/lib/cloudinary/uploadImageToCloudinary';
-import { Company } from '@/types/company';
+import { Company } from '@/types/databaseTypes';
 
 export const saveCompany = async (formData: FormData): Promise<void> => {
   try {

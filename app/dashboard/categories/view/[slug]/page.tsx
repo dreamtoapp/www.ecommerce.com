@@ -6,7 +6,7 @@ import BackButton from '@/components/BackButton';
 import ProductCard from '@/components/product/ProductCard';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Product } from '@/types/product';
+import { Product } from '@/types/databaseTypes';;
 
 import { getCategoryBySlug } from '../../actions/get-category-by-slug';
 import {

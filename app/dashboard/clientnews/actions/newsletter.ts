@@ -2,10 +2,10 @@
 
 import { revalidatePath } from 'next/cache';
 import db from '../../../../lib/prisma';
-import { Subscriber } from '../../../../types/newsletters';
+import { NewLetter } from '@/types/databaseTypes';
 
 // Fetch all subscribers
-export async function fetchSubscribers(): Promise<Subscriber[]> {
+export async function fetchSubscribers(): Promise<NewLetter[]> {
   return await db.newLetter.findMany({
     orderBy: { createdAt: 'desc' },
   });

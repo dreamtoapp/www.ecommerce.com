@@ -13,7 +13,7 @@ import {
 } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
-import { Product } from '@/types/product';
+import { Product } from '@/types/databaseTypes';;
 import { debounce } from '@/utils/debounce';
 
 import { fetchFilteredProducts } from '../actions/fetchFilteredProducts';

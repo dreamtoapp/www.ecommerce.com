@@ -1,4 +1,4 @@
-import { Product as ProductType } from '@/types/product'; // Assuming ProductType is your shared product type
+import { Product as ProductType } from '@/types/databaseTypes';; // Assuming ProductType is your shared product type
 
 export interface SalesByMonthData {
   month: string;

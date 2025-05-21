@@ -24,8 +24,7 @@ import {
 import { Input } from '../../../../components/ui/input';
 import { Label } from '../../../../components/ui/label';
 import useAccurateGeolocation from '../../../../hooks/use-geo';
-import { Company } from '../../../../types/company';
-
+import { Company } from '@/types/databaseTypes';
 interface FormErrors {
   address?: string;
   latitude?: string;

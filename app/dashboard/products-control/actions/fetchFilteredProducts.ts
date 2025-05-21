@@ -1,7 +1,7 @@
 'use server';
 import db from '@/lib/prisma';
 // Define the type for Product including the supplier relation
-import { Product } from '@/types/product';
+import { Product } from '@/types/databaseTypes';;
 import { Prisma } from '@prisma/client'; // Import Prisma
 
 type FetchedProduct = Omit<Prisma.ProductGetPayload<{ // Renamed for clarity

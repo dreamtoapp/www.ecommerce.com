@@ -2,7 +2,7 @@
 import Image from 'next/image';
 
 import { Skeleton } from '@/components/ui/skeleton';
-import { Product } from '@/types/product'; // Import Product from shared types
+import { Product } from '@/types/databaseTypes';; // Import Product from shared types
 
 import ProductTableClientActions from './ProductTableClientActions';
 

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Product } from '@/types/product'; // Added import
+import { Product } from '@/types/databaseTypes';; // Added import
 
 import ProductCard from './ProductCard';
 

@@ -2,7 +2,7 @@
 
 
 import { CardContent } from '@/components/ui/card';
-import { Product } from '@/types/product';
+import { Product } from '@/types/databaseTypes';;
 
 import UpdateProductDialog from '../../../components/UpdateProductDialog';
 import ProductHeader from './ProductHeader';

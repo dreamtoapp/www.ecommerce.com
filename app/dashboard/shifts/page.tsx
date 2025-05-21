@@ -23,12 +23,12 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Shift } from '@/types/shift';
 
 import { Button } from '../../../components/ui/button';
 import { createShift } from './actions/createShift';
 import { deleteShift } from './actions/deleteShift';
 import { fetchShifts } from './actions/fetchShifts';
+import { Shift } from '@/types/databaseTypes';
 
 // النصوص العربية
 const UI_TEXT = {
@@ -72,7 +72,8 @@ const formatTimeToArabic = (time: string) => {
 };
 
 export default function ShiftsPage() {
-  const [shifts, setShifts] = useState<Shift[]>([]);
+  const [shifts, setShifts] = useState<Partial<Shift>[]>([]);
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newShift, setNewShift] = useState<Partial<Shift>>({
     name: '',
@@ -179,8 +180,8 @@ export default function ShiftsPage() {
     return (
       <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3'>
         {shifts.map((shift) => {
-          const start = parse(shift.startTime, 'HH:mm', new Date());
-          const end = parse(shift.endTime, 'HH:mm', new Date());
+          const start = parse(shift.startTime!, 'HH:mm', new Date());
+          const end = parse(shift.endTime!, 'HH:mm', new Date());
 
           return (
             <Card
@@ -204,7 +205,7 @@ export default function ShiftsPage() {
                 <Button
                   variant='destructive'
                   size='sm'
-                  onClick={() => handleDeleteShift(shift.id)}
+                  onClick={() => handleDeleteShift(shift.id!)}
                   aria-label={`${UI_TEXT.deleteButton} ${shift.name}`}
                 >
                   {UI_TEXT.deleteButton}

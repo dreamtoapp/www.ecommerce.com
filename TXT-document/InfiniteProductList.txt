@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 import dynamic from 'next/dynamic';
 
-import { Product } from '@/types/product';
+import { Product } from '@/types/databaseTypes';;
 import uniqeId from '@/utils/uniqeId';
 
 import { fetchPaginatedProducts } from '../../actions/fetchPaginatedProducts';

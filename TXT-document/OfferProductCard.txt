@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import EnhancedProductCard from '@/components/product/EnhancedProductCard';
-import { Product } from '@/types/product';
+import { Product } from '@/types/databaseTypes';;
 
 // Simplified OfferProductCard component that uses EnhancedProductCard
 const OfferProductCard = ({

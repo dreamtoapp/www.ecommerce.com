@@ -8,7 +8,7 @@ import {
 import { useInView } from 'react-intersection-observer';
 
 import { useCartStore } from '@/store/cartStore';
-import { Product } from '@/types/product';
+import { Product } from '@/types/databaseTypes';;
 
 import { fetchProductsPage } from '../../actions/fetchProductsPage';
 import ProductSkeleton from '../../component/ProductSkeleton';

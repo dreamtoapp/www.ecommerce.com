@@ -1,6 +1,6 @@
 'use client';
 import EnhancedProductCard from '@/components/product/EnhancedProductCard';
-import { Product } from '@/types/product';
+import { Product } from '@/types/databaseTypes';;
 
 interface CategoryProductCardProps {
     product: Product;

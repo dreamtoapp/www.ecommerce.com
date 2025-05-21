@@ -15,7 +15,6 @@ import {
   OrderHistoryItem,
   SalesByMonthData,
 } from '@/types/analytics';
-import { Company } from '@/types/company';
 
 import AnalyticsChart from './AnalyticsChart';
 import ChartTypeSwitcher from './ChartTypeSwitcher';
@@ -24,6 +23,7 @@ import DateRangePicker from './DateRangePicker';
 import ProductInfo from './ProductInfo';
 import ProductOrderHistoryTable from './ProductOrderHistoryTable';
 import ProductRatingsSection from './ProductRatingsSection';
+import { Company } from '@/types/databaseTypes';
 
 export default function ClientAnalyticsDashboard({
   analytics,

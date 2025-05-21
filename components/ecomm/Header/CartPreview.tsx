@@ -9,7 +9,7 @@ import { formatCurrency } from '@/lib/formatCurrency';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Product } from '@/types/product';
+import { Product } from '@/types/databaseTypes';;
 import { cn } from '@/lib/utils';
 
 // Mini cart item component for the preview
@@ -48,7 +48,7 @@ const CartPreviewItem = ({
                     </div>
                 </div>
             </div>
-            
+
             {/* Controls row - separate row for controls to ensure they're always visible */}
             <div className="flex items-center justify-end gap-2 rtl:flex-row-reverse">
                 <Button

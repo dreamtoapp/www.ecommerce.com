@@ -14,7 +14,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { iconVariants } from '@/lib/utils';
-import { Product } from '@/types/product';
+import { Product } from '@/types/databaseTypes';;
 
 // نصوص واجهة المستخدم بالعربي
 const UI_TEXT = {

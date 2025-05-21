@@ -12,7 +12,7 @@ import {
 import NoData from '@/app/(e-comm)/homepage/component/product/NoProduct';
 import { Button } from '@/components/ui/button';
 import { useCartStore } from '@/store/cartStore';
-import { Product } from '@/types/product';
+import { Product } from '@/types/databaseTypes';;
 
 // Import ProductCard directly for better performance
 import ProductCard from './ProductCard';

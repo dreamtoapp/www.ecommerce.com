@@ -12,7 +12,7 @@ import RatingPreview from '@/components/rating/RatingPreview';
 import WishlistButton from '@/components/wishlist/WishlistButton';
 import { Alert } from '@/lib/alert-utils';
 import { cn } from '@/lib/utils';
-import { Product } from '@/types/product';
+import { Product } from '@/types/databaseTypes';;
 import { useCartContext } from '@/providers/cart-provider';
 
 interface EnhancedProductCardProps {

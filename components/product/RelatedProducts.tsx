@@ -5,7 +5,7 @@ import {
   useState,
 } from 'react';
 
-import { Product } from '@/types/product'; // Import shared Product type
+import { Product } from '@/types/databaseTypes';; // Import shared Product type
 
 import ProductCard from './ProductCard';
 

@@ -13,8 +13,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-import { Shift } from '../../../../types/shift';
 import { getAvailableShifts } from '../actions/shiftActions';
+import { Shift } from '@/types/databaseTypes';
 
 interface ShiftSelectorProps {
   selectedShiftId: string;
@@ -23,7 +23,8 @@ interface ShiftSelectorProps {
 
 
 export const ShiftSelector = ({ selectedShiftId, onShiftSelect }: ShiftSelectorProps) => {
-  const [shifts, setShifts] = useState<Shift[]>([]);
+  const [shifts, setShifts] = useState<Partial<Shift>[]>([]);
+
 
   useEffect(() => {
     const fetchShifts = async () => {
@@ -43,7 +44,7 @@ export const ShiftSelector = ({ selectedShiftId, onShiftSelect }: ShiftSelectorP
       </SelectTrigger>
       <SelectContent>
         {shifts.map((shift) => (
-          <SelectItem key={shift.id} value={shift.id}>
+          <SelectItem key={shift.id} value={shift.id!}>
             {`${shift.startTime} - ${shift.endTime}`}
           </SelectItem>
         ))}

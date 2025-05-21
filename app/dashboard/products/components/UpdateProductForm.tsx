@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import ReactSwal from '@/lib/swal-config';
-import { Product } from '@/types/product';
+import { Product } from '@/types/databaseTypes';;
 
 import { updateProduct } from '../actions/update-product';
 

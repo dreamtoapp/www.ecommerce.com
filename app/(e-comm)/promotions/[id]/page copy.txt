@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import db from '@/lib/prisma';
-import { Product } from '@/types/product';
+import { Product } from '@/types/databaseTypes';;
 
 import ProductCardAdapter from '../../categories/components/ProductCardAdapter';
 import { applyPromotionsToProducts } from '../actions/promotionService';

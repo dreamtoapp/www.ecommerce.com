@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"; // Assuming shadcn/ui path
-import { Product } from '@/types/product';
+import { Product } from '@/types/databaseTypes';;
 
 import { deleteProduct } from '../actions/deleteProduct';
 import { iconVariants } from '@/lib/utils';

@@ -1,7 +1,7 @@
 'use server';
 
 import db from '@/lib/prisma';
-import { Product } from '@/types/product';
+import { Product } from '@/types/databaseTypes';;
 import { Prisma } from '@prisma/client'; // Import Prisma
 
 import {

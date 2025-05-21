@@ -1,6 +1,6 @@
 'use server';
 import db from '@/lib/prisma';
-import { Shift } from '@/types/shift';
+import { Shift } from '@/types/databaseTypes';
 
 export async function createShift(data: Partial<Shift>): Promise<Shift> {
   try {

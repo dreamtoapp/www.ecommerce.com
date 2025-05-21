@@ -1,5 +1,5 @@
 import db from '@/lib/prisma';
-import { Product } from '@/types/product';
+import { Product } from '@/types/databaseTypes';;
 
 // Extract real ID from slug-format URL parameter
 function extractIdFromParam(param: string): string {

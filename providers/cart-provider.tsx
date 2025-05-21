@@ -2,7 +2,7 @@
 
 import { createContext, useContext, ReactNode } from 'react';
 import { useCart, CartItem } from '@/hooks/useCart';
-import { Product } from '@/types/product';
+import { Product } from '@/types/databaseTypes';;
 import { DiscountedProduct } from '@/app/(e-comm)/promotions/actions/promotionService';
 
 // Define the context type

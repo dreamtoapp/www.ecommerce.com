@@ -14,7 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Product } from '@/types/product';
+import { Product } from '@/types/databaseTypes';;
 
 import UpdateProductForm from './UpdateProductForm';
 

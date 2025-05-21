@@ -9,7 +9,7 @@ import {
 import {
   DiscountedProduct,
 } from '@/app/(e-comm)/promotions/actions/promotionService';
-import { Product } from '@/types/product';
+import { Product } from '@/types/databaseTypes';;
 
 // Define CartItem type
 export interface CartItem {

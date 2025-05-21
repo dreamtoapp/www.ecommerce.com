@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-import { Product } from '@/types/product';
+import { Product } from '@/types/databaseTypes';;
 
 // تعريف هيكل عنصر السلة، والذي يتكون من المنتج وكميته.
 interface CartItem {

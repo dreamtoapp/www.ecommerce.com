@@ -23,9 +23,9 @@ import {
   CardFooter,
   CardHeader,
 } from '../../../../../components/ui/card';
-import { Product } from '../../../../../types/product';
 import Notification from '../NotificationSection';
 import QuantityControls from '../QuantityControls';
+import { Product } from '@/types/databaseTypes';
 
 // Memoized TotalPrice component
 const TotalPrice = memo(({ quantity, price }: { quantity: number; price: number }) => {

@@ -1,7 +1,7 @@
 'use server';
 
 import db from '@/lib/prisma';
-import { Product } from '@/types/product';
+import { Product } from '@/types/databaseTypes';;
 import { PromotionType } from '@prisma/client';
 
 export interface DiscountedProduct extends Product {

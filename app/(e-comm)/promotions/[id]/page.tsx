@@ -6,7 +6,7 @@ import {
     getPromotionPageData,
 } from '@/app/(e-comm)/promotions/actions/promotion-service';
 import { Button } from '@/components/ui/button';
-import { Product } from '@/types/product';
+import { Product } from '@/types/databaseTypes';;
 
 import ProductCardAdapter from '../../categories/components/ProductCardAdapter';
 import { applyPromotionsToProducts } from '../actions/promotionService';

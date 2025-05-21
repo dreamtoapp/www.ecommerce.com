@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button'; // Import Button
 import { Input } from '@/components/ui/input';
 import WishlistButton from '@/components/wishlist/WishlistButton';
 import { cn } from '@/lib/utils';
-import { Product } from '@/types/product';
+import { Product } from '@/types/databaseTypes';;
 
 import Link from '../link';
 
