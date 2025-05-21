@@ -1,5 +1,6 @@
 // types/prisma.ts
 import {
+  Prisma,
   Account as PrismaAccount,
   Category as PrismaCategory,
   CategoryProduct as PrismaCategoryProduct,
@@ -13,7 +14,7 @@ import {
   LocationHistory as PrismaLocationHistory,
   NewLetter as PrismaNewLetter,
   Notification as PrismaNotification,
-  Order as PrismaOrder,
+  // Order as PrismaOrder,
   OrderInWay as PrismaOrderInWay,
   OrderItem as PrismaOrderItem,
   Product as PrismaProduct,
@@ -48,7 +49,7 @@ export type GlobalSEO = PrismaGlobalSEO;
 export type LocationHistory = PrismaLocationHistory;
 export type NewLetter = PrismaNewLetter;
 export type Notification = PrismaNotification;
-export type Order = PrismaOrder;
+// export type Order = PrismaOrder;
 export type OrderInWay = PrismaOrderInWay;
 export type OrderItem = PrismaOrderItem;
 export type Product = PrismaProduct;
@@ -69,11 +70,17 @@ export type WebVital = PrismaWebVital;
 export type WishlistItem = PrismaWishlistItem;
 
 
-// import {
-//   Company as PrismaCompany,
-//   Product as PrismaProduct,
-// } from '@prisma/client';
+export const orderIncludeRelation = {
+  items: {
+    include: {
+      product: true,
+    },
+  },
+  customer: true,
+  driver: true,
+  shift: true,
+} satisfies Prisma.OrderInclude;
 
-// export type Product = PrismaProduct;
-
-// export type Company = PrismaCompany;
+export type Order = Prisma.OrderGetPayload<{
+  include: typeof orderIncludeRelation;
+}>;

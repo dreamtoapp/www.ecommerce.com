@@ -5,7 +5,7 @@ import { useState } from 'react';
 import Carousel from 'react-multi-carousel';
 import Image from 'next/image';
 import Link from 'next/link';
-import { CarouselImage } from '@/types/carouselTypes'; // Import shared type
+import { CarouselImage } from '@/types/commonType';
 
 const responsive = {
   desktop: {
@@ -21,15 +21,6 @@ const responsive = {
     items: 1,
   },
 };
-
-// Remove local definition
-// interface CarouselImage {
-//   id: string;
-//   src: string | StaticImageData;
-//   alt: string;
-//   width?: number;
-//   height?: number;
-// }
 
 interface SimpleCarouselProps {
   images: CarouselImage[]; // Use imported type

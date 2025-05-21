@@ -6,10 +6,10 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
 import { Skeleton } from '@/components/ui/skeleton';
-import { Order } from '@/types/cardType';
 
 import { fetchOrdersAction } from '../../action/fetchOrders';
 import OrderCard from './OrderCard';
+import { Order } from '@/types/databaseTypes';
 
 // Memoize the OrderCard to prevent unnecessary re-renders
 const MemoizedOrderCard = memo(OrderCard);

@@ -1,9 +1,10 @@
 'use server';
 import { ORDER_STATUS } from '@/constant/order-status';
 import db from '@/lib/prisma';
+import { Order, orderIncludeRelation } from '@/types/databaseTypes';
 
 export type OrdersResponse = {
-  orders: any[];
+  orders: Order[];
   totalCount: number;
   totalPages: number;
 };
@@ -79,38 +80,14 @@ export async function fetchOrders({
       where,
       skip,
       take: pageSize,
-      include: {
-        customer: {
-          select: {
-            name: true,
-            email: true,
-            phone: true,
-          },
-        },
-        items: {
-          include: {
-            product: {
-              select: {
-                name: true,
-                price: true,
-                images: true,
-              },
-            },
-          },
-        },
-        driver: {
-          select: {
-            name: true,
-            phone: true,
-          },
-        },
-        orderInWay: true,
-      },
+      include: orderIncludeRelation,
       orderBy: {
         createdAt: 'desc',
       },
-    }); return {
-      orders,
+    });
+    console.log('Fetched orders:', orders[0]);
+    return {
+      orders: orders as Order[],
       totalCount,
       totalPages,
     };

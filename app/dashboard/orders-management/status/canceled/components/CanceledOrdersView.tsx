@@ -44,9 +44,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
-import { Order } from '@/types/cardType';
 
 import { restoreOrder } from '../actions/restore-order';
+import { Order } from '@/types/databaseTypes';
 
 interface CanceledOrdersViewProps {
   orders: Order[];

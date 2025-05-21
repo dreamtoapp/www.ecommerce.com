@@ -1,6 +1,7 @@
 'use server';
 import { ORDER_STATUS } from '@/constant/order-status';
 import db from '@/lib/prisma';
+import { Order, orderIncludeRelation } from '@/types/databaseTypes';
 
 export async function fetchOrders({
   status,
@@ -8,40 +9,14 @@ export async function fetchOrders({
 }: {
   status?: string;
   driverId?: string;
-}): Promise<{ orders: any[] }> {
+}): Promise<{ orders: Order[] }> {
   try {
     const where: any = status ? { status } : {};
     if (driverId) where.driverId = driverId;
 
     const orders = await db.order.findMany({
       where,
-      include: {
-        customer: {
-          select: {
-            name: true,
-            email: true,
-            phone: true,
-          },
-        },
-        items: {
-          include: {
-            product: {
-              select: {
-                name: true,
-                price: true,
-                images: true,
-              },
-            },
-          },
-        },
-        driver: {
-          select: {
-            name: true,
-            phone: true,
-          },
-        },
-        orderInWay: true,
-      },
+      include: orderIncludeRelation,
       orderBy: {
         createdAt: 'desc',
       },

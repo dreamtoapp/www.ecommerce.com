@@ -5,7 +5,7 @@ import db from '@/lib/prisma';
 import { pusherServer } from '@/lib/pusherServer';
 
 import { generateOrderNumber } from '../helpers/orderNumber';
-import { OrderCartItem } from '@/types/order';
+import { OrderCartItem } from '@/types/commonType';
 
 export async function CreateOrderInDb(orderData: {
   userId: string;

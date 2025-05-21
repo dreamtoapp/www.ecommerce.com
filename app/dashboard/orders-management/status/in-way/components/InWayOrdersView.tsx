@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -26,7 +27,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
-import { Order } from '@/types/cardType';
+import { Order } from '@/types/databaseTypes';
 
 interface InWayOrdersViewProps {
   orders: Order[];
@@ -46,7 +47,9 @@ export default function InWayOrdersView({
   // Sort orders by driver name
   const sortedOrders = [...orders].sort((a, b) => {
     const nameA = a.driver?.name || '';
+
     const nameB = b.driver?.name || '';
+
     if (driverSort === 'asc') {
       return nameA.localeCompare(nameB, 'ar');
     } else {
@@ -113,7 +116,7 @@ export default function InWayOrdersView({
                             {order.orderNumber}
                           </Link>
                         </TableCell>
-                        <TableCell className="align-middle">{order.customer?.name || 'غير معروف'}</TableCell>
+                        <TableCell className="align-middle">{order.customer.name || 'غير معروف'}</TableCell>
                         <TableCell className="align-middle">
                           <div className="flex items-center gap-2">
                             <div className="h-8 w-8 rounded-full flex items-center justify-center"
@@ -133,15 +136,17 @@ export default function InWayOrdersView({
                         <TableCell className="font-semibold align-middle">{order.amount} ر.س</TableCell>
                         <TableCell className="align-middle">
                           <div className="flex items-center gap-2">
-                            {order.driver?.phone ? (
+
+                            {order.driverId ? (
+
                               <a
-                                href={`tel:${order.driver.phone}`}
+                                href={`tel:${order.driverId}`}
                                 className="inline-flex h-8 w-8 items-center justify-center rounded-md p-0 text-blue-600 hover:bg-blue-100 hover:text-blue-700"
-                                title={order.driver.phone}
+                                title={order.driverId}
                                 style={{ direction: 'ltr' }}
                               >
                                 <PhoneCall className="h-4 w-4" />
-                                <span className="sr-only">{order.driver.phone}</span>
+                                <span className="sr-only">{order.driverId}</span>
                               </a>
                             ) : (
                               <Button

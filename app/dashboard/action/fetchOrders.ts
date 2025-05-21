@@ -1,142 +1,61 @@
 'use server';
+
 import { cacheData } from '@/lib/cache';
 import db from '@/lib/prisma';
-import { Order } from '@/types/cardType';
+import { Order } from '@/types/databaseTypes';
 
-// Define the argument type for clarity
-type FetchOrdersArgs = {
+/**
+ * Options for fetching orders
+ */
+type OrderFilterOptions = {
   status?: string;
   page?: number;
   pageSize?: number;
 };
 
-// Cached fetchOrdersAction
+/**
+ * Fetches orders with optional filtering and pagination
+ * Uses cacheData utility for efficient data caching with a 1-hour revalidation period
+ * 
+ * @returns Promise containing an array of orders with related data
+ */
 export const fetchOrdersAction = cacheData<
-  [FetchOrdersArgs?], // Args type: An array containing zero or one FetchOrdersArgs object
-  Order[], // Return type
-  (args?: FetchOrdersArgs) => Promise<Order[]> // Update T to reflect optional arg
+  [OrderFilterOptions?],  // Args type: Array with optional filter object
+  Order[],                // Return type
+  (options?: OrderFilterOptions) => Promise<Order[]>  // Full function signature
 >(
-  // Modify implementation to accept optional arg and handle undefined
-  async (args?: FetchOrdersArgs) => {
-    const { status, page = 1, pageSize = 10 } = args || {}; // Handle undefined args before destructuring
+  async (options?: OrderFilterOptions) => {
+    // Set defaults for undefined options
+    const {
+      status,
+      page = 1,
+      pageSize = 10
+    } = options || {};
+
     try {
-      // Create a where clause for status filtering
-      let whereClause = {};
+      // Build where clause conditionally
+      const where = status ? { status } : {};
 
-      if (status) {
-        // Use the status directly as a string value
-        whereClause = { status };
-      }
-
+      // Fetch orders with relations
       const orders = await db.order.findMany({
-        where: whereClause,
+        where,
         skip: (page - 1) * pageSize,
         take: pageSize,
-        select: {
-          id: true,
-          orderNumber: true,
-          customerName: true,
-          status: true,
-          isTripStart: true,
-          resonOfcancel: true,
-          amount: true,
-          createdAt: true,
-          updatedAt: true,
-          customerId: true,
-          shiftId: true,
-          driverId: true,
+        include: {
           items: {
-            select: {
-              id: true,
-              productId: true,
-              quantity: true,
-              price: true,
-              product: {
-                select: {
-                  id: true,
-                  name: true,
-                  price: true,
-                },
-              },
-            },
+            include: { product: true }
           },
-          shift: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-          customer: {
-            select: {
-              id: true,
-              phone: true,
-              name: true,
-              address: true,
-              latitude: true,
-              longitude: true,
-            },
-          },
-          driver: {
-            select: {
-              id: true,
-              name: true,
-              phone: true,
-            },
-          },
-        },
-        orderBy: { updatedAt: 'desc' },
+          customer: true,
+          driver: true,
+          shift: true
+        }
       });
 
-      const transformedOrders = orders.map(order => {
-        console.log("Order before transformation:", order);
-        const transformedOrder: Order = {
-          id: order.id,
-          orderNumber: order.orderNumber,
-          status: order.status,
-          isTripStart: order.isTripStart,
-          // resonOfcancel: order.resonOfcancel,
-          amount: order.amount,
-          createdAt: order.createdAt,
-          updatedAt: order.updatedAt,
-          // paymentMethod: null,
-          // deliveredAt: null,
-          items: order.items.map(item => ({
-            productId: item.productId,
-            quantity: item.quantity,
-            price: item.price,
-            product: item.product ? {
-              name: item.product.name,
-              price: item.product.price,
-              images: [], // Assuming no images are available here
-            } : { name: '', price: 0, images: [] }
-          })),
-          customer: {
-            phone: order.customer?.phone || "",
-            name: order.customer?.name || "",
-            email: "", // Assuming no email is available here
-            address: order.customer?.address || undefined,
-            latitude: order.customer?.latitude || "",
-            longitude: order.customer?.longitude || ""
-          },
-          driver: order.driver ? {
-            id: order.driver.id,
-            name: order.driver.name,
-            phone: order.driver.phone
-          } : null,
-          orderInWay: null, // Assuming no data for orderInWay
-          driverId: order.driverId || null,
-          // shiftId: order.shiftId
-        };
-        console.log("Transformed order:", transformedOrder);
-        return transformedOrder;
-      });
-
-      console.log("Transformed orders:", transformedOrders);
-      return transformedOrders as any;
+      return orders as Order[];
     } catch (error) {
       throw new Error('Failed to fetch orders.');
     }
   },
-  ['fetchOrders'], // Cache key
-  { revalidate: 3600 },
+  ['fetchOrders'],
+  { revalidate: 3600 }
 );

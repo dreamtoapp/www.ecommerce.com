@@ -30,10 +30,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Order } from '@/types/cardType';
 
 import { fetchOrdersAction } from '../../action/fetchOrders';
 import OrderCard from '../../orders/component/OrderCard';
+import { Order } from '@/types/databaseTypes';
 
 interface OrdersListProps {
   initialOrders: Order[];

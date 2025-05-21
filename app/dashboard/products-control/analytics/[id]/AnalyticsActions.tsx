@@ -3,7 +3,7 @@ import { Printer, FileDown } from 'lucide-react'; // Import directly
 import { iconVariants } from '@/lib/utils'; // Import CVA variants
 // Removed Icon import: import { Icon } from '@/components/icons';
 import { Button } from '@/components/ui/button';
-import { ProductType } from '@/types/ProductType'; // Assuming ProductType is needed indirectly via AnalyticsData
+import { Product } from '@/types/databaseTypes';
 
 // Re-define or import necessary types (consider moving to shared file if used elsewhere)
 interface SalesByMonthData {
@@ -28,7 +28,7 @@ interface OrderHistoryItem {
 }
 
 interface AnalyticsData {
-  product: ProductType;
+  product: Product;
   totalSales: number;
   totalOrders: number;
   totalCustomers?: number;

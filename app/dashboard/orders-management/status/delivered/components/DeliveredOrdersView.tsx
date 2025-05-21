@@ -4,6 +4,9 @@ import React, { useState } from 'react';
 
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+
+
+
 import {
   Calendar,
   CheckCircle,
@@ -41,7 +44,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
-import { Order } from '@/types/cardType';
+import { Order } from '@/types/databaseTypes';
 
 interface DeliveredOrdersViewProps {
   orders: Order[];
@@ -61,6 +64,7 @@ export default function DeliveredOrdersView({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  console.log({ orders })
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDateRange, setSelectedDateRange] = useState(dateRange);
@@ -231,34 +235,38 @@ export default function DeliveredOrdersView({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {orders.map((order) => (
-                  <TableRow key={order.id} className="hover:bg-secondary">
-                    <TableCell className="font-medium">
-                      <Link href={`/dashboard/show-invoice/${order.id}`} className="text-primary hover:underline">
-                        {order.orderNumber}
-                      </Link>
-                    </TableCell>
-                    <TableCell>{order.customer?.name || 'غير معروف'}</TableCell>
-                    <TableCell className="font-semibold">{order.amount} ر.س</TableCell>
-                    <TableCell>{order.deliveredAt ? formatDate(String(order.deliveredAt)) : '-'}</TableCell>
-                    <TableCell>{order.driver?.name || 'غير معروف'}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Link
-                          href={`/dashboard/show-invoice/${order.id}`}
-                          className={cn(
-                            "inline-flex h-8 w-8 items-center justify-center rounded-md p-0 text-sm font-medium transition-colors",
-                            "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                          )}
-                          title="عرض التفاصيل"
-                        >
-                          <Search className="h-4 w-4" />
-                        </Link>
+                {orders.map((order) => {
+                  console.log(order); // ✅ Logs each order object
 
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                  return (
+                    <TableRow key={order.id} className="hover:bg-secondary">
+                      <TableCell className="font-medium">
+                        <Link href={`/dashboard/show-invoice/${order.id}`} className="text-primary hover:underline">
+                          {order.orderNumber}
+                        </Link>
+                      </TableCell>
+                      <TableCell>{order.customer.name || 'غير معروف'}</TableCell>
+                      <TableCell className="font-semibold">{order.amount} ر.س</TableCell>
+                      <TableCell>{order.deliveredAt ? formatDate(String(order.deliveredAt)) : '-'}</TableCell>
+                      <TableCell>{order?.driver?.name || 'غير معروف'}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Link
+                            href={`/dashboard/show-invoice/${order.id}`}
+                            className={cn(
+                              "inline-flex h-8 w-8 items-center justify-center rounded-md p-0 text-sm font-medium transition-colors",
+                              "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                            )}
+                            title="عرض التفاصيل"
+                          >
+                            <Search className="h-4 w-4" />
+                          </Link>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+
               </TableBody>
             </Table>
           </CardContent>

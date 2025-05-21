@@ -11,9 +11,9 @@ import {
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Order } from '@/types/cardType';
 
 import OrderTable from './OrderTable';
+import { Order } from '@/types/databaseTypes';
 
 interface PendingOrdersViewProps {
   orders: Order[];
