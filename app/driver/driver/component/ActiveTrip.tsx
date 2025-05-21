@@ -6,10 +6,10 @@ import { MapPin, Package, PhoneCall, User } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-import { Order } from '../../../../types/orderType';
 import CancelOrder from './CancelOrder';
 import DeleverOrder from './DeleverOrder';
 import DriverTracker from './TrackDriver';
+import { Order } from '@/types/databaseTypes';
 
 export default function ActiveTrip({ order }: { order: Order }) {
   // Dummy coordinates for Google Maps (replace with real data if available)

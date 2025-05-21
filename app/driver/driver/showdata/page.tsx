@@ -18,8 +18,8 @@ import {
   CardHeader,
   CardTitle,
 } from '../../../../components/ui/card';
-import { getOrderByStatus } from '../action/actions';
 import StartTrip from '../component/StartTrip';
+import { getOrderByStatus } from '../action/getOrderByStatus';
 
 async function page({
   searchParams,

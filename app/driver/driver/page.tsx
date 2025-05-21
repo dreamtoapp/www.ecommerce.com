@@ -13,11 +13,10 @@ import {
 } from '@/components/ui/card';
 
 import DriverHeader from '../components/DriverHeader';
-import {
-  getActiveTrip,
-  getOrderCount,
-} from './action/actions';
+
 import ActiveTrip from './component/ActiveTrip';
+import { getActiveTrip } from './action/getActiveTrip';
+import { getOrderCount } from './action/getOrderCount';
 
 const NoActiveOrder = () => (
   <Card className='mx-auto mt-8 w-full max-w-md'>
@@ -87,7 +86,7 @@ async function Page({
           driverId={driverId}
         />
 
-        {activeTrip ? <ActiveTrip order={{ ...activeTrip, status: activeTrip.status as import('@/constant/order-status').OrderStatus }} /> : <NoActiveOrder />}
+        {activeTrip ? <ActiveTrip order={activeTrip} /> : <NoActiveOrder />}
       </div>
     );
   } catch {

@@ -14,7 +14,7 @@ import {
 } from '../../../../components/ui/dialog';
 import { Input } from '../../../../components/ui/input';
 import { Textarea } from '../../../../components/ui/textarea';
-import { cancelOrder } from '../action/actions';
+import { cancelOrder } from '../action/cancelOrder';
 
 interface CancelOrderProps {
   orderId: string;

@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '../../../../components/ui/dialog';
-import { deleverOrder } from '../action/actions';
+import { deleverOrder } from '../action/deleverOrder';
 
 interface DeleverOrderProps {
   orderId: string;
