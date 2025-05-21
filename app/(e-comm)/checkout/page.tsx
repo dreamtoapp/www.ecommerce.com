@@ -54,12 +54,12 @@ const CheckOutPage = () => {
       }));
 
       const orderData = {
-        userId: session!.user.id,
-        phone: session!.user.phone,
-        name: session!.user.name,
-        address: session!.user.address,
-        lat: session!.user.latitude,
-        lng: session!.user.longitude,
+        userId: session!.id,
+        phone: session!.phone ?? '',
+        name: session!.name ?? '',
+        address: session!.address ?? '',
+        lat: session!.latitude ?? '',
+        lng: session!.longitude ?? '',
         cart: formattedCart,
         totalAmount: getTotalPrice(),
         totalItems: getTotalItems(),
@@ -90,7 +90,7 @@ const CheckOutPage = () => {
       </div>
     );
   }
-  const clienAddress = session?.user?.address;
+  const clienAddress = session?.address;
 
   return (
     <div className='flex min-h-screen flex-col items-center justify-center gap-6 p-4 md:flex-row md:items-start'>
@@ -109,22 +109,22 @@ const CheckOutPage = () => {
               <div className='grid grid-cols-1 gap-4 rounded-lg bg-muted/10 p-4 md:grid-cols-2'>
                 <div className='space-y-1'>
                   <p className='text-sm text-muted-foreground'>رقم الهاتف</p>
-                  <p className='font-medium'>{session?.user?.phone}</p>
+                  <p className='font-medium'>{session?.phone}</p>
                 </div>
                 <div className='space-y-1'>
                   <p className='text-sm text-muted-foreground'>الاسم</p>
-                  <p className='font-medium'>{session?.user?.name}</p>
+                  <p className='font-medium'>{session?.name}</p>
                 </div>
                 <div className='space-y-1'>
                   <p className='text-sm text-muted-foreground'>العنوان</p>
                   {clienAddress ? (
-                    <p className='font-medium'>{session?.user?.address}</p>
+                    <p className='font-medium'>{session?.address}</p>
                   ) : (
                     <div className='flex items-center gap-2'>
                       <p className='font-medium text-destructive'>اضف عنوانك من فضلك</p>
                       <Button
                         variant='outline'
-                        onClick={() => router.push(`/user/profile?id=${session?.user.id}`)}
+                        onClick={() => router.push(`/user/profile?id=${session?.id}`)}
                       >
                         <Pencil />
                       </Button>

@@ -2,9 +2,9 @@ import { AlertCircle, KeyRound, ShieldX } from 'lucide-react';
 
 import Link from '@/components/link';
 import { cn } from '@/lib/utils';
-import { User } from '@/types/user';
+import { User } from '@/types/databaseTypes';
 
-const CheckUserActivation = ({ user }: { user?: User }) => {
+const CheckUserActivation = ({ user }: { user?: Partial<User> }) => {
   const isOtp = user?.isOtp;
   if (!user || isOtp) return null;
 

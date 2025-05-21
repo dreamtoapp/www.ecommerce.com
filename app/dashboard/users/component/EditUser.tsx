@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Edit } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { User } from '@/types/user';
 
 import { Button } from '../../../../components/ui/button';
 import {
@@ -17,6 +16,7 @@ import {
 import { Input } from '../../../../components/ui/input';
 import { ScrollArea } from '../../../../components/ui/scroll-area';
 import { getUserToUpdate, updateUserData } from '../action/actions';
+import { User } from '@/types/databaseTypes';
 
 function EditUser({ userId }: { userId: string }) {
   const [user, setUser] = useState<User | null>(null);

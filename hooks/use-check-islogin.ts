@@ -4,14 +4,14 @@
 import { useEffect, useState } from 'react';
 
 import { checkIsLogin } from '@/lib/check-is-login';
-import { CustomSession } from '@/types/customSesstion';
+import { User } from '@/types/databaseTypes';
 
 // Custom type definitions
 
 export type AuthStatus = 'authenticated' | 'unauthenticated' | 'loading';
 
 export const useCheckIsLogin = () => {
-  const [session, setSession] = useState<CustomSession | null>(null);
+  const [session, setSession] = useState<User | null>(null);
   const [status, setStatus] = useState<AuthStatus>('loading');
   const [error, setError] = useState<string | null>(null);
 
@@ -19,12 +19,9 @@ export const useCheckIsLogin = () => {
     const fetchSession = async () => {
       try {
         setStatus('loading');
-        const result = await checkIsLogin();
-
-        if (result?.user) {
-          // Type assertion with validation
-          const validSession = result as CustomSession;
-          setSession(validSession);
+        const user = await checkIsLogin();
+        if (user) {
+          setSession(user);
           setStatus('authenticated');
         } else {
           setSession(null);

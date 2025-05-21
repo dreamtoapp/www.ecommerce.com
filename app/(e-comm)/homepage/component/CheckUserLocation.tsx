@@ -2,9 +2,9 @@ import { AlertCircle, MapPin, MapPinOff } from 'lucide-react';
 
 import Link from '@/components/link';
 import { cn } from '@/lib/utils';
-import { User } from '@/types/user';
+import { User } from '@/types/databaseTypes';
 
-const CheckUserLocation = ({ user }: { user?: User }) => {
+const CheckUserLocation = ({ user }: { user?: Partial<User> }) => {
   if (!user?.id || (user.latitude && user.longitude)) return null;
 
   return (
