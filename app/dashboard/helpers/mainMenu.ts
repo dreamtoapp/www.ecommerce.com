@@ -127,6 +127,7 @@ export const menuGroups = [
       { title: 'SEO المنتجات', url: '/dashboard/seo/product', icon: Package },
       { title: 'SEO العروض', url: '/dashboard/seo/promotion', icon: Gift },
       { title: 'SEO الأصناف', url: '/dashboard/seo/category', icon: LayoutGrid },
+      { title: 'SEO Performance', url: '/dashboard/seo/performance', icon: PieChart }, // Added performance dashboard
     ],
   },
 ];

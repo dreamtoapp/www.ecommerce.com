@@ -1,7 +1,3 @@
-// helper/orderType.ts
-// Using string values for order status
-
-'delivered';
 
 export interface Order {
   id: string;

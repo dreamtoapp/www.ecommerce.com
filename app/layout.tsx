@@ -6,6 +6,7 @@ import { cairo } from './font';
 
 import { Directions } from '../constant/enums';
 import { ThemeProvider } from '../provider/theme-provider';
+import WebVitalsCollector from '@/components/seo/WebVitalsCollector';
 
 export const metadata: Metadata = {
   title: 'amwag',
@@ -37,6 +38,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang={locale} dir={dir} suppressHydrationWarning>
       {/* <head>{head()}</head> */}
       <body className={`${cairo.className} min-h-screen bg-background antialiased`}>
+        <WebVitalsCollector />
         <ThemeProvider
           attribute='class'
           defaultTheme='system'

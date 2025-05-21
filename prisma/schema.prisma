@@ -569,3 +569,17 @@ model AnalyticsSettings {
   linkedinInsightTagId String?
   updatedAt            DateTime @updatedAt
 }
+
+model WebVital {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  name       String   // Metric name: LCP, FCP, CLS, INP, TTFB
+  value      Float    // Metric value
+  page       String   // Page route or URL
+  userAgent  String   // User agent string
+  timestamp  DateTime // When the metric was recorded
+  device     String?  // Device type (mobile, desktop, etc.)
+  browser    String?  // Browser name/version
+  city       String?  // City from geolocation
+  country    String?  // Country from geolocation
+  additional Json?    // For future extensibility (e.g., connection, custom fields)
+}
