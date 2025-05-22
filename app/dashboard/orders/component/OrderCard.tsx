@@ -38,12 +38,12 @@ import {
   OrderStatus,
 } from '@/constant/order-status';
 import { iconVariants } from '@/lib/utils';
+import { Order } from '@/types/databaseTypes';
 
 import {
   STATUS_STYLES,
   STATUS_TRANSLATIONS,
 } from '../helper/helper';
-import { Order } from '@/types/databaseTypes';
 
 // Memoized StatusIcon
 const StatusIcon = React.memo(({ status }: { status: OrderStatus }) => {
@@ -169,17 +169,17 @@ const OrderContent = React.memo(({ order }: { order: Order }) => (
     <div className='flex w-full flex-wrap items-center justify-between'>
       <CardDescription className='flex items-center gap-2 text-sm'>
         <User className={iconVariants({ size: 'xs', className: 'text-muted-foreground' })} />
-        {order.customerName || 'Unknown Customer'}
+        {order.customer.name || 'Unknown Customer'}
       </CardDescription>
       {/* TODO:check the schema to get customerphone
 address
 latitude
 longitude */}
       <CustomerCardAction
-        phone={order?.customerName || ''}
-        address={order?.customerName || ''}
-        latitude={order?.customerName || ''}
-        longitude={order?.customerName || ''}
+        phone={order.customer.phone || ''}
+        address={order.customer.address || ''}
+        latitude={order.customer.latitude || ''}
+        longitude={order.customer.longitude || ''}
       />
     </div>
     {/* TODO:check the schema to get driver name */}

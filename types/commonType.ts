@@ -25,3 +25,8 @@ export interface CarouselImage {
   discountType?: string | null;
   linkUrl?: string;
 }
+
+export interface ActionError {
+  message: string;
+  code?: string;
+}

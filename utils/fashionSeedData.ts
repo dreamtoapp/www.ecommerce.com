@@ -962,7 +962,6 @@ async function generateFashionOrders(count: number, shiftId: string) {
         data: {
           orderNumber,
           customerId: user.id,
-          customerName: user.name || undefined,
           driverId: driverId,
           status: orderStatus,
           amount: totalAmount,

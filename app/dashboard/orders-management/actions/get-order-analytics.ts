@@ -2,18 +2,13 @@
 
 import db from '@/lib/prisma';
 
+// Types for analytics data
 export interface OrderAnalyticsData {
   totalOrders: number;
   ordersByStatus: { status: string; _count: { status: number } }[];
   totalRevenue: number;
-  firstOrder?: {
-    orderNumber: string;
-    createdAt: Date;
-  };
-  lastOrder?: {
-    orderNumber: string;
-    createdAt: Date;
-  };
+  firstOrder?: { orderNumber: string; createdAt: Date };
+  lastOrder?: { orderNumber: string; createdAt: Date };
   todayOrdersByStatus: { status: string; _count: { status: number } }[];
   unfulfilledOrders: number;
   returnsCount: number;
@@ -28,142 +23,131 @@ export interface GetOrderAnalyticsResult {
   error?: string;
 }
 
+// --- Analytics helpers ---
+
+async function getCoreStats() {
+  const [totalOrders, revenueResult] = await Promise.all([
+    db.order.count(),
+    db.order.aggregate({ _sum: { amount: true } })
+  ]);
+  return {
+    totalOrders,
+    totalRevenue: revenueResult._sum.amount || 0
+  };
+}
+
+async function getStatusAnalytics() {
+  const [ordersByStatus, todayOrdersByStatus] = await Promise.all([
+    db.order.groupBy({ by: ['status'], _count: { status: true } }),
+    getTodayStatusCounts()
+  ]);
+  return { ordersByStatus, todayOrdersByStatus };
+}
+
+async function getTodayStatusCounts() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+  return db.order.groupBy({
+    by: ['status'],
+    where: { createdAt: { gte: today, lt: tomorrow } },
+    _count: { status: true }
+  });
+}
+
+async function getOrderTimeline() {
+  const [firstOrder, lastOrder] = await Promise.all([
+    db.order.findFirst({ orderBy: { createdAt: 'asc' }, select: { orderNumber: true, createdAt: true } }),
+    db.order.findFirst({ orderBy: { createdAt: 'desc' }, select: { orderNumber: true, createdAt: true } })
+  ]);
+  return { firstOrder, lastOrder };
+}
+
+async function getFulfillmentMetrics() {
+  const [unfulfilledOrders, returnsCount] = await Promise.all([
+    db.order.count({ where: { status: { notIn: ['Delivered', 'CANCELED'] } } }),
+    db.order.count({ where: { status: { in: ['RETURNED', 'REFUNDED'] } } })
+  ]);
+  return { unfulfilledOrders, returnsCount };
+}
+
+async function getSalesTrendAnalysis() {
+  const fromDate = new Date();
+  fromDate.setDate(fromDate.getDate() - 29);
+  const rawData = await db.order.findMany({
+    where: { createdAt: { gte: fromDate } },
+    select: { createdAt: true, amount: true }
+  });
+  // Aggregate by day
+  const trends: Record<string, { date: string; orders: number; revenue: number }> = {};
+  for (const order of rawData) {
+    const date = order.createdAt.toISOString().slice(0, 10);
+    if (!trends[date]) trends[date] = { date, orders: 0, revenue: 0 };
+    trends[date].orders++;
+    trends[date].revenue += order.amount || 0;
+  }
+  return Object.values(trends).sort((a, b) => a.date.localeCompare(b.date));
+}
+
+async function getProductLeaderboard() {
+  const items = await db.orderItem.findMany({
+    select: { productId: true, quantity: true, product: { select: { name: true } } }
+  });
+  const productMap: Record<string, { name: string; count: number }> = {};
+  for (const item of items) {
+    if (!item.product) continue;
+    if (!productMap[item.productId]) productMap[item.productId] = { name: item.product.name, count: 0 };
+    productMap[item.productId].count += item.quantity;
+  }
+  return Object.values(productMap).sort((a, b) => b.count - a.count).slice(0, 5);
+}
+
+async function getCustomerLeaderboard() {
+  const orders = await db.order.findMany({
+    where: { customerId: { not: undefined } },
+    select: { amount: true, customer: { select: { name: true } } }
+  });
+  const customerMap: Record<string, number> = {};
+  for (const order of orders) {
+    const name = order.customer?.name;
+    if (!name) continue;
+    customerMap[name] = (customerMap[name] || 0) + (order.amount || 0);
+  }
+  return Object.entries(customerMap)
+    .map(([name, total]) => ({ name, total }))
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 5);
+}
+
+// --- Main analytics function ---
+
 export async function getOrderAnalytics(): Promise<GetOrderAnalyticsResult> {
   try {
-    const totalOrders = await db.order.count();
-
-    const ordersByStatus = await db.order.groupBy({
-      by: ['status'],
-      _count: {
-        status: true,
-      },
-    });
-
-    const revenueResult = await db.order.aggregate({
-      _sum: {
-        amount: true,
-      },
-    });
-
-    const totalRevenue = revenueResult._sum.amount || 0;
-
-    // Fetch the first order
-    const firstOrder = await db.order.findFirst({
-      orderBy: {
-        createdAt: 'asc',
-      },
-      select: {
-        orderNumber: true,
-        createdAt: true,
-      },
-    });
-
-    // Fetch the last order
-    const lastOrder = await db.order.findFirst({
-      orderBy: {
-        createdAt: 'desc',
-      },
-      select: {
-        orderNumber: true,
-        createdAt: true,
-      },
-    });
-
-    // Calculate today's orders by status
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    const todayOrdersByStatus = await db.order.groupBy({
-      by: ['status'],
-      where: {
-        createdAt: {
-          gte: today,
-          lt: tomorrow,
-        },
-      },
-      _count: {
-        status: true,
-      },
-    });
-
-    // Unfulfilled orders (not delivered or canceled)
-    const unfulfilledOrders = await db.order.count({
-      where: { status: { notIn: ['Delivered', 'CANCELED'] } },
-    });
-
-    // Returns (orders with status 'RETURNED' or similar)
-    const returnsCount = await db.order.count({
-      where: { status: { in: ['RETURNED', 'REFUNDED'] } },
-    });
-
-    // Sales trends (group by day for last 30 days)
-    const fromDate = new Date();
-    fromDate.setDate(fromDate.getDate() - 29);
-    const salesTrendsRaw = await db.order.findMany({
-      where: { createdAt: { gte: fromDate } },
-      select: { createdAt: true, amount: true },
-    });
-    const salesTrendsMap: Record<string, { date: string; orders: number; revenue: number }> = {};
-    salesTrendsRaw.forEach((o) => {
-      const date = o.createdAt.toISOString().slice(0, 10);
-      if (!salesTrendsMap[date]) salesTrendsMap[date] = { date, orders: 0, revenue: 0 };
-      salesTrendsMap[date].orders += 1;
-      salesTrendsMap[date].revenue += o.amount || 0;
-    });
-    const salesTrends = Object.values(salesTrendsMap).sort((a, b) => a.date.localeCompare(b.date));
-
-    // Top products (by quantity)
-    const topProductsRaw = await db.orderItem.findMany({
-      select: { productId: true, quantity: true, product: { select: { name: true } } },
-    });
-    const productMap: Record<string, { name: string; count: number }> = {};
-    topProductsRaw.forEach((item) => {
-      if (!item.product) return;
-      if (!productMap[item.productId]) productMap[item.productId] = { name: item.product.name, count: 0 };
-      productMap[item.productId].count += item.quantity;
-    });
-    const topProducts = Object.values(productMap).sort((a, b) => b.count - a.count).slice(0, 5);
-
-    // Top customers (by total order value)
-    const topCustomersRaw = await db.order.findMany({
-      select: { customerName: true, amount: true },
-      where: { customerName: { not: null } },
-    });
-    const customerMap: Record<string, number> = {};
-    topCustomersRaw.forEach((o) => {
-      if (!o.customerName) return;
-      customerMap[o.customerName] = (customerMap[o.customerName] || 0) + (o.amount || 0);
-    });
-    const topCustomers = Object.entries(customerMap)
-      .map(([name, total]) => ({ name, total }))
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 5);
-
+    // Run all analytics in parallel
+    const [coreStats, statusAnalytics, timeline, fulfillmentMetrics, salesTrends, topProducts, topCustomers] = await Promise.all([
+      getCoreStats(),
+      getStatusAnalytics(),
+      getOrderTimeline(),
+      getFulfillmentMetrics(),
+      getSalesTrendAnalysis(),
+      getProductLeaderboard(),
+      getCustomerLeaderboard()
+    ]);
+    // Combine all analytics into one object
     const analyticsData: OrderAnalyticsData = {
-      totalOrders,
-      ordersByStatus,
-      totalRevenue,
-      firstOrder: firstOrder ? {
-        orderNumber: firstOrder.orderNumber,
-        createdAt: firstOrder.createdAt,
-      } : undefined,
-      lastOrder: lastOrder ? {
-        orderNumber: lastOrder.orderNumber,
-        createdAt: lastOrder.createdAt,
-      } : undefined,
-      todayOrdersByStatus,
-      unfulfilledOrders,
-      returnsCount,
+      ...coreStats,
+      ...statusAnalytics,
+      firstOrder: timeline.firstOrder || undefined,
+      lastOrder: timeline.lastOrder || undefined,
+      ...fulfillmentMetrics,
       salesTrends,
       topProducts,
-      topCustomers,
+      topCustomers
     };
-
     return { success: true, data: analyticsData };
   } catch (error) {
-    console.error("Error fetching order analytics:", error);
-    return { success: false, error: "Failed to fetch order analytics." };
+    console.error("Order analytics error:", error);
+    return { success: false, error: "Failed to generate order analytics" };
   }
 }

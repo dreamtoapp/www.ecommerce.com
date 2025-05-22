@@ -46,7 +46,7 @@ export default async function Page({ params }: { params: Promise<{ orderid: stri
             <div className="flex flex-col">
               <span className="text-xs text-muted-foreground font-medium">اسم العميل</span>
               <span className="font-semibold text-foreground">
-                {trackInfo?.order.customerName || 'غير محدد'}
+                {trackInfo?.order.customer?.name || 'غير محدد'}
               </span>
             </div>
             <div className="flex flex-col text-right">

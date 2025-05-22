@@ -3,9 +3,9 @@
 import { auth } from '@/auth';
 import db from '@/lib/prisma';
 import { pusherServer } from '@/lib/pusherServer';
+import { OrderCartItem } from '@/types/commonType';
 
 import { generateOrderNumber } from '../helpers/orderNumber';
-import { OrderCartItem } from '@/types/commonType';
 
 export async function CreateOrderInDb(orderData: {
   userId: string;
@@ -37,8 +37,6 @@ export async function CreateOrderInDb(orderData: {
       data: {
         orderNumber,
         customerId: userId,
-        // TODO:remove custemr name no need any more relate it with the user info from UserTable
-        customerName: orderData.name,
         amount: orderData.totalAmount,
         shiftId: orderData.shiftId,
         latitude: orderData.lat,

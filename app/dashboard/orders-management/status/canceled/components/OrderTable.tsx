@@ -1,7 +1,6 @@
 // app/dashboard/orders-management/status/canceled/components/OrderTable.tsx
 'use client';
 
-
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import {
@@ -27,9 +26,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
+import { Order } from '@/types/databaseTypes';
 
 import { restoreOrder } from '../actions/restore-order';
-import { Order } from '@/types/databaseTypes';
 
 interface OrderTableProps {
   orders: Order[];
@@ -120,7 +119,7 @@ export default function OrderTable({
                     #{order.id.substring(0, 8)}
                   </Link>
                 </TableCell>
-                <TableCell>{order.customerName || 'غير معروف'}</TableCell>
+                <TableCell>{order.customer.name || 'غير معروف'}</TableCell>
                 <TableCell className="font-semibold">{order.amount} ر.س</TableCell>
                 <TableCell>
                   <Badge variant="outline" className="bg-blue-50 text-blue-700">

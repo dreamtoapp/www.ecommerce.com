@@ -1,0 +1,87 @@
+Here's a streamlined checklist format for quick reference (for you **and** AI assistants):
+
+---
+
+### **Code Quality Checklist** ✅❌  
+*(Mark items as you review)*
+
+1. **Function Structure**  
+   ✅ Split into focused functions (1 task = 1 function)  
+   ✅ Max 30 lines per function  
+   ✅ No nested promise chains  
+
+2. **Naming Convention**  
+   ✅ No single-letter variables (e.g., `user` not `u`)  
+   ✅ Functions use verb-noun format (`calculateRevenue`)  
+   ✅ Booleans start with "is/has" (`isValidOrder`)  
+
+3. **Async Efficiency**  
+   ✅ Independent `await` calls wrapped in `Promise.all`  
+   ✅ No sequential awaits for unrelated operations  
+
+4. **Error Handling**  
+   ✅ Try/catch in parent functions  
+   ✅ Consistent error format (`{ success, data, error }`)  
+   ✅ Contextual error messages ("Failed to load orders" not "Error")  
+
+5. **DRY Code**  
+   ✅ Repeated logic extracted to utils/helpers  
+   ✅ No copy-pasted code blocks (>2 duplicates)  
+
+6. **Type Safety**  
+   ✅ No `any` types  
+   ✅ Interfaces for complex objects  
+   ✅ Zod/data validation in API boundaries  
+
+7. **Data Processing**  
+   ✅ `forEach` replaced with `map`/`filter`/`reduce`  
+   ✅ No side effects in data transformations  
+
+8. **Readability**  
+   ✅ Functions self-document through names  
+   ✅ Complex logic has brief inline comments  
+   ✅ Consistent indentation (2/4 spaces)  
+
+9. **Interface Stability**  
+   ✅ Existing API fields unchanged  
+   ✅ New fields marked as optional (`newField?`)  
+   ✅ Versioned APIs (`/v1/analytics`)  
+
+---
+
+### **Quick Scan Guide** 🔍  
+*(For rapid code review)*
+
+**Code Smells** ❌:  
+- `let` without clear reason → Should be `const`  
+- `any` type usage → Add proper typing  
+- `.then().catch()` chains → Convert to async/await  
+- Functions > 50 lines → Split into sub-functions  
+- Multiple `if(!x) return` → Use early returns consistently  
+
+**Quality Indicators** ✅:  
+- `Promise.all` for async operations  
+- Pure functions (no side effects)  
+- Typed function parameters/returns  
+- Descriptive variable names (`orderTotal` vs `total`)  
+- Unified error responses  
+
+---
+
+### **Implementation Steps**  
+1. Paste code + this checklist to AI with:  
+   *"Review using checklist. Mark ✅/❌. Explain failures."*  
+2. Prioritize ❌ items starting with:  
+   - Type safety errors  
+   - Async inefficiencies  
+   - Critical error handling gaps  
+3. Batch-similar fixes (e.g., rename all variables first)  
+
+---
+
+### **Example AI Prompt** 🤖  
+*"Apply checklist to this code. Show ❌ violations grouped by priority. Suggest fixes with code examples for top 3 issues."*
+
+--- 
+
+This format helps both humans and AI systematically improve code while maintaining your preferred patterns. Would you like me to create a specific version for React components/API routes/etc.?

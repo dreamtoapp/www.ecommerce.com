@@ -165,7 +165,7 @@ model Order {
   orderNumber   String  @unique
   customerId    String  @db.ObjectId // Reference to the user 
   customer      User    @relation(fields: [customerId], references: [id]) // Relation to the User model
-  customerName  String?
+  // customerName  String?
   driverId      String? @db.ObjectId // Changed to ObjectId type
   driver        Driver? @relation(fields: [driverId], references: [id]) // New relation
   latitude      String?
