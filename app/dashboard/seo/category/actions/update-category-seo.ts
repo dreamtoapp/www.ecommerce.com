@@ -4,6 +4,7 @@ import db from '@/lib/prisma';
 import { EntityType } from '@prisma/client';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
+import { ActionError } from '@/types/commonType';
 
 const schema = z.object({
   categoryId: z.string(),
@@ -44,11 +45,16 @@ export async function updateCategorySeo(input: any) {
         ...seoFields,
       },
     });
-    await revalidatePath('/dashboard/seo/category');
-    await revalidatePath(`/dashboard/seo/category/${categoryId}`);
+    await Promise.all([
+      revalidatePath('/dashboard/seo/category'),
+      revalidatePath(`/dashboard/seo/category/${categoryId}`),
+    ]);
     return { success: true };
-  } catch (e: any) {
-    console.error('Category SEO update error:', e);
-    return { success: false, error: e.message || 'Unknown error' };
+  } catch (error) {
+    const err: ActionError =
+      typeof error === 'object' && error && 'message' in error
+        ? { message: (error as ActionError).message, code: (error as ActionError).code }
+        : { message: 'فشل في تحديث بيانات السيو للفئة.' };
+    return { success: false, error: err.message };
   }
 }

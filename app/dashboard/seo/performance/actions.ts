@@ -2,6 +2,7 @@
 "use server";
 import db from '@/lib/prisma';
 import { z } from 'zod';
+import { ActionError } from '@/types/commonType';
 
 const webVitalSchema = z.object({
   name: z.string(),
@@ -17,24 +18,33 @@ const webVitalSchema = z.object({
 export async function saveWebVital(data: unknown) {
   const parsed = webVitalSchema.safeParse(data);
   if (!parsed.success) {
-    throw new Error('Invalid web vital payload');
+    const err: ActionError = { message: 'Invalid web vital payload' };
+    throw err;
   }
   const {
     name, value, page, userAgent, timestamp, device, browser, additional
   } = parsed.data;
-  const metric = await db.webVital.create({
-    data: {
-      name,
-      value,
-      page,
-      userAgent,
-      timestamp: new Date(timestamp),
-      device,
-      browser,
-      additional,
-    },
-  });
-  return metric;
+  try {
+    const metric = await db.webVital.create({
+      data: {
+        name,
+        value,
+        page,
+        userAgent,
+        timestamp: new Date(timestamp),
+        device,
+        browser,
+        additional,
+      },
+    });
+    return metric;
+  } catch (error) {
+    const err: ActionError =
+      typeof error === 'object' && error && 'message' in error
+        ? { message: (error as ActionError).message, code: (error as ActionError).code }
+        : { message: 'فشل في حفظ بيانات الأداء.' };
+    throw err;
+  }
 }
 
 // Add a POST handler for fetching distinct values for filters

@@ -2,6 +2,7 @@
 "use server";
 import db from '@/lib/prisma';
 import { EntityType } from '@prisma/client';
+import { ActionError } from '@/types/commonType';
 
 export async function upsertHomeSeo(data: {
   metaTitle: string;
@@ -14,12 +15,12 @@ export async function upsertHomeSeo(data: {
   twitterCardType?: string;
   twitterImage?: string;
   schemaOrg?: any;
-  locale: string; // locale is now required, not optional
+  locale: string;
 }) {
   try {
     const entityId = 'homepage';
     const entityType = EntityType.PAGE;
-    const locale = data.locale; // locale is required
+    const locale = data.locale;
     const existing = await db.globalSEO.findUnique({
       where: { entityId_entityType_locale: { entityId, entityType, locale } },
     });
@@ -51,6 +52,10 @@ export async function upsertHomeSeo(data: {
       return { success: true, created: true };
     }
   } catch (error) {
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    const err: ActionError =
+      typeof error === 'object' && error && 'message' in error
+        ? { message: (error as ActionError).message, code: (error as ActionError).code }
+        : { message: 'فشل في تحديث بيانات السيو للصفحة الرئيسية.' };
+    return { success: false, error: err.message };
   }
 }

@@ -7,6 +7,7 @@ import {
   EntityType,
   type GlobalSEO,
 } from '@prisma/client';
+import { ActionError } from '@/types/commonType';
 
 // Placeholder for SEO actions
 export async function getAllSeoEntries() {
@@ -14,8 +15,11 @@ export async function getAllSeoEntries() {
     const seoEntries = await db.globalSEO.findMany();
     return seoEntries;
   } catch (error) {
-    console.error('Error fetching SEO entries:', error);
-    return []; // Return empty array on error
+    const err: ActionError =
+      typeof error === 'object' && error && 'message' in error
+        ? { message: (error as ActionError).message, code: (error as ActionError).code }
+        : { message: 'فشل في جلب بيانات السيو.' };
+    throw err;
   }
 }
 
@@ -26,8 +30,11 @@ export async function getSeoEntryById(id: string) { // New function
     });
     return seoEntry;
   } catch (error) {
-    console.error(`Error fetching SEO entry with ID ${id}:`, error);
-    return null; // Return null on error
+    const err: ActionError =
+      typeof error === 'object' && error && 'message' in error
+        ? { message: (error as ActionError).message, code: (error as ActionError).code }
+        : { message: `فشل في جلب بيانات السيو للمعرف ${id}.` };
+    throw err;
   }
 }
 
@@ -48,8 +55,11 @@ export async function getSeoEntryByEntity(entityId: string, entityType: EntityTy
     });
     return seoEntry;
   } catch (error) {
-    console.error(`Error fetching SEO entry for entityId=${entityId}, entityType=${entityType}, locale=${locale}:`, error);
-    return null;
+    const err: ActionError =
+      typeof error === 'object' && error && 'message' in error
+        ? { message: (error as ActionError).message, code: (error as ActionError).code }
+        : { message: `فشل في جلب بيانات السيو للكيان ${entityId}.` };
+    throw err;
   }
 }
 
@@ -61,8 +71,11 @@ export async function deleteSeoEntry(id: string) { // New function
     revalidatePath('/seo');
     return { success: true };
   } catch (error) {
-    console.error(`Error deleting SEO entry with ID ${id}:`, error);
-    return { success: false, errors: { _form: ['Failed to delete SEO entry.'] } };
+    const err: ActionError =
+      typeof error === 'object' && error && 'message' in error
+        ? { message: (error as ActionError).message, code: (error as ActionError).code }
+        : { message: `فشل في حذف بيانات السيو للمعرف ${id}.` };
+    return { success: false, errors: { _form: [err.message] } };
   }
 }
 
@@ -107,9 +120,12 @@ export async function createSeoEntry(data: SeoFormData): Promise<ServerActionRes
     });
 
     return { success: true, data: { id: seoEntry.id } };
-  } catch (error: any) {
-    console.error('Error creating SEO entry:', error);
-    return { success: false, errors: { _form: ['Failed to create SEO entry.'] } };
+  } catch (error) {
+    const err: ActionError =
+      typeof error === 'object' && error && 'message' in error
+        ? { message: (error as ActionError).message, code: (error as ActionError).code }
+        : { message: 'فشل في إنشاء بيانات السيو.' };
+    return { success: false, errors: { _form: [err.message] } };
   }
 }
 
@@ -122,7 +138,10 @@ export async function updateSeoEntry(id: string, data: Partial<{ metaTitle: stri
     revalidatePath('/dashboard/seo');
     return { success: true };
   } catch (error) {
-    console.error('Error updating SEO entry:', error);
-    return { success: false, errors: { _form: ['Failed to update SEO entry.'] } };
+    const err: ActionError =
+      typeof error === 'object' && error && 'message' in error
+        ? { message: (error as ActionError).message, code: (error as ActionError).code }
+        : { message: 'فشل في تحديث بيانات السيو.' };
+    return { success: false, errors: { _form: [err.message] } };
   }
 }

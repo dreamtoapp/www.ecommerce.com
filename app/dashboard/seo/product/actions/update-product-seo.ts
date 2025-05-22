@@ -1,9 +1,11 @@
 // Update or create product SEO for a given locale
 "use server";
+import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
+
 import db from '@/lib/prisma';
 import { EntityType } from '@prisma/client';
-import { z } from 'zod';
-import { revalidatePath } from 'next/cache';
+import { ActionError } from '@/types/commonType';
 
 const schema = z.object({
   productId: z.string(),
@@ -18,9 +20,10 @@ const schema = z.object({
   twitterImage: z.string().optional(),
   schemaOrg: z.string().optional(),
   twitterCardType: z.string().optional(),
+  customMetaTag: z.string().optional(),
 });
 
-export async function updateProductSeo(input: any) {
+export async function updateProductSeo(input: z.infer<typeof schema>) {
   const parsed = schema.safeParse(input);
   if (!parsed.success) {
     return { success: false, error: parsed.error.errors[0].message };
@@ -44,14 +47,19 @@ export async function updateProductSeo(input: any) {
         ...seoFields,
       },
     });
-    await revalidatePath('/dashboard/seo/product');
-    await revalidatePath(`/dashboard/seo/product/${productId}`);
+    await Promise.all([
+      revalidatePath('/dashboard/seo/product'),
+      revalidatePath(`/dashboard/seo/product/${productId}`),
+    ]);
     return { success: true };
-  } catch (e: any) {
-    console.error('updateProductSeo error:', e);
+  } catch (error) {
+    const err: ActionError =
+      typeof error === 'object' && error && 'message' in error
+        ? { message: (error as ActionError).message, code: (error as ActionError).code }
+        : { message: 'فشل في تحديث بيانات السيو للمنتج.' };
     return {
       success: false,
-      error: e?.message || e?.toString() || 'Unknown server error while saving SEO data.',
+      error: err.message,
     };
   }
 }

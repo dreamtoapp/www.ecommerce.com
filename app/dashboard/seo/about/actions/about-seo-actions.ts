@@ -2,6 +2,7 @@
 "use server";
 import db from '@/lib/prisma';
 import { EntityType } from '@prisma/client';
+import { ActionError } from '@/types/commonType';
 
 export async function upsertAboutSeo(data: {
   metaTitle: string;
@@ -51,6 +52,10 @@ export async function upsertAboutSeo(data: {
       return { success: true, created: true };
     }
   } catch (error) {
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    const err: ActionError =
+      typeof error === 'object' && error && 'message' in error
+        ? { message: (error as ActionError).message, code: (error as ActionError).code }
+        : { message: 'فشل في تحديث بيانات السيو لصفحة من نحن.' };
+    return { success: false, error: err.message };
   }
 }

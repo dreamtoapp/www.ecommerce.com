@@ -1,14 +1,16 @@
 "use server";
 import db from '@/lib/prisma';
+import { ActionError } from '@/types/commonType';
 
 export async function getDrivers() {
-  console.log("Fetching drivers from the database...");
   try {
     const drivers = await db.driver.findMany();
-    console.log("Fetching drivers from the database...", drivers);
     return drivers;
   } catch (error) {
-    console.error("Error fetching drivers:", error);
-    throw new Error("Failed to fetch drivers");
+    const err: ActionError =
+      typeof error === 'object' && error && 'message' in error
+        ? { message: (error as ActionError).message, code: (error as ActionError).code }
+        : { message: 'فشل في جلب قائمة السائقين من قاعدة البيانات.' };
+    throw err;
   }
 }
