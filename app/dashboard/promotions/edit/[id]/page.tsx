@@ -1,14 +1,11 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { PageProps } from '@/types/commonTypes';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { iconVariants } from '@/lib/utils';
 import db from '@/lib/prisma';
 import PromotionForm from '../../new/components/PromotionForm';
-
-interface EditPromotionPageProps {
-  params: Promise<{ id: string }>; // Next.js 15 params are promises
-}
 
 async function getPromotionById(id: string) {
   const promotion = await db.promotion.findUnique({
@@ -20,9 +17,8 @@ async function getPromotionById(id: string) {
   return promotion;
 }
 
-export default async function EditPromotionPage({ params: paramsPromise }: EditPromotionPageProps) {
-  const params = await paramsPromise;
-  const { id } = params;
+export default async function EditPromotionPage({ params }: PageProps<{ id: string }>) {
+  const { id } = await params;
   const promotion = await getPromotionById(id);
 
   return (

@@ -7,7 +7,6 @@ import {
   Company as PrismaCompany,
   ContactSubmission as PrismaContactSubmission,
   Counter as PrismaCounter,
-  Driver as PrismaDriver,
   Expense as PrismaExpense,
   GlobalSEO as PrismaGlobalSEO,
   LocationHistory as PrismaLocationHistory,
@@ -41,7 +40,6 @@ export type CategoryTranslation = PrismaCategoryTranslation;
 export type Company = PrismaCompany;
 export type ContactSubmission = PrismaContactSubmission;
 export type Counter = PrismaCounter;
-export type Driver = PrismaDriver;
 export type Expense = PrismaExpense;
 export type GlobalSEO = PrismaGlobalSEO;
 export type LocationHistory = PrismaLocationHistory;

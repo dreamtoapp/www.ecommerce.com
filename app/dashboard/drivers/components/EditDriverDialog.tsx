@@ -52,8 +52,17 @@ export default function EditDriverDialog({ driver, children }: EditDriverDialogP
   const handleSubmit = async () => {
     try {
       setLoading(true);
-      await updateDriver(driver.id, formData); // Call the server action to update the driver
-      window.location.reload(); // Refresh the page after updating
+      const fd = new FormData();
+      fd.append('id', driver.id);
+      fd.append('name', formData.name);
+      fd.append('email', formData.email);
+      fd.append('phone', formData.phone);
+      fd.append('password', formData.password);
+      if (formData.imageFile) {
+        fd.append('imageFile', formData.imageFile);
+      }
+      await updateDriver(fd);
+      window.location.reload();
     } catch (e) {
       let errorMessage = 'Failed to update driver.';
       if (e instanceof Error) {

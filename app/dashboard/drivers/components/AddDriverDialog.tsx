@@ -45,7 +45,16 @@ export default function AddDriverDialog({ children }: { children: React.ReactNod
   const handleSubmit = async () => {
     try {
       setLoading(true);
-      await createDriver(formData); // Call the server action to create the driver
+      const fd = new FormData();
+      fd.append('name', formData.name);
+      fd.append('email', formData.email);
+      fd.append('phone', formData.phone);
+      fd.append('address', formData.address);
+      fd.append('password', formData.password);
+      if (formData.imageFile) {
+        fd.append('imageFile', formData.imageFile);
+      }
+      await createDriver(fd); // Pass FormData to server action
       window.location.reload(); // Refresh the page after adding
     } catch (e) {
       let errorMessage = 'Failed to add driver.';

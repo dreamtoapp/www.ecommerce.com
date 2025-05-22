@@ -1,12 +1,13 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { PageProps } from '@/types/commonTypes';
 
 import {
     getPromotionPageData,
 } from '@/app/(e-comm)/promotions/actions/promotion-service';
 import { Button } from '@/components/ui/button';
-import { Product } from '@/types/databaseTypes';;
+import { Product } from '@/types/databaseTypes';
 
 import ProductCardAdapter from '../../categories/components/ProductCardAdapter';
 import { applyPromotionsToProducts } from '../actions/promotionService';
@@ -16,8 +17,8 @@ import { applyPromotionsToProducts } from '../actions/promotionService';
 
 
 
-export default async function PromotionPage({ params }: { params: Promise<{ id: string }> }) {
-    const promotionIdOrSlug = (await params).id;
+export default async function PromotionPage({ params }: PageProps<{ id: string }>) {
+    const { id: promotionIdOrSlug } = await params;
 
     const { promotion, products } = (await getPromotionPageData(promotionIdOrSlug)) || { promotion: null, products: [] };
 

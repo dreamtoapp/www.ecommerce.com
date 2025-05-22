@@ -49,7 +49,7 @@ export default function LoginPe(...args: any[]) {
             <Lock className='absolute left-3 top-1/2 -translate-y-1/2 transform text-gray-400' />
             <Input type='password' placeholder='كلمة المرور' name='password' className='pl-10' />
           </div>
-          {state.message && (
+          {state && state.message && (
             <div
               className={`mt-4 rounded p-3 ${state.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}
             >

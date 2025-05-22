@@ -1,11 +1,12 @@
 'use server';
 
-import { prevState as _prevState } from '@/types/commonType';
-
 import { signIn } from '../../../../../auth';
 import db from '../../../../../lib/prisma';
 
-export const userLogin = async (_prevState: _prevState, formData: FormData) => {
+export const userLogin = async (
+  _state: { success: boolean; message: string } | null,
+  formData: FormData
+): Promise<{ success: boolean; message: string } | null> => {
   const phone = formData.get('phone') as string;
   const password = formData.get('password') as string;
   // Validate input data
@@ -14,9 +15,8 @@ export const userLogin = async (_prevState: _prevState, formData: FormData) => {
   }
 
   // Check if the user already exists
-  const existingUser = await db.user.findUnique({
-    where: { phone },
-  });
+  if (!phone) return null;
+  const existingUser = await db.user.findUnique({ where: { phone } });
   if (!existingUser) {
     return { success: false, message: 'المعلومات  غير صحيحية' };
   }

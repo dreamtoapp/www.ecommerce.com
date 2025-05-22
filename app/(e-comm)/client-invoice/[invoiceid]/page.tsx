@@ -1,4 +1,5 @@
 import { ArrowDownFromLine } from 'lucide-react';
+import { PageProps } from '@/types/commonTypes';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,16 +8,11 @@ import { getOrderData } from '../actions/getOrderData';
 
 // Order Type Definition
 
+export default async function ClientInvoicePage({ params }: PageProps<{ invoiceid: string }, { status?: string }>) {
+  const resolvedParams = await params;
+  const { invoiceid } = resolvedParams;
 
-
-interface ParamsProp {
-  searchParams: Promise<{ status?: string }>;
-  params: Promise<{ invoiceid: string }>;
-}
-
-export default async function InvoicePage({ params }: ParamsProp) {
-  const orderId = (await params).invoiceid;
-  const order = await getOrderData(orderId as string);
+  const order = await getOrderData(invoiceid as string);
 
   return (
     <div className='mx-auto my-10 max-w-3xl'>

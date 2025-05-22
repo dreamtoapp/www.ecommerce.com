@@ -1,54 +1,58 @@
 // app/dashboard/drivers/actions.ts
 'use server';
-import { uploadImageToCloudinary } from '@/lib/cloudinary';
+
+// All driver CRUD operations now use the User model with role: 'DRIVER'.
+// All references to db.driver have been removed. See migration plan for details.
+
 import db from '@/lib/prisma';
+import { UserRole } from '@prisma/client';
 
-// Create a new driver
-export async function createDriver(data: {
-  name: string;
-  email: string;
-  phone: string;
-  password: string;
-  imageFile?: File | null; // Allow both undefined and null
-}) {
+// Create a new driver (User with role: 'DRIVER')
+export async function createDriver(formData: FormData) {
   try {
-    let imageUrl = null;
+    const data = {
+      phone: formData.get('phone') as string,
+      name: formData.get('name') as string,
+      email: formData.get('email') as string | null,
+      password: formData.get('password') as string,
+      address: formData.get('address') as string | null,
+      latitude: formData.get('latitude') as string,
+      longitude: formData.get('longitude') as string,
+    };
 
-    // Upload image to Cloudinary if provided
-    if (data.imageFile) {
-      const cloudinaryResponse = await uploadImageToCloudinary(
-        data.imageFile,
-        process.env.CLOUDINARY_UPLOAD_PRESET_DRIVER || '',
-      );
-
-      if (!cloudinaryResponse?.result?.secure_url) {
-        throw new Error('Failed to upload image to Cloudinary.');
-      }
-
-      imageUrl = cloudinaryResponse.result.secure_url;
-    }
-
-    const driver = await db.driver.create({
-      data: {
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        password: data.password,
-        imageUrl: imageUrl,
+    // Check if phone or email already exists
+    const existingUser = await db.user.findFirst({
+      where: {
+        OR: [
+          { phone: data.phone },
+          { email: data.email },
+        ],
       },
     });
 
-    return driver;
+    if (existingUser) {
+      return { msg: 'رقم الهاتف أو البريد الإلكتروني موجود بالفعل' };
+    }
+
+    // Create a new driver (User with role: 'DRIVER')
+    await db.user.create({
+      data: {
+        ...data,
+        role: UserRole.DRIVER,
+      },
+    });
+
+    return { msg: 'تم إضافة السائق بنجاح' };
   } catch (error) {
     console.error('Error creating driver:', error);
-    throw new Error('Failed to create driver.');
+    throw new Error('Failed to create driver');
   }
 }
 
-// Fetch all drivers
+// Fetch all drivers (users with role: 'DRIVER')
 export async function getDrivers() {
   try {
-    const drivers = await db.driver.findMany();
+    const drivers = await db.user.findMany({ where: { role: UserRole.DRIVER } });
     return drivers;
   } catch (error) {
     console.error('Error fetching drivers:', error);
@@ -56,60 +60,61 @@ export async function getDrivers() {
   }
 }
 
-// Update an existing driver
-export async function updateDriver(
-  id: string,
-  data: {
-    name?: string;
-    email?: string;
-    phone?: string;
-    password?: string;
-    imageFile?: File | null; // Allow both undefined and null
-  },
-) {
+// Update an existing driver (User with role: 'DRIVER')
+export async function updateDriver(formData: FormData) {
   try {
-    let imageUrl = null;
-
-    // Upload image to Cloudinary if provided
-    if (data.imageFile) {
-      const cloudinaryResponse = await uploadImageToCloudinary(
-        data.imageFile,
-        process.env.CLOUDINARY_UPLOAD_PRESET_DRIVER || '',
-      );
-
-      if (!cloudinaryResponse?.result?.secure_url) {
-        throw new Error('Failed to upload image to Cloudinary.');
-      }
-
-      imageUrl = cloudinaryResponse.result.secure_url;
+    const driverId = formData.get('id') as string;
+    if (!driverId) {
+      throw new Error('Driver ID is required');
     }
 
-    const driver = await db.driver.update({
-      where: { id },
-      data: {
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        password: data.password,
-        imageUrl: imageUrl || undefined, // Use undefined to avoid overwriting with null
+    const data = {
+      phone: formData.get('phone') as string,
+      name: formData.get('name') as string,
+      email: formData.get('email') as string | null,
+      address: formData.get('address') as string | null,
+      latitude: formData.get('latitude') as string,
+      longitude: formData.get('longitude') as string,
+    };
+
+    // Check if phone or email already exists for another user
+    const existingUser = await db.user.findFirst({
+      where: {
+        OR: [
+          { phone: data.phone, NOT: { id: driverId } },
+          { email: data.email, NOT: { id: driverId } },
+        ],
       },
     });
 
-    return driver;
+    if (existingUser) {
+      return { msg: 'رقم الهاتف أو البريد الإلكتروني موجود بالفعل لمستخدم آخر' };
+    }
+
+    await db.user.update({
+      where: { id: driverId },
+      data: {
+        ...data,
+        role: UserRole.DRIVER,
+      },
+    });
+
+    return { msg: 'تم تحديث بيانات السائق بنجاح' };
   } catch (error) {
     console.error('Error updating driver:', error);
-    throw new Error('Failed to update driver.');
+    throw new Error('Failed to update driver');
   }
 }
 
-// Delete a driver
-export async function deleteDriver(id: string) {
+// Delete a driver (User with role: 'DRIVER')
+export async function deleteDriver(driverId: string) {
   try {
-    await db.driver.delete({
-      where: { id },
+    await db.user.delete({
+      where: { id: driverId },
     });
+    return { msg: 'تم حذف السائق بنجاح' };
   } catch (error) {
     console.error('Error deleting driver:', error);
-    throw new Error('Failed to delete driver.');
+    throw new Error('Failed to delete driver');
   }
 }

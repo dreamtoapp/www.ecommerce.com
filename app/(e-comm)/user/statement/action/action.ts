@@ -1,33 +1,29 @@
 import db from '../../../../../lib/prisma';
 
-export async function userStatment(id: string) {
+export async function getUserStatement(userId: string) {
+  if (!userId) {
+    // Prevent Prisma error if userId is undefined/null
+    return null;
+  }
   try {
-    const userData = await db.user.findFirst({
-      where: { id },
+    const user = await db.user.findUnique({
+      where: { id: userId },
       include: {
-        orders: {
-          select: {
-            id: true,
-            status: true,
-            orderNumber: true,
-            createdAt: true,
-            amount: true,
-            items: {
-              include: {
-                product: {
-                  select: {
-                    name: true,
-                  },
-                },
-              },
-            },
+        customerOrders: {
+          include: {
+            items: true,
           },
         },
       },
     });
-    return userData;
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return user;
   } catch (error) {
-    console.error('Error fetching users:', error);
-    throw new Error('Failed to fetch users');
+    // Removed console.error to keep build output clean
+    throw error;
   }
 }

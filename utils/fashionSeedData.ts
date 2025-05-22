@@ -1,9 +1,15 @@
-import { ORDER_STATUS } from '@/constant/order-status';
+import {
+  ORDER_STATUS,
+  // Remove unused imports
+  // DiscountType,
+  // PromotionType,
+} from '@/constant/order-status';
 import { faker } from '@faker-js/faker/locale/ar'; // Use Arabic locale
 import {
-  DiscountType,
+  Prisma,
+  UserRole,
+  User,
   Product,
-  PromotionType,
 } from '@prisma/client';
 
 import {
@@ -162,7 +168,7 @@ const fashionImages = {
     'https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=500&q=80', // Gold Jewelry
 
     // Watches & Eyewear
-    '/fallback/product-fallback.avif', // Watch
+    '/fallback/product-fallback.aviv', // Watch
     'https://images.unsplash.com/photo-1556306535-0f09a537f0a3?w=500&q=80', // Sunglasses
     'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500&q=80', // Glasses
     'https://images.unsplash.com/photo-1622434641406-a158123450f9?w=500&q=80', // Luxury Watch
@@ -639,6 +645,41 @@ async function createProductCategories() {
   return createdCategories;
 }
 
+// Create drivers as users with role: 'DRIVER'
+async function createDrivers() {
+  const driversData: Prisma.UserCreateInput[] = [
+    {
+      name: 'سائق 1',
+      phone: '+966500001111',
+      password: 'driver123',
+      role: UserRole.DRIVER,
+      image: '/fallback/driver1.jpg', // Changed from imageUrl to image to match schema
+    },
+    {
+      name: 'سائق 2',
+      phone: '+966500002222',
+      password: 'driver123',
+      role: UserRole.DRIVER,
+      image: '/fallback/driver2.jpg',
+    },
+    {
+      name: 'سائق 3',
+      phone: '+966500003333',
+      password: 'driver123',
+      role: UserRole.DRIVER,
+      image: '/fallback/driver3.jpg',
+    },
+  ];
+
+  const createdDrivers: User[] = [];
+  for (const driver of driversData) {
+    const created = await db.user.create({ data: driver });
+    createdDrivers.push(created);
+  }
+  log(`Created ${createdDrivers.length} drivers as users with role: 'DRIVER'`);
+  return createdDrivers;
+}
+
 // Generate fashion products with multiple suppliers
 async function generateFashionProducts(count: number, supplierId: string) {
   log(`Generating ${count} fashion products...`);
@@ -879,7 +920,10 @@ async function generateFashionOrders(count: number, shiftId: string) {
 
   const users = await db.user.findMany();
   const products = await db.product.findMany();
-  const drivers = await db.driver.findMany();
+  // Get users with DRIVER role and properly type them
+  const drivers = await db.user.findMany({
+    where: { role: UserRole.DRIVER }
+  });
 
   if (!users.length || !products.length) {
     throw new Error('No users or products found. Please seed users and products first.');
@@ -1026,129 +1070,6 @@ async function generateFashionOrders(count: number, shiftId: string) {
   return orders;
 }
 
-// Create shifts for orders
-async function createShifts() {
-  log('Creating shifts...');
-  try {
-    const shifts = await db.shift.findMany();
-
-    if (shifts.length > 0) {
-      log(`Using existing shifts (${shifts.length} found)`);
-      return shifts[0];
-    }
-
-    const morningShift = await db.shift.create({
-      data: {
-        name: 'صباح',
-        startTime: '09:00',
-        endTime: '17:00',
-      },
-    });
-
-    await db.shift.create({
-      data: {
-        name: 'مساء',
-        startTime: '17:00',
-        endTime: '01:00',
-      },
-    });
-
-    log(`Created shifts successfully`);
-    return morningShift;
-  } catch (error) {
-    log(`Error creating shifts: ${error}`);
-    throw error;
-  }
-}
-
-// High-quality slider/banner images for the e-commerce homepage
-const sliderImages = [
-  'https://images.unsplash.com/photo-1445205170230-053b83016050?w=1200&q=80', // Fashion banner with models
-  'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&q=80', // Shopping mall with fashion stores
-  'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200&q=80', // Fashion model in urban setting
-  'https://images.unsplash.com/photo-1607083206968-13611e3d76db?w=1200&q=80', // Luxury fashion items
-  'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1200&q=80', // Fashion accessories display
-  'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=1200&q=80', // Clothing rack with colorful items
-  'https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=1200&q=80', // Seasonal fashion sale
-  'https://images.unsplash.com/photo-1551232864-3f0890e580d9?w=1200&q=80', // Luxury shopping bags
-];
-
-// Generate slider images for the homepage
-async function generateSliderImages() {
-  log(`Generating slider images for the homepage...`);
-
-  try {
-    const promotions = [];
-
-    // Use index to create unique coupon codes
-    for (let i = 0; i < sliderImages.length; i++) {
-      const imageUrl = sliderImages[i];
-      const title = faker.commerce.productAdjective() + ' ' + faker.commerce.department() + ' Collection';
-
-      // Generate a unique coupon code
-      const couponCode = `FASHION${i}${faker.string.alphanumeric(6).toUpperCase()}`;
-
-      // Generate slug from title
-      let slug = Slugify(title);
-
-      // Add a unique identifier to ensure uniqueness
-      slug = `${slug}-${faker.string.alphanumeric(6).toLowerCase()}`;
-
-      promotions.push({
-        title: title,
-        description: faker.commerce.productDescription(),
-        imageUrl: imageUrl,
-        type: PromotionType.PERCENTAGE_PRODUCT, // Use proper enum value
-        discountValue: faker.number.int({ min: 10, max: 50 }), // Discount percentage between 10-50%
-        discountType: DiscountType.PERCENTAGE, // Use proper enum value
-        active: true,
-        couponCode: couponCode, // Add the unique coupon code
-        slug: slug, // Add the slug field
-        startDate: faker.date.past({ years: 0.1 }), // About a month ago
-        endDate: faker.date.future({ years: 0.25 }), // About 3 months in future
-        translations: {
-          create: [
-            {
-              languageCode: 'ar-SA',
-              title: title + ' (عربي)',
-              description: faker.commerce.productDescription() + ' (عربي)'
-            },
-            {
-              languageCode: 'en',
-              title: title,
-              description: faker.commerce.productDescription()
-            }
-          ]
-        }
-      });
-    }
-
-    for (const promotion of promotions) {
-      await db.promotion.create({
-        data: {
-          title: promotion.title,
-          description: promotion.description,
-          imageUrl: promotion.imageUrl,
-          type: promotion.type,
-          discountValue: promotion.discountValue,
-          discountType: promotion.discountType,
-          couponCode: promotion.couponCode, // Include the coupon code
-          slug: promotion.slug, // Include the slug
-          active: promotion.active,
-          startDate: promotion.startDate,
-          endDate: promotion.endDate,
-          translations: promotion.translations
-        }
-      });
-    }
-
-    log(`Successfully created ${promotions.length} slider images with translations`);
-  } catch (error) {
-    log(`Error creating slider images: ${error}`);
-    throw error;
-  }
-}
-
 // Generate product reviews with realistic distribution
 async function generateProductReviews() {
   log('Generating product reviews...');
@@ -1259,252 +1180,47 @@ async function generateProductReviews() {
         totalReviews++;
 
         if (totalReviews % 50 === 0) {
-          log(`Created ${totalReviews} reviews so far`);
+          log(`Generated ${totalReviews} reviews`);
         }
       }
     }
 
-    log(`✅ All product review data generation is complete. Total reviews created: ${totalReviews}`);
-    return reviews;
+    log(`Successfully generated ${totalReviews} product reviews`);
   } catch (error) {
     log(`Error generating product reviews: ${error}`);
     throw error;
   }
 }
 
-// Generate wishlist items for users
-async function generateWishlistItems() {
-  log('Generating wishlist items...');
-
+// Main function to seed the database
+async function seedDatabase() {
   try {
-    const users = await db.user.findMany();
-    const products = await db.product.findMany({
-      where: { published: true },
-    });
-
-    if (!users.length || !products.length) {
-      log('No users or products found. Skipping wishlist generation.');
-      return;
-    }
-
-    const wishlistItems = [];
-    let totalItems = 0;
-
-    // For each user, add some products to their wishlist
-    for (const user of users) {
-      // Determine how many items to add to this user's wishlist (0-10)
-      const itemCount = faker.number.int({ min: 0, max: 10 });
-
-      if (itemCount === 0) continue;
-
-      // Select random products for this user's wishlist
-      const selectedProducts = faker.helpers.arrayElements(products, itemCount);
-
-      for (const product of selectedProducts) {
-        try {
-          const createdItem = await db.wishlistItem.create({
-            data: {
-              userId: user.id,
-              productId: product.id,
-              createdAt: faker.date.past({ years: 1 }),
-            }
-          });
-
-          wishlistItems.push(createdItem);
-          totalItems++;
-
-          if (totalItems % 50 === 0) {
-            log(`Created ${totalItems} wishlist items so far`);
-          }
-        } catch (error) {
-          // Skip duplicates (unique constraint violation)
-          if (!(error instanceof Error) || !error.message.includes('Unique constraint')) {
-            log(`Error creating wishlist item: ${error}`);
-          }
-        }
-      }
-    }
-
-    log(`Successfully generated ${totalItems} wishlist items`);
-    return wishlistItems;
-  } catch (error) {
-    log(`Error generating wishlist items: ${error}`);
-    throw error;
-  }
-}
-
-// Clean up existing data before seeding
-async function cleanupExistingData(shouldCleanup: boolean) {
-  if (!shouldCleanup) {
-    log('Skipping data cleanup as requested');
-    return;
-  }
-
-  log('Cleaning up existing data before seeding...');
-
-  try {
-    // Delete in the correct order to respect foreign key constraints
-    log('Deleting existing reviews...');
-    await db.review.deleteMany({});
-    log('Finished deleting reviews.');
-
-    // Check if any reviews remain (for debugging)
-    const remainingReviews = await db.review.findMany({ select: { id: true } });
-    if (remainingReviews.length > 0) {
-      log(`ERROR: ${remainingReviews.length} reviews still exist after deleteMany.`);
-      // Optionally throw an error or handle this unexpected state
-      // throw new Error("Failed to delete all reviews.");
-    } else {
-      log('Successfully verified no reviews remain.');
-    }
-
-    log('Deleting existing wishlist items...');
-    await db.wishlistItem.deleteMany({});
-
-    log('Deleting existing category-product assignments...');
-    await db.categoryProduct.deleteMany({});
-
-    log('Deleting existing orders and order items...');
-    await db.orderInWay.deleteMany({});
-    await db.orderItem.deleteMany({});
-    await db.order.deleteMany({});
-
-    log('Deleting existing product translations...');
-    await db.productTranslation.deleteMany({});
-
-    // Attempt to delete reviews again right before deleting products (debugging step)
-    log('Attempting to delete reviews again before deleting products...');
-    await db.review.deleteMany({});
-    log('Finished second attempt to delete reviews.');
-
-    log('Deleting existing products...');
-    await db.product.deleteMany({});
-
-    log('Deleting existing category translations...');
-    await db.categoryTranslation.deleteMany({});
-
-    log('Deleting existing categories...');
-    await db.category.deleteMany({});
-
-    log('Deleting existing supplier translations...');
-    await db.supplierTranslation.deleteMany({});
-
-    log('Deleting existing suppliers...');
-    await db.supplier.deleteMany({});
-
-    log('Deleting existing promotion translations...');
-    await db.promotionTranslation.deleteMany({});
-
-    log('Deleting existing promotions...');
-    await db.promotion.deleteMany({});
-
-    log('Data cleanup completed successfully');
-  } catch (error) {
-    log(`Error during data cleanup: ${error}`);
-    throw error;
-  }
-}
-
-// Main seeding function
-async function main() {
-  // Parse command line arguments
-  const productCount = getArgValue('products', 50);
-  const orderCount = getArgValue('orders', 20);
-
-  // Always clean up existing data first regardless of command line arguments
-  const shouldCleanup = true;
-
-  try {
-    // Clean up existing data always
-    log('🧹 Always cleaning up existing data first to avoid conflicts...');
-    await cleanupExistingData(shouldCleanup);
-
-    // Create or get existing shift
-    const shift = (await db.shift.findFirst()) || (await createShifts());
-    log(`Using shift: ${shift.name} (${shift.id})`);
-
-    // Create categories
-    log('Creating product categories...');
-    await createProductCategories();
+    log('Seeding database...');
 
     // Create suppliers
-    log('Creating suppliers...');
-    const suppliers = await createFashionSuppliers();
-    const mainSupplier = suppliers[0];
+    await createFashionSuppliers();
+
+    // Create categories
+    await createProductCategories();
+
+    // Create drivers
+    await createDrivers();
 
     // Generate products
-    log(`Generating ${productCount} products...`);
-    await generateFashionProducts(productCount, mainSupplier.id);
-
-    // Generate slider images for the homepage
-    log('Generating slider images...');
-    await generateSliderImages();
+    await generateFashionProducts(getArgValue('productCount', 100), '');
 
     // Generate orders
-    log(`Generating ${orderCount} orders...`);
-    await generateFashionOrders(orderCount, shift.id);
+    await generateFashionOrders(getArgValue('orderCount', 100), '');
 
-    // Generate product reviews
-    log('Generating product reviews...');
+    // Generate reviews
     await generateProductReviews();
 
-    // Generate wishlist items
-    log('Generating wishlist items...');
-    await generateWishlistItems();
-
-    log('Fashion seed data generation completed successfully with full data flow!');
-    log('✅ Categories created with translations');
-    log('✅ Suppliers created with translations');
-    log('✅ Products created with translations and category assignments');
-    log('✅ Slider images/promotions created with translations');
-    log('✅ Orders created');
-    log('✅ Product reviews created');
-    log('✅ Wishlist items created');
-
-    // --- POST-PROCESS: Ensure all isTripStart orders are in OrderInWay ---
-    log('🔎 Post-processing: Ensuring all isTripStart orders are in OrderInWay...');
-    const tripOrders = await db.order.findMany({ where: { isTripStart: true } });
-    let addedCount = 0;
-    for (const order of tripOrders) {
-      if (!order.driverId) continue;
-      const existing = await db.orderInWay.findUnique({ where: { driverId: order.driverId } });
-      if (!existing) {
-        await db.orderInWay.create({
-          data: {
-            orderId: order.id,
-            driverId: order.driverId,
-            orderNumber: order.orderNumber,
-            latitude: order.latitude ? parseFloat(order.latitude) : 0,
-            longitude: order.longitude ? parseFloat(order.longitude) : 0,
-          },
-        });
-        addedCount++;
-      }
-    }
-    log(`✅ Post-processing complete. Added ${addedCount} missing OrderInWay records.`);
+    log('Database seeding completed successfully');
   } catch (error) {
-    log(`Seed data generation failed: ${error}`);
-    process.exit(1);
+    log(`Error seeding database: ${error}`);
+    throw error;
   }
 }
 
-// Run the seeding
-if (import.meta.url === new URL('file://' + process.argv[1]).href) {
-  main()
-    .then(() => process.exit(0))
-    .catch((error) => {
-      console.error(error);
-      process.exit(1);
-    });
-}
-
-export {
-  cleanupExistingData,
-  createFashionSuppliers,
-  createProductCategories,
-  generateFashionOrders,
-  generateFashionProducts,
-  generateProductReviews,
-  generateSliderImages,
-  generateWishlistItems,
-};
+// Run the seeding function
+seedDatabase();

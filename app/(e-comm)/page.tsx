@@ -9,6 +9,8 @@ import { getPromotions } from './homepage/actions/getPromotions';
 import {
   fetchSuppliersWithProducts,
 } from './homepage/actions/getSuppliersWithProducts';
+import { UserRole } from '@prisma/client';
+import { PageProps } from '@/types/commonTypes';
 
 // Dynamically import components with optimized loading strategies
 // Critical above-the-fold components with priority
@@ -72,18 +74,26 @@ const CategoryListClient = dynamic(
   },
 );
 
+// Update the user type to include role
+type UserWithRole = {
+  id: string;
+  name: string | null;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  role: UserRole;
+  // ... other fields ...
+};
+
+// Dynamically import components
 const CheckUserActivationClient = dynamic(
   () => import('./homepage/component/EcommClientWrappers').then((mod) => mod.CheckUserActivationClient),
-  {
-    ssr: true,
-  },
+  { ssr: true }
 );
 
 const CheckUserLocationClient = dynamic(
   () => import('./homepage/component/EcommClientWrappers').then((mod) => mod.CheckUserLocationClient),
-  {
-    ssr: true,
-  },
+  { ssr: true }
 );
 
 const ClearButton = dynamic(() => import('./homepage/component/supplier/ClearButton'), {
@@ -120,8 +130,9 @@ const ProductsSection = dynamic(() => import('./homepage/component/product/Produ
 //   return generatePageMetadata('ecomm');
 // }
 
-export default async function Page({ searchParams }: { searchParams: Promise<{ slug?: string }> }) {
-  const { slug } = await searchParams;
+export default async function HomePage({ searchParams }: PageProps<Record<string, never>, { slug?: string }>) {
+  const resolvedSearchParams = await searchParams;
+  const slug = resolvedSearchParams?.slug || '';
   const session = await auth();
 
   // Fetch data in parallel
@@ -156,8 +167,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ s
       {/* User-specific components */}
       {session && (
         <>
-          <CheckUserActivationClient user={session.user} />
-          <CheckUserLocationClient user={session.user} />
+          <CheckUserActivationClient user={session.user as Partial<UserWithRole>} />
+          <CheckUserLocationClient user={session.user as Partial<UserWithRole>} />
         </>
       )}
 
@@ -181,7 +192,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ s
 
       {/* Main product grid */}
       <section className="py-2">
-        <ProductsSection slug={slug || ''} />
+        <ProductsSection slug={slug} />
       </section>
 
       {/* SUPPLIERS SECTION - Moved lower in the page hierarchy */}

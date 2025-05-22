@@ -2,6 +2,7 @@
 import db from '@/lib/prisma';
 import prisma from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { UserRole } from '@prisma/client';
 
 // Define the User type
 export type UserWithOrders = {
@@ -9,7 +10,7 @@ export type UserWithOrders = {
   phone: string;
   name: string;
   email: string | null;
-  role: string;
+  role: UserRole;
   address: string | null;
   isOtp: boolean;
   latitude: string;
@@ -20,20 +21,24 @@ export type UserWithOrders = {
 // Fetch users with search and role filters
 export async function getUsers() {
   try {
-    return await prisma.user.findMany({
+    const users = await db.user.findMany({
+      where: {
+        role: {
+          in: [UserRole.ADMIN, UserRole.CUSTOMER, UserRole.DRIVER, UserRole.MARKETER]
+        }
+      },
       include: {
-        orders: {
-          select: {
-            id: true,
-            status: true,
-            orderNumber: true,
+        customerOrders: {
+          include: {
+            items: true,
           },
         },
       },
     });
+    return users;
   } catch (error) {
     console.error('Error fetching users:', error);
-    throw new Error('Failed to fetch users');
+    throw error;
   }
 }
 
@@ -94,7 +99,10 @@ export async function updateUserData(formData: FormData) {
 
     await prisma.user.update({
       where: { id: userId },
-      data,
+      data: {
+        ...data,
+        role: data.role as UserRole,
+      },
     });
     revalidatePath('/dashboard/users');
     return { msg: 'تم تحديث المستخدم بنجاح' };
@@ -109,13 +117,8 @@ export async function userData(id: string) {
     const userData = await db.user.findFirst({
       where: { id },
       include: {
-        orders: {
-          select: {
-            id: true,
-            status: true,
-            orderNumber: true,
-            createdAt: true,
-            amount: true,
+        customerOrders: {
+          include: {
             items: {
               include: {
                 product: {
@@ -134,4 +137,48 @@ export async function userData(id: string) {
     console.error('Error fetching users:', error);
     throw new Error('Failed to fetch users');
   }
+}
+
+export async function updateUser(id: string, data: {
+  phone: string;
+  name: string;
+  email: string | null;
+  address: string | null;
+  role: UserRole;
+  isOtp: boolean;
+  latitude: string;
+  longitude: string;
+}) {
+  try {
+    const { role, ...rest } = data;
+    const updatedUser = await db.user.update({
+      where: { id },
+      data: {
+        ...rest,
+        role: role as UserRole,
+      },
+      include: {
+        customerOrders: {
+          include: {
+            items: true,
+          },
+        },
+      },
+    });
+    return updatedUser;
+  } catch (error) {
+    console.error('Error updating user:', error);
+    throw error;
+  }
+}
+
+export async function getUserById(id: string) {
+  if (!id) return null;
+  const user = await db.user.findUnique({
+    where: { id },
+    include: {
+      customerOrders: true,
+    },
+  });
+  return user;
 }

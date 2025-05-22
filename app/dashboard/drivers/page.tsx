@@ -33,7 +33,10 @@ export default async function DriversPage() {
       {/* Driver List */}
       <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
         {drivers.length > 0 ? (
-          drivers.map((driver) => <DriverCard key={driver.id} driver={driver} />)
+          drivers.map((driver) => <DriverCard key={driver.id} driver={{
+            ...driver,
+            name: driver.name || '',
+          }} />)
         ) : (
           <div className='col-span-full text-center text-muted-foreground'>
             لا يوجد سائقون متاحون. يرجى إضافة سائق جديد.

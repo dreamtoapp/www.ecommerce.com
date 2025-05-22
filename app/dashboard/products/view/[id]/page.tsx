@@ -1,16 +1,13 @@
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { PageProps } from '@/types/commonTypes';
 
 import { Button } from '@/components/ui/button';
 import db from '@/lib/prisma';
 import { iconVariants } from '@/lib/utils';
 
 import ProductViewContent from './product-view-content';
-
-interface ProductViewPageProps {
-  params: Promise<{ id: string }>;
-}
 
 async function getFullProductDetails(id: string) {
   try {
@@ -35,7 +32,7 @@ async function getFullProductDetails(id: string) {
   }
 }
 
-export default async function ProductViewPage({ params }: ProductViewPageProps) {
+export default async function ProductViewPage({ params }: PageProps<{ id: string }>) {
   try {
     // Resolve params promise
     const { id } = await params;

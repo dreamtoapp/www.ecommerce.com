@@ -41,7 +41,10 @@ export default async function InvoicePage({ params, searchParams }: ParamsProp) 
           />
         )}
         {status === 'ship' && (
-          <ConfirmDriver orderNo={order?.orderNumber || ''} driverList={drivers} />
+          <ConfirmDriver
+            orderNo={order?.orderNumber || ''}
+            driverList={drivers?.filter(d => d.name !== null) as { id: string; name: string; }[]}
+          />
         )}
         <BackButton />{' '}
       </div>

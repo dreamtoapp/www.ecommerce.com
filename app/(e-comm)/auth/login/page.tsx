@@ -1,10 +1,7 @@
 import LoginPe from './component/login-from';
+import { PageProps } from '@/types/commonTypes';
 
-async function pe({ searchParams }: { searchParams: Promise<{ redirect?: string }> }) {
+export default async function LoginPage({ searchParams }: PageProps<Record<string, never>, { redirect?: string }>) {
   const resolvedSearchParams = await searchParams;
-  const redirect = resolvedSearchParams.redirect;
-
-  return <LoginPe redirect={redirect || '/'} />;
+  return <LoginPe redirect={resolvedSearchParams?.redirect || '/'} />;
 }
-
-export default pe;

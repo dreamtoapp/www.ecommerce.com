@@ -1,6 +1,6 @@
 import Link from '@/components/link';
 import { getDriverOrders } from '../actions/getDriverOrders';
-import { Prisma } from '@prisma/client'; // Import Prisma
+import { Prisma } from '@prisma/client';
 import { getDriversReport } from '../actions/getDriversReport';
 import {
   Table,
@@ -10,32 +10,40 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { PageProps } from '@/types/commonTypes';
 
 // Define types based on Prisma payloads
-type DriverWithOrders = Prisma.DriverGetPayload<{ include: { orders: true } }>;
+type DriverWithOrders = Prisma.UserGetPayload<{
+  include: {
+    driverOrders: {
+      include: {
+        items: true;
+      };
+    };
+  };
+}>;
 // Note: OrderWithCustomer type isn't strictly needed here as TS infers it from getDriverOrders
 
-// Define correct props for Next.js App Router page components
-interface DriverDetailsPageProps {
-  params: Promise<{ driverId: string }>; // Revert to Promise
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>; // Revert to Promise
-}
+// Remove empty interface and use PageProps directly
+export default async function DriverDetailsPage({ params, searchParams }: PageProps<{ driverId: string }, { page?: string }>) {
+  const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
+  const { driverId } = resolvedParams;
+  const page = resolvedSearchParams?.page;
 
-export default async function DriverDetailsPage({
-  params,
-  searchParams,
-}: DriverDetailsPageProps) {
-  const { driverId } = await params; // Await params
-  const resolvedSearchParams = await searchParams; // Await searchParams
-  const page = resolvedSearchParams?.page ? Number(resolvedSearchParams.page) : 1; // Access resolved object
+  const currentPage = page ? Number(page) : 1;
   const pageSize = 10;
 
   // Fetch driver info (name, etc)
   const drivers: DriverWithOrders[] = await getDriversReport(); // Type drivers array
   const driver = drivers.find((d: DriverWithOrders) => d.id === driverId); // Use correct type for d
 
+  if (!driver) {
+    return <div>Driver not found</div>;
+  }
+
   // Fetch orders for this driver
-  const { orders, totalCount } = await getDriverOrders(driverId, page, pageSize);
+  const { orders, totalCount } = await getDriverOrders(driverId, currentPage, pageSize);
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   return (
@@ -45,10 +53,10 @@ export default async function DriverDetailsPage({
           <h2 className='text-2xl font-bold mb-1'>تفاصيل السائق: {driver?.name || driverId}</h2>
           <div className='text-muted-foreground text-sm'>رقم الجوال: <span className='font-semibold'>{driver?.phone || '-'}</span></div>
           <div className='flex gap-4 mt-2'>
-            <span className='px-3 py-1 rounded bg-muted text-xs'>إجمالي الطلبات: <span className='font-bold'>{driver?.orders?.length || 0}</span></span>
-            <span className='px-3 py-1 rounded bg-success-foreground/10 text-xs text-success-foreground'>المكتملة: <span className='font-bold'>{driver?.orders?.filter(o => o.status === 'Completed').length || 0}</span></span>
-            <span className='px-3 py-1 rounded bg-destructive-foreground/10 text-xs text-destructive-foreground'>الملغاة: <span className='font-bold'>{driver?.orders?.filter(o => o.status === 'Cancelled').length || 0}</span></span>
-            <span className='px-3 py-1 rounded bg-primary/10 text-xs text-primary'>الأرباح: <span className='font-bold'>{(driver?.orders?.reduce((sum, o) => sum + (o.status === 'Completed' ? o.amount : 0), 0) || 0).toLocaleString('ar-EG', { minimumFractionDigits: 2 })} ر.س</span></span>
+            <span className='px-3 py-1 rounded bg-muted text-xs'>إجمالي الطلبات: <span className='font-bold'>{driver?.driverOrders?.length || 0}</span></span>
+            <span className='px-3 py-1 rounded bg-success-foreground/10 text-xs text-success-foreground'>المكتملة: <span className='font-bold'>{driver?.driverOrders?.filter((o: { status: string }) => o.status === 'DELIVERED').length || 0}</span></span>
+            <span className='px-3 py-1 rounded bg-destructive-foreground/10 text-xs text-destructive-foreground'>الملغاة: <span className='font-bold'>{driver?.driverOrders?.filter((o: { status: string }) => o.status === 'CANCELED').length || 0}</span></span>
+            <span className='px-3 py-1 rounded bg-primary/10 text-xs text-primary'>الأرباح: <span className='font-bold'>{(driver?.driverOrders?.reduce((sum: number, o: { status: string; amount: number }) => sum + (o.status === 'DELIVERED' ? o.amount : 0), 0) || 0).toLocaleString('ar-EG', { minimumFractionDigits: 2 })} ر.س</span></span>
           </div>
         </div>
         <Link
@@ -99,22 +107,22 @@ export default async function DriverDetailsPage({
             <div className='mt-4 flex items-center justify-between'>
               <a
                 className='rounded bg-gray-200 px-3 py-1 disabled:opacity-50 shadow'
-                href={`?page=${page - 1}`}
-                aria-disabled={page === 1}
-                tabIndex={page === 1 ? -1 : 0}
-                style={{ pointerEvents: page === 1 ? 'none' : 'auto' }}
+                href={`?page=${currentPage - 1}`}
+                aria-disabled={currentPage === 1}
+                tabIndex={currentPage === 1 ? -1 : 0}
+                style={{ pointerEvents: currentPage === 1 ? 'none' : 'auto' }}
               >
                 السابق
               </a>
               <span className='text-sm text-muted-foreground'>
-                صفحة {page} من {totalPages}
+                صفحة {currentPage} من {totalPages}
               </span>
               <a
                 className='rounded bg-gray-200 px-3 py-1 disabled:opacity-50 shadow'
-                href={`?page=${page + 1}`}
-                aria-disabled={page === totalPages}
-                tabIndex={page === totalPages ? -1 : 0}
-                style={{ pointerEvents: page === totalPages ? 'none' : 'auto' }}
+                href={`?page=${currentPage + 1}`}
+                aria-disabled={currentPage === totalPages}
+                tabIndex={currentPage === totalPages ? -1 : 0}
+                style={{ pointerEvents: currentPage === totalPages ? 'none' : 'auto' }}
               >
                 التالي
               </a>

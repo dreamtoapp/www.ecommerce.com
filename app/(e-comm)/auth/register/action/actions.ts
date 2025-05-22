@@ -1,10 +1,8 @@
 'use server';
 
-import { prevState } from '@/types/commonType';
-
 import db from '../../../../../lib/prisma';
 
-export const registerUser = async (_prevState: prevState, formData: FormData) => {
+export async function registerUser(_state: { success: boolean; message: string } | null, formData: FormData) {
   const name = formData.get('name') as string;
   const phone = formData.get('phone') as string;
   const password = formData.get('password') as string;
@@ -14,6 +12,7 @@ export const registerUser = async (_prevState: prevState, formData: FormData) =>
   }
 
   // Check if the user already exists
+  if (!phone) return null;
   const existingUser = await db.user.findUnique({
     where: { phone },
   });
@@ -35,4 +34,4 @@ export const registerUser = async (_prevState: prevState, formData: FormData) =>
   });
 
   return { success: true, message: 'تم التسجيل بنجاح' };
-};
+}

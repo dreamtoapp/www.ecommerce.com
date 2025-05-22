@@ -29,13 +29,12 @@ import {
   getProductReviews,
 } from '../actions/actions';
 import ProductQuantity from './ProductQuantity';
+import { PageProps } from '@/types/commonTypes';
 
 // Generate metadata for the page
 export async function generateMetadata({
   params,
-}: {
-  params: Promise<{ slug: string }>;
-}): Promise<Metadata> {
+}: PageProps<{ slug: string }>): Promise<Metadata> {
   const { slug } = await params;
 
   const product = await getProductBySlug(slug);
@@ -68,7 +67,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function ProductPage({ params }: PageProps<{ slug: string }>) {
   const { slug } = await params;
 
   const session = await auth();

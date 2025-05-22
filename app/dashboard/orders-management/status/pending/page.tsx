@@ -1,7 +1,7 @@
 // app/dashboard/orders-management/status/pending/page.tsx
 
 import { Clock } from 'lucide-react';
-
+import { PageProps } from '@/types/commonTypes';
 import { ORDER_STATUS } from '@/constant/order-status';
 
 import {
@@ -12,20 +12,21 @@ import PendingOrdersView from './components/PendingOrdersView';
 
 export default async function PendingOrdersPage({
   searchParams,
-}: {
-  searchParams: Promise<Record<string, string | undefined>>;
-}) {
-  const params = await searchParams;
+}: PageProps<Record<string, never>, { page?: string; pageSize?: string; search?: string; sortBy?: string; sortOrder?: string }>) {
+  const resolvedSearchParams = await searchParams;
+
   // Get current page and page size from URL or use defaults
-  const currentPage = Number(params.page) || 1;
-  const pageSize = Number(params.pageSize) || 10;
-  const search = params.search || '';
+  const currentPage = Number(resolvedSearchParams?.page) || 1;
+  const searchTerm = resolvedSearchParams?.search || '';
+  const pageSize = Number(resolvedSearchParams?.pageSize) || 10;
+
   // Ensure sortBy is a valid value for the backend type
   const allowedSortFields = ['createdAt', 'orderNumber', 'amount'] as const;
-  const sortBy = allowedSortFields.includes(params.sortBy as any)
-    ? (params.sortBy as typeof allowedSortFields[number])
+  const sortByParam = resolvedSearchParams?.sortBy;
+  const sortBy = allowedSortFields.includes(sortByParam as any)
+    ? (sortByParam as typeof allowedSortFields[number])
     : 'createdAt';
-  const sortOrder = params.sortOrder === 'asc' ? 'asc' : 'desc';
+  const sortOrder = resolvedSearchParams?.sortOrder === 'asc' ? 'asc' : 'desc';
 
   try {
     // Fetch data in parallel using server actions
@@ -36,7 +37,7 @@ export default async function PendingOrdersPage({
         pageSize,
         sortBy,
         sortOrder,
-        search,
+        search: searchTerm,
       }),
       fetchAnalytics(),
     ]);

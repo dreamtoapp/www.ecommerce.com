@@ -105,6 +105,8 @@ export enum Environments {
 export enum UserRole {
   USER = 'USER',
   ADMIN = 'ADMIN',
+  DRIVER = 'DRIVER',
+  CUSTOMER = 'CUSTOMER'
 }
 
 export enum questionQueryMode {

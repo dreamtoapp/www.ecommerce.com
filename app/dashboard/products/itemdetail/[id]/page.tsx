@@ -1,10 +1,10 @@
 import { getProductById } from './actions';
 import ProductDetails from './component/ProductDetails';
+import { PageProps } from '@/types/commonTypes';
 
-export default async function Page(props: { params: Promise<{ id: string }> }) {
-  const params = await props.params;
-  const producid = params.id;
-  const product = await getProductById(producid);
+export default async function ProductItemDetailPage({ params }: PageProps<{ id: string }>) {
+  const { id: productId } = await params;
+  const product = await getProductById(productId);
 
   if (!product) {
     return <div>Product not found</div>;

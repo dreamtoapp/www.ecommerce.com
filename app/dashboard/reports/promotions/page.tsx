@@ -1,22 +1,17 @@
 import BackButton from '@/components/BackButton';
+import { PageProps } from '@/types/commonTypes';
 
 import { getPromotionsReportData } from './action/getPromotionsReportData';
 import PromotionsReportClient from './component/PromotionsReportClient';
 
 export const dynamic = 'force-dynamic';
-interface PageProps {
-  searchParams: Promise<{
-    from?: string;
-    to?: string;
-  }>;
-}
 
-export default async function PromotionsReportPage({ searchParams }: PageProps) {
+export default async function PromotionsReportPage({ searchParams }: PageProps<Record<string, never>, { from?: string; to?: string }>) {
+  const resolvedSearchParams = await searchParams;
+  const from = resolvedSearchParams?.from;
+  const to = resolvedSearchParams?.to;
+
   try {
-    // Resolve searchParams promise
-    const params = await searchParams;
-    const { from, to } = params;
-
     // Fetch data with error handling
     const data = await getPromotionsReportData({ from, to });
 

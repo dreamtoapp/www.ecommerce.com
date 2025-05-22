@@ -1,5 +1,6 @@
 'use server';
 import db from '@/lib/prisma';
+import { UserRole } from '@prisma/client';
 
 export interface MilestoneItem {
   title: string;
@@ -50,7 +51,7 @@ export async function getMilestonesReportData(): Promise<{ milestones: Milestone
     const customerCountTarget = 100;
     const nthCustomerResult = await db.user.findMany({ // findMany to use skip
       where: {
-        role: { notIn: ['admin', 'driver', 'OWNER'] },
+        role: { notIn: [UserRole.ADMIN, UserRole.DRIVER] },
       },
       orderBy: { createdAt: 'asc' },
       skip: customerCountTarget - 1,

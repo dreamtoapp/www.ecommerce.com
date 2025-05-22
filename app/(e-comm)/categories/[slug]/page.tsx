@@ -13,13 +13,10 @@ import {
 } from '../action/actions';
 import EnhancedProductCardAdapter
   from '../components/EnhancedProductCardAdapter';
+import { PageProps } from '@/types/commonTypes';
 
-type Params = Promise<{ slug: string }>;
-type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
-
-export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  const resolvedParams = await params;
-  const { slug } = resolvedParams;
+export async function generateMetadata({ params }: PageProps<{ slug: string }>): Promise<Metadata> {
+  const { slug } = await params;
   const categoryResult = await getCategoryBySlug(slug);
 
   if (!categoryResult.success || !categoryResult.category) {
@@ -41,12 +38,13 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
 const PRODUCTS_PER_PAGE = 12;
 
-export default async function CategoryPage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
+export default async function CategoryPage({ params, searchParams }: PageProps<{ slug: string }, { page?: string }>) {
   const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
   const { slug } = resolvedParams;
+  const pageParam = resolvedSearchParams?.page;
 
-  const resolvedSearchParams = searchParams ? await searchParams : {};
-  const page = typeof resolvedSearchParams?.page === 'string' ? parseInt(resolvedSearchParams.page, 10) : 1;
+  const currentPage = pageParam ? parseInt(pageParam, 10) : 1;
   const pageSize = PRODUCTS_PER_PAGE;
 
   // Fetch data in parallel for better performance
@@ -61,7 +59,7 @@ export default async function CategoryPage({ params, searchParams }: { params: P
   const category = categoryDataResult.category;
 
   // Fetch products for the current category
-  const productsResult = await getProductsByCategorySlug(slug, page, pageSize);
+  const productsResult = await getProductsByCategorySlug(slug, currentPage, pageSize);
 
   if (!productsResult.success) {
     console.error("Error fetching products for category:", productsResult.error);
@@ -142,21 +140,21 @@ export default async function CategoryPage({ params, searchParams }: { params: P
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
-              {page > 1 && (
+              {currentPage > 1 && (
                 <Button asChild variant="outline">
-                  <Link href={`/categories/${slug}?page=${page - 1}`}>
+                  <Link href={`/categories/${slug}?page=${currentPage - 1}`}>
                     <span className="ml-2">←</span> الصفحة السابقة
                   </Link>
                 </Button>
               )}
 
               <div className="text-sm text-muted-foreground">
-                صفحة {page} من {totalPages}
+                صفحة {currentPage} من {totalPages}
               </div>
 
-              {page < totalPages && (
+              {currentPage < totalPages && (
                 <Button asChild variant="outline">
-                  <Link href={`/categories/${slug}?page=${page + 1}`}>
+                  <Link href={`/categories/${slug}?page=${currentPage + 1}`}>
                     الصفحة التالية <span className="mr-2">→</span>
                   </Link>
                 </Button>

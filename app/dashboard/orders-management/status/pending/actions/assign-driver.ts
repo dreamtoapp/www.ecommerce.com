@@ -26,20 +26,14 @@ export async function assignDriver(orderId: string, driverId: string) {
       };
     }
 
-    // Check if the driver exists
-    const driver = await db.driver.findUnique({
-      where: {
-        id: driverId,
-      },
-    });
-
-    if (!driver) {
+    // Check if the driver (user) exists and has role 'DRIVER'
+    const driver = await db.user.findUnique({ where: { id: driverId } });
+    if (!driver || driver.role !== 'DRIVER') {
       return {
         state: 'error',
-        message: 'Driver not found.',
+        message: 'Driver (user) not found or not a driver.',
       };
     }
-
     // Update the order with the driver ID
     await db.order.update({
       where: {
@@ -47,7 +41,7 @@ export async function assignDriver(orderId: string, driverId: string) {
       },
       data: {
         driverId: driverId,
-        status: ORDER_STATUS.IN_TRANSIT, // Update the order status to ASSIGNED
+        status: ORDER_STATUS.IN_TRANSIT,
       },
     });
 

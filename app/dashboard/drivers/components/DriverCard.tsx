@@ -9,24 +9,30 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import DeleteDriverAlert from './DeleteDriverAlert';
 import EditDriverDialog from './EditDriverDialog';
 
-interface DriverCardProps {
+type DriverCardProps = {
   driver: {
     id: string;
     name: string;
-    email: string;
+    email: string | null;
     phone: string | null;
-    password?: string | null;
-    imageUrl?: string | null;
+    image?: string | null;
   };
-}
+};
 
 export default function DriverCard({ driver }: DriverCardProps) {
+  const safeDriver = {
+    ...driver,
+    name: driver.name || 'No Name',
+    email: driver.email || '',
+    password: undefined,
+    imageUrl: driver.image || undefined,
+  };
   return (
     <Card className='overflow-hidden rounded-lg border border-border bg-background text-foreground shadow-md transition-shadow hover:shadow-lg'>
       {/* Card Header */}
       <CardHeader className='border-b border-border bg-muted/50 p-4'>
         <CardTitle className='line-clamp-1 text-lg font-semibold text-primary'>
-          {driver.name}
+          {safeDriver.name}
         </CardTitle>
       </CardHeader>
 
@@ -34,10 +40,10 @@ export default function DriverCard({ driver }: DriverCardProps) {
       <CardContent className='space-y-4 p-4'>
         {/* Image */}
         <div className='relative h-48 w-full overflow-hidden rounded-lg bg-muted/20'>
-          {driver.imageUrl ? (
+          {safeDriver.imageUrl ? (
             <Image
-              src={driver.imageUrl}
-              alt={`${driver.name}'s profile`}
+              src={safeDriver.imageUrl}
+              alt={`${safeDriver.name}'s profile`}
               fill
               sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
               className='object-cover object-center transition-transform duration-300 hover:scale-105'
@@ -55,10 +61,10 @@ export default function DriverCard({ driver }: DriverCardProps) {
         {/* Details */}
         <div className='space-y-2'>
           <p className='flex items-center gap-2 text-sm text-muted-foreground'>
-            <strong className='font-medium'>Email:</strong> {driver.email}
+            <strong className='font-medium'>Email:</strong> {safeDriver.email || 'No Email'}
           </p>
           <p className='flex items-center gap-2 text-sm text-muted-foreground'>
-            <strong className='font-medium'>Phone:</strong> {driver.phone}
+            <strong className='font-medium'>Phone:</strong> {safeDriver.phone || 'No Phone'}
           </p>
         </div>
       </CardContent>
@@ -66,14 +72,14 @@ export default function DriverCard({ driver }: DriverCardProps) {
       {/* Card Footer */}
       <CardFooter className='flex justify-between border-t border-border bg-muted/50 p-4'>
         {/* Edit Driver Dialog */}
-        <EditDriverDialog driver={driver}>
+        <EditDriverDialog driver={safeDriver}>
           <button className='flex items-center gap-1 text-primary hover:underline'>
             <Pencil className={iconVariants({ size: 'xs' })} /> {/* Use direct import + CVA */} Edit
           </button>
         </EditDriverDialog>
 
         {/* Delete Driver Alert */}
-        <DeleteDriverAlert driverId={driver.id}>
+        <DeleteDriverAlert driverId={safeDriver.id}>
           <button className='flex items-center gap-1 text-destructive hover:underline'>
             <Trash2 className={iconVariants({ size: 'xs' })} /> {/* Use direct import + CVA */} Delete
           </button>

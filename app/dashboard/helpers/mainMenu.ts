@@ -115,6 +115,7 @@ export const menuGroups = [
       { title: 'التنبيهات', url: '/dashboard/alerts', icon: AlertTriangle },
       { title: 'الدعم الفني', url: '/dashboard/maintinance', icon: Wrench },
       { title: 'الدليل والإرشادات', url: '/dashboard/guidelines', icon: Info },
+      { title: 'بذر البيانات', url: '/dashboard/dataSeed', icon: Layers },
     ],
   },
   {

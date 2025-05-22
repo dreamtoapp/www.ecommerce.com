@@ -1,21 +1,16 @@
 import BackButton from '@/components/BackButton';
+import { PageProps } from '@/types/commonTypes';
 
 import { getReviewsReportData } from './action/getReviewsReportData';
 import ReviewsReportClient from './component/ReviewsReportClient';
 
 export const dynamic = 'force-dynamic'; // Required
 
-interface PageProps {
-  searchParams: Promise<{
-    from?: string;
-    to?: string;
-  }>;
-}
-
-export default async function ReviewsReportPage({ searchParams }: PageProps) {
+export default async function ReviewsReportPage({ searchParams }: PageProps<Record<string, never>, { from?: string; to?: string }>) {
   try {
-    // Resolve searchParams promise
-    const { from, to } = await searchParams;
+    const resolvedSearchParams = await searchParams;
+    const from = resolvedSearchParams?.from;
+    const to = resolvedSearchParams?.to;
 
     // Fetch report data
     const data = await getReviewsReportData({ from, to });

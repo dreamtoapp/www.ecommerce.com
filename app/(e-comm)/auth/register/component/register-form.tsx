@@ -88,10 +88,7 @@ const AuthLink = ({ href, text }: { href: string; text: string }) => (
 );
 
 export default function RegisterForm() {
-  const [state, addAction, isPending] = useActionState(registerUser, {
-    success: false,
-    message: '',
-  });
+  const [state, addAction, isPending] = useActionState(registerUser, { success: false, message: '' });
 
   return (
     <div className='flex items-center justify-center p-4'>
@@ -124,7 +121,7 @@ export default function RegisterForm() {
             />
           </div>
 
-          {state.message && <StatusMessage success={state.success} message={state.message} />}
+          {state && state.message && <StatusMessage success={state.success} message={state.message} />}
 
           <Button
             type='submit'

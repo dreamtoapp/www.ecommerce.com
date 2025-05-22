@@ -1,8 +1,9 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { FileText, } from 'lucide-react';
-import { userStatment } from './action/action';
+import { getUserStatement } from './action/action';
 import EmptyState from '../../../../components/warinig-msg';
+import { PageProps } from '@/types/commonTypes';
 
 interface Order {
   id: string;
@@ -12,33 +13,27 @@ interface Order {
   amount: number;
 }
 
-interface UserStatement {
+type UserWithCustomerOrders = {
   id: string;
   phone: string;
   name: string;
   email: string;
-  orders: Order[];
-}
+  customerOrders: Order[];
+};
 
 type OrderStatus = 'delivered' | 'pending' | 'inway' | 'canceled';
 
-async function StatementPage({ searchParams }: { searchParams: Promise<{ id?: string }> }) {
-  const resolvedSearchParams = await searchParams;
-  const userId = resolvedSearchParams.id;
+export default async function UserStatementPage({ params }: PageProps<{ id: string }>) {
+  const { id } = await params;
+  const user = await getUserStatement(id) as UserWithCustomerOrders;
 
-  if (!userId) return <EmptyState message='معرّف المستخدم غير صالح' />;
+  if (!user) return <EmptyState message='معرّف المستخدم غير صالح' />;
 
-  const statement = (await userStatment(userId)) as UserStatement | null;
-
-  if (!statement?.orders?.length) {
-    return <EmptyState message='لا توجد طلبات مرتبطة بهذا المستخدم' />;
-  }
-
-  const totalSpent = statement.orders.reduce((sum, order) => sum + order.amount, 0);
-  const orderCounts = statement.orders.reduce(
-    (acc, order) => {
-      acc[order.status.toLowerCase() as OrderStatus] =
-        (acc[order.status.toLowerCase() as OrderStatus] || 0) + 1;
+  const totalSpent = user.customerOrders.reduce((sum: number, order: Order) => sum + order.amount, 0);
+  const orderCounts = user.customerOrders.reduce(
+    (acc: Record<OrderStatus, number>, order: Order) => {
+      const status = order.status.toLowerCase() as OrderStatus;
+      acc[status] = (acc[status] || 0) + 1;
       return acc;
     },
     {} as Record<OrderStatus, number>,
@@ -53,7 +48,7 @@ async function StatementPage({ searchParams }: { searchParams: Promise<{ id?: st
         </h1>
         <div className='flex flex-col items-start justify-between gap-3 md:flex-row md:items-center md:gap-4'>
           <p className='text-sm text-gray-600 md:text-base'>
-            <span className='font-medium'>{statement?.name}</span>
+            <span className='font-medium'>{user.name}</span>
           </p>
         </div>
       </div>
@@ -67,7 +62,7 @@ async function StatementPage({ searchParams }: { searchParams: Promise<{ id?: st
         />
         <SummaryCard
           title='عدد الطلبات'
-          value={statement.orders.length}
+          value={user.customerOrders.length}
           icon={<FileText className='h-6 w-6 text-green-600 md:h-8 md:w-8' />}
         />
         <div className='space-y-2 rounded-lg bg-white p-4 shadow-md md:space-y-4 md:p-6'>
@@ -78,7 +73,7 @@ async function StatementPage({ searchParams }: { searchParams: Promise<{ id?: st
               <span
                 className={`font-medium ${getStatusColor(status as OrderStatus)} rounded-full px-2 py-1 text-sm md:px-3 md:text-base`}
               >
-                {count}
+                {count as number}
               </span>
             </div>
           ))}
@@ -98,7 +93,7 @@ async function StatementPage({ searchParams }: { searchParams: Promise<{ id?: st
               </tr>
             </thead>
             <tbody>
-              {statement.orders.map((order: Order) => (
+              {user.customerOrders.map((order: Order) => (
                 <tr key={order.id} className='border-t transition hover:bg-gray-50'>
                   <td className='px-4 py-3 text-sm font-medium md:px-6 md:text-base'>
                     {order.orderNumber}
@@ -158,5 +153,3 @@ const getStatusColor = (status: OrderStatus): string => {
       return 'bg-gray-100 text-gray-600';
   }
 };
-
-export default StatementPage;

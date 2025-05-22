@@ -1,10 +1,16 @@
 import db from '@/lib/prisma';
+import { UserRole } from '@prisma/client';
 
 export async function getDriversReport() {
-  // Fetch drivers and delivery stats
-  return db.driver.findMany({
+  // Fetch users with role: 'DRIVER' and their orders (as driver)
+  return db.user.findMany({
+    where: { role: UserRole.DRIVER },
     include: {
-      orders: true,
+      driverOrders: {
+        include: {
+          items: true
+        }
+      }
     },
     orderBy: [{ name: 'asc' }],
   });

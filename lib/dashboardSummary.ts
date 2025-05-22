@@ -3,6 +3,7 @@ import {
   OrderStatus,
 } from '@/constant/order-status';
 import db from '@/lib/prisma';
+import { UserRole } from '@prisma/client';
 
 export async function getDashboardSummary() {
   // Orders
@@ -22,9 +23,9 @@ export async function getDashboardSummary() {
   });
 
   // Customers
-  const totalCustomers = await db.user.count({ where: { role: 'customer' } });
+  const totalCustomers = await db.user.count({ where: { role: UserRole.CUSTOMER } });
   const newCustomersToday = await db.user.count({
-    where: { role: 'customer', createdAt: { gte: today } },
+    where: { role: UserRole.CUSTOMER, createdAt: { gte: today } },
   });
 
   // Products
@@ -32,7 +33,7 @@ export async function getDashboardSummary() {
   const outOfStockProducts = await db.product.count({ where: { outOfStock: true } });
 
   // Drivers
-  const totalDrivers = await db.driver.count();
+  const totalDrivers = await db.user.count({ where: { role: UserRole.DRIVER } });
 
   // Sales by Month (last 6 months)
   const now = new Date();

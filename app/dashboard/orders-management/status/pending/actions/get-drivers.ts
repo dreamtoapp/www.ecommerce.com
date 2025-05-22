@@ -1,10 +1,12 @@
 "use server";
 import db from '@/lib/prisma';
 import { ActionError } from '@/types/commonType';
+import { UserRole } from '@prisma/client';
 
 export async function getDrivers() {
   try {
-    const drivers = await db.driver.findMany();
+    // Fetch all users with role: 'DRIVER' instead of from the old Driver table
+    const drivers = await db.user.findMany({ where: { role: UserRole.DRIVER } });
     return drivers;
   } catch (error) {
     const err: ActionError =

@@ -1,30 +1,34 @@
 import { getExpenses } from './action/expenseActions';
 import ExpenseListClient from './component/ExpenseListClient';
+import { PageProps } from '@/types/commonTypes';
 
 export default async function ExpensesPage({
   searchParams,
-}: {
-  searchParams: Promise<Record<string, string>>;
-}) {
-  const sp = await searchParams;
-  const page = parseInt(sp?.page || '1', 10);
+}: PageProps<Record<string, never>, { page?: string; search?: string; category?: string }>) {
+  const resolvedSearchParams = await searchParams;
+  const page = resolvedSearchParams?.page;
+  const search = resolvedSearchParams?.search;
+  const category = resolvedSearchParams?.category;
+
+  const currentPage = parseInt(page || '1', 10);
   const rowsPerPage = 20;
-  const search = sp?.search || '';
-  const category = sp?.category || '';
+  const searchTerm = search || '';
+  const categoryFilter = category || '';
+
   const { expenses, total } = await getExpenses({
-    search,
-    category,
-    skip: (page - 1) * rowsPerPage,
+    search: searchTerm,
+    category: categoryFilter,
+    skip: (currentPage - 1) * rowsPerPage,
     take: rowsPerPage,
   });
   return (
     <ExpenseListClient
       expenses={expenses}
       total={total}
-      page={page}
+      page={currentPage}
       rowsPerPage={rowsPerPage}
-      search={search}
-      category={category}
+      search={searchTerm}
+      category={categoryFilter}
     />
   );
 }
