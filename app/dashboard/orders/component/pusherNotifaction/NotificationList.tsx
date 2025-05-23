@@ -1,9 +1,11 @@
-// NotificationList.tsx
-// Notification dialog for admin dashboard
-
 import React from 'react';
-import { Bell, Package, Mail, Newspaper } from 'lucide-react'; // Import directly
-import { iconVariants } from '@/lib/utils'; // Import CVA variants
+
+import {
+  Bell,
+  Mail,
+  Newspaper,
+  Package,
+} from 'lucide-react'; // Import directly
 
 // Removed Icon import: import { Icon } from '@/components/icons';
 import {
@@ -11,7 +13,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '../../../../../components/ui/dialog';
+} from '@/components/ui/dialog';
+import { iconVariants } from '@/lib/utils'; // Import CVA variants
 
 export type NotificationType = {
   id: string;

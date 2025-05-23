@@ -1,5 +1,6 @@
 'use client';
 import { useActionState } from 'react';
+import { log } from '@/utils/logger';
 
 import {
   Lock,
@@ -14,7 +15,7 @@ import { userLogin } from '../action/userLogin';
 // Define props interface
 
 export default function LoginPe(...args: any[]) {
-  console.log("LoginPe redirect prop:", args);
+  log("LoginPe redirect prop:", args);
 
   const [state, addAction, isPending] = useActionState(userLogin, { success: false, message: '' });
 

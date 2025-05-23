@@ -2,20 +2,22 @@
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { UserRole } from '@/constant/enums';
 
 import AdminMaintenanceDashboard from '../maintenance/admin-dashboard';
 import TenantMaintenanceDashboard from '../maintenance/tenant-dashboard';
 
 export default function MaintenancePage() {
-  const [role, setRole] = useState<'admin' | 'tenant'>('admin');
+  // Use a union type for role: UserRole | 'tenant'
+  const [role, setRole] = useState<UserRole | 'tenant'>(UserRole.ADMIN);
 
   return (
     <div className='container mx-auto p-6'>
       <div className='mb-6 flex items-center gap-4'>
         <span className='font-semibold'>Role Preview:</span>
         <Button
-          variant={role === 'admin' ? 'default' : 'outline'}
-          onClick={() => setRole('admin')}
+          variant={role === UserRole.ADMIN ? 'default' : 'outline'}
+          onClick={() => setRole(UserRole.ADMIN)}
         >
           Admin
         </Button>
@@ -26,7 +28,7 @@ export default function MaintenancePage() {
           Tenant
         </Button>
       </div>
-      {role === 'admin' ? <AdminMaintenanceDashboard /> : <TenantMaintenanceDashboard />}
+      {role === UserRole.ADMIN ? <AdminMaintenanceDashboard /> : <TenantMaintenanceDashboard />}
     </div>
   );
 }

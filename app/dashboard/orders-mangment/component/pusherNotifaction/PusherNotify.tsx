@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { pusherClient } from '@/lib/pusherClient';
 import { cn } from '@/lib/utils';
 
-import { Button } from '../../../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { fetchNotifications } from './fetchNotifications';
 import NotificationList, { NotificationType } from './NotificationList';
 

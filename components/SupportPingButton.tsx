@@ -1,5 +1,4 @@
-// components/SupportPingButton.tsx
-// UI Button to ping admin with fallback logic, message modal, and cooldown timer
+
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import { Zap } from 'lucide-react'; // Import directly

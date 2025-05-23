@@ -7,17 +7,20 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
+import { UserRole } from '@prisma/client';
 
-// import AppSidebarEnhanced from '@/app/dashboard/components/AppSidebarEnhanced'; // New enhanced sidebar (commented out)
 import CurrentLinkTitle from './orders/component/CurrentLinkTitle';
 import PusherNotify from './orders/component/pusherNotifaction/PusherNotify';
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
   // This layout is used for the dashboard pages
   const session = await auth();
-  if (!session?.user || (session.user as { role?: string }).role !== 'admin') {
+  // Fix: Accept both string and enum for role, and handle legacy lowercase roles
+  const userRole = (session?.user as { role?: string })?.role;
+  if (!session?.user || (userRole !== UserRole.ADMIN && userRole !== 'ADMIN')) {
     return redirect('/auth/login');
   }
+  console.log(session)
 
 
 

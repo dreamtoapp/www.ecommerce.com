@@ -40,6 +40,7 @@ import {
   iconVariants,
 } from '@/lib/utils'; // Correct import path for CVA variants
 import { useCartStore } from '@/store/cartStore';
+import { UserRole } from '@/constant/enums';
 
 import { userLogOut } from '../../../app/(e-comm)/auth/action';
 import { Button } from '../../ui/button';
@@ -118,7 +119,7 @@ export default function UserMenu({ session }: UserMenuProps) {
                 {session.user.name?.[0]?.toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            {session.user.role === 'admin' && (
+            {session.user.role === UserRole.ADMIN && (
               <BadgeAlert // Use direct import
                 className={iconVariants({ size: 'xs', className: 'absolute -bottom-1 -right-1 fill-destructive/20 text-destructive' })} // Reverted badge position
               />
@@ -138,7 +139,7 @@ export default function UserMenu({ session }: UserMenuProps) {
       >
         <DropdownMenuLabel className='flex items-center justify-between rounded-t-lg bg-muted/20 px-4 py-2'>
           <span className='text-sm font-semibold text-foreground'>الحساب</span>
-          {session.user.role === 'admin' && (
+          {session.user.role === UserRole.ADMIN && (
             <span className='flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-1 text-xs text-destructive'>
               <BadgeAlert className={iconVariants({ size: 'xs' })} /> {/* Use direct import */}
               مدير النظام
@@ -245,7 +246,7 @@ export default function UserMenu({ session }: UserMenuProps) {
         </DropdownMenuItem>
 
         {/* Admin Dashboard */}
-        {session.user.role === 'admin' && (
+        {session.user.role === UserRole.ADMIN && (
           <>
             <DropdownMenuSeparator className='my-1 bg-border/50' />
             <DropdownMenuItem asChild>
