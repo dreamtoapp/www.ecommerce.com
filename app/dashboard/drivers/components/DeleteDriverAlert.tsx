@@ -2,18 +2,20 @@
 'use client'; // Mark as a Client Component
 
 import { useState } from 'react';
+
 import {
   AlertDialog,
-  AlertDialogTrigger,
+  AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
   AlertDialogDescription,
   AlertDialogFooter,
-  AlertDialogCancel,
-  AlertDialogAction,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { deleteDriver } from '../actions/Actions';
+
+import { deleteDriver } from '../actions/deleteDriver';
 
 interface DeleteDriverAlertProps {
   driverId: string;

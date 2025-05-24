@@ -1,6 +1,5 @@
 'use client';
 import { useActionState } from 'react';
-import { log } from '@/utils/logger';
 
 import {
   Lock,
@@ -9,6 +8,7 @@ import {
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { log } from '@/utils/logger';
 
 import { userLogin } from '../action/userLogin';
 
@@ -21,7 +21,7 @@ export default function LoginPe(...args: any[]) {
 
   return (
     <div dir='rtl' className='flex items-center justify-center'>
-      <div className='w-full max-w-md space-y-6 rounded-xl bg-white p-6 shadow-lg'>
+      <div className='w-full max-w-md space-y-6 rounded-xl  p-6 shadow-lg'>
         {/* Header */}
         <div className='space-y-2 text-center'>
           <h1 className='text-3xl font-bold text-primary'>مرحباً بعودتك!</h1>
@@ -31,13 +31,13 @@ export default function LoginPe(...args: any[]) {
         {/* Form */}
         <form action={addAction} className='space-y-4'>
           {/* Phone Input */}
-          <div className='relative'>
+          <div className='relative text-primary-foreground'>
             <Phone className='absolute left-3 top-1/2 -translate-y-1/2 transform text-gray-400' />
             <Input
               type='tel'
               placeholder='رقم الهاتف'
               maxLength={10}
-              className='pl-10'
+              className='pl-10 '
               required
               autoComplete='tel'
               name='phone'

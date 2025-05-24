@@ -1,15 +1,21 @@
 'use client';
 
-import React, { useState, ElementType } from 'react'; // Import ElementType
+import React, {
+  ElementType,
+  useState,
+} from 'react'; // Import ElementType
 
-import { Home, LayoutDashboard } from 'lucide-react';
+import {
+  ChevronsUpDown,
+  Home,
+  LayoutDashboard,
+} from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
 import Link from '@/components/link';
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarHeader,
   SidebarRail,
@@ -26,7 +32,7 @@ interface MenuItem { // Renamed BaseMenuItem to MenuItem
 }
 
 export default function AppSidebar() {
-  // For now, hardcode RTL (right side) for Arabic; in future, detect from i18n or context
+
   const side: 'left' | 'right' = 'right';
   const pathname = usePathname();
   const [collapsedGroups, setCollapsedGroups] = useState<number[]>([]);
@@ -38,7 +44,7 @@ export default function AppSidebar() {
   };
 
   return (
-    <Sidebar side={side} className='flex h-screen flex-col border-r bg-background rtl:text-right'>
+    <Sidebar side={side} className='flex h-screen flex-col border-r bg-background  rtl:text-right'>
       <SidebarHeader className='flex flex-col items-center gap-2 border-b bg-background p-4'>
         <div className='mb-1 flex w-full items-center justify-center gap-4'>
           <Link
@@ -55,7 +61,7 @@ export default function AppSidebar() {
           </Link>
         </div>
       </SidebarHeader>
-      <SidebarContent className='flex-1 overflow-y-auto p-2'>
+      <SidebarContent className='flex-1 overflow-y-auto p-2 '>
         {menuGroups.map((group, i) => {
           const isCollapsed = collapsedGroups.includes(i);
           return (
@@ -66,8 +72,8 @@ export default function AppSidebar() {
                 aria-expanded={!isCollapsed}
                 aria-controls={`sidebar-group-${i}`}
               >
-                <span className='text-right'>{group.label}</span>
-                <span className={`transition-transform ${isCollapsed ? 'rotate-180' : ''}`}>▼</span>
+                <span className='text-right text-sm'>{group.label}</span>
+                <span className={`transition-transform ${isCollapsed ? 'rotate-180' : ''}`}><ChevronsUpDown size={15} /></span>
               </button>
               <ul
                 id={`sidebar-group-${i}`}
@@ -83,7 +89,7 @@ export default function AppSidebar() {
                           className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground ${pathname === item.url ? 'bg-accent font-bold text-accent-foreground' : ''}`}
                         >
                           <item.icon className='h-5 w-5 text-primary' />
-                          <span className='flex-1'>{item.title}</span>
+                          <span className='flex-1 text-[12px] font-semibold'>{item.title}</span>
                         </Link>
                       </li>
                       {/* Render sub-menu if available */}
@@ -110,12 +116,12 @@ export default function AppSidebar() {
           );
         })}
       </SidebarContent>
-      <SidebarFooter className='border-t p-4'>
+      {/* <SidebarFooter className='border-t p-4'>
         <div className='w-full text-center text-xs text-muted-foreground'>
           {' '}
           {new Date().getFullYear()} www.amwag.com
         </div>
-      </SidebarFooter>
+      </SidebarFooter> */}
       <SidebarRail />
     </Sidebar>
   );

@@ -2,22 +2,39 @@
 // Seed data using real backend/server action functions (not direct db calls)
 // This file is for development/testing only. DO NOT use in production!
 
-import { createDriver } from '../app/dashboard/drivers/actions/Actions';
-import { registerUser } from '../app/(e-comm)/auth/register/action/actions';
-import { createSupplier } from '../app/dashboard/suppliers/actions/createSupplier';
-import { createCategory } from '../app/dashboard/categories/new/actions/create-category';
-import { createProduct } from '../app/dashboard/products/actions/create-product';
-import { CreateOrderInDb } from '../app/(e-comm)/checkout/actions/creatOrder';
-import { submitProductRating } from '../app/(e-comm)/product/actions/rating';
-import { addToWishlist } from '../app/(e-comm)/product/actions/wishlist';
-import { faker } from '@faker-js/faker/locale/ar';
+import { createDriver } from '@/app/dashboard/drivers/actions/createDriver';
+import {
+  createPromotion,
+} from '@/app/dashboard/promotions/actions/createPromotion';
+import { createSeoEntry } from '@/app/dashboard/seo/actions/seo';
 import { auth } from '@/auth';
 import db from '@/lib/prisma';
 import { OrderCartItem } from '@/types/commonType';
-import { User, Product, Supplier, Category } from '@/types/databaseTypes';
-import { UserRole, EntityType } from '@prisma/client';
-import { createPromotion } from '@/app/dashboard/promotions/actions/createPromotion';
-import { createSeoEntry } from '@/app/dashboard/seo/actions/seo';
+import {
+  Category,
+  Product,
+  Supplier,
+  User,
+} from '@/types/databaseTypes';
+import { faker } from '@faker-js/faker/locale/ar';
+import {
+  EntityType,
+  UserRole,
+} from '@prisma/client';
+
+import { registerUser } from '../app/(e-comm)/auth/register/action/actions';
+import { CreateOrderInDb } from '../app/(e-comm)/checkout/actions/creatOrder';
+import { submitProductRating } from '../app/(e-comm)/product/actions/rating';
+import { addToWishlist } from '../app/(e-comm)/product/actions/wishlist';
+import {
+  createCategory,
+} from '../app/dashboard/categories/new/actions/create-category';
+import {
+  createProduct,
+} from '../app/dashboard/products/actions/create-product';
+import {
+  createSupplier,
+} from '../app/dashboard/suppliers/actions/createSupplier';
 
 // Types for our seeding functions
 type SeedingResult<T> = {
@@ -78,20 +95,20 @@ export async function seedDrivers(count = 5): Promise<SeedingResult<UserWithId>[
       }
       const nonNullResult = (result as unknown) as { success: boolean; message: string };
       if (nonNullResult.success) {
-         if (!driver.phone) {
-           results.push({ success: false, message: 'Driver phone missing' });
-           continue;
-         }
-         const createdDriver = await db.user.findUnique({ where: { phone: driver.phone } });
-         if (createdDriver) {
-            // Update the user's role to DRIVER (integrated with user table)
-            const updatedDriver = await db.user.update({ where: { id: createdDriver.id }, data: { role: UserRole.DRIVER } });
-            results.push({ success: true, message: nonNullResult.message, data: updatedDriver as UserWithId });
-         } else {
-            results.push({ success: false, message: 'Driver (user) created but not found in database' });
-         }
+        if (!driver.phone) {
+          results.push({ success: false, message: 'Driver phone missing' });
+          continue;
+        }
+        const createdDriver = await db.user.findUnique({ where: { phone: driver.phone } });
+        if (createdDriver) {
+          // Update the user's role to DRIVER (integrated with user table)
+          const updatedDriver = await db.user.update({ where: { id: createdDriver.id }, data: { role: UserRole.DRIVER } });
+          results.push({ success: true, message: nonNullResult.message, data: updatedDriver as UserWithId });
+        } else {
+          results.push({ success: false, message: 'Driver (user) created but not found in database' });
+        }
       } else {
-         results.push({ success: false, message: nonNullResult.message });
+        results.push({ success: false, message: nonNullResult.message });
       }
     } catch (error) {
       results.push(handleError(error));
@@ -120,18 +137,18 @@ export async function seedUsers(count = 5): Promise<SeedingResult<UserWithId>[]>
       }
       const nonNullResult = (result as unknown) as { success: boolean; message: string };
       if (nonNullResult.success) {
-         if (!user.phone) {
-           results.push({ success: false, message: 'User phone missing' });
-           continue;
-         }
-         const createdUser = await db.user.findUnique({ where: { phone: user.phone } });
-         if (createdUser) {
-            results.push({ success: true, message: nonNullResult.message, data: createdUser as UserWithId });
-         } else {
-            results.push({ success: false, message: 'User created but not found in database' });
-         }
+        if (!user.phone) {
+          results.push({ success: false, message: 'User phone missing' });
+          continue;
+        }
+        const createdUser = await db.user.findUnique({ where: { phone: user.phone } });
+        if (createdUser) {
+          results.push({ success: true, message: nonNullResult.message, data: createdUser as UserWithId });
+        } else {
+          results.push({ success: false, message: 'User created but not found in database' });
+        }
       } else {
-         results.push({ success: false, message: nonNullResult.message });
+        results.push({ success: false, message: nonNullResult.message });
       }
     } catch (error) {
       results.push(handleError(error));
@@ -333,7 +350,7 @@ export async function seedReviews(
   for (let i = 0; i < count; i++) {
     try {
       const product = faker.helpers.arrayElement(products);
-      
+
       const reviewData = {
         productId: product.id,
         rating: faker.number.int({ min: 1, max: 5 }),
@@ -364,7 +381,7 @@ export async function seedWishlistItems(
   for (let i = 0; i < count; i++) {
     try {
       const product = faker.helpers.arrayElement(products);
-      
+
       // Simulate user session for the wishlist action
       const session = await auth();
       if (!session?.user) {
@@ -447,7 +464,7 @@ async function cleanupExistingData(shouldCleanup: boolean) {
 // Generate slider images for homepage
 async function generateSliderImages() {
   console.log('Generating slider images...');
-  
+
   const sliderImages = [
     {
       title: 'عروض الصيف',

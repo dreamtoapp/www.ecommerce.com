@@ -128,8 +128,8 @@ model User {
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
   accounts      Account[]
-  latitude      String  @default("")
-  longitude     String  @default("")
+  latitude       Float? 
+  longitude       Float? 
   address       String? @default("")
   role          UserRole @default(CUSTOMER) // Use enum for roles
   isOtp         Boolean @default(false)
@@ -174,8 +174,8 @@ model Order {
   customer      User    @relation("OrderCustomer", fields: [customerId], references: [id]) // Relation to the User model
   driverId      String? @db.ObjectId // Reference to User (was Driver)
   driver        User?   @relation("OrderDriver", fields: [driverId], references: [id]) // Updated to User, explicit relation name
-  latitude      String?
-  longitude     String?
+  latitude      Float? 
+  longitude    Float?  
   status        String @default("PENDING") 
   isTripStart   Boolean @default(false)
   amount        Float   @default(0)
@@ -220,8 +220,8 @@ model LocationHistory {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   driverId  String // Should reference User.id
   orderId   String?
-  latitude  Float // Latitude of the location
-  longitude Float // Longitude of the location
+  latitude  Float? // Latitude of the location
+  longitude Float? // Longitude of the location
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -318,8 +318,8 @@ model Company {
   snapchat       String   @default("") // Snapchat URL
   website        String   @default("") // Website URL
   address        String   @default("") // Address of the company
-  latitude       String   @default("") // Latitude of the company location
-  longitude      String   @default("") // Longitude of the company location
+  latitude         Float?  // Latitude of the company location
+  longitude        Float?  // Longitude of the company location
   createdAt      DateTime @default(now()) // Timestamp of creation
   updatedAt      DateTime @updatedAt // Timestamp of last update
 }

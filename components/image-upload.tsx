@@ -27,7 +27,8 @@ import {
   cn,
   iconVariants,
 } from '@/lib/utils';
-import fallbackImage from '@/public/fallback/fallback.webp';
+
+// import fallbackImage from '@/public/fallback/fallback.avif';
 
 // --- Types ---
 export interface ImageUploadError {
@@ -242,7 +243,7 @@ function ImagePreview({
         aspectRatio: aspectRatio || (width && height ? width / height : 1),
         maxWidth: width ? `${width}px` : undefined,
         maxHeight: height ? `${height}px` : undefined,
-        backgroundImage: showPlaceholder ? `url(${fallbackImage.src})` : undefined,
+        backgroundImage: showPlaceholder ? "url('/fallback/fallback.avif')" : undefined,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',

@@ -27,11 +27,11 @@ export default async function Layout({ children }: { children: React.ReactNode }
   // Hardcode RTL for now; in the future, detect from language/i18n
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className='flex min-h-screen w-full bg-background' dir='rtl'>
+      <div className='flex min-h-screen w-full bg-background ' dir='rtl'>
         <AppSidebar /> {/* Reverted to use the old sidebar */}
         <div className='flex min-h-screen flex-1 flex-col'>
           {/* Sticky header */}
-          <header className='sticky top-0 z-40 flex items-center justify-between border-b bg-secondary px-6 py-3'>
+          <header className='sticky top-0 z-40 flex items-center justify-between border-b bg-secondary px-6 py-1'>
             <div className='flex items-center gap-2'>
               <SidebarTrigger />
               <CurrentLinkTitle />
