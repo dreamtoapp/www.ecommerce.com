@@ -8,19 +8,42 @@ import { z } from 'zod';
 
 export type DriverFormData = z.infer<typeof driverSchema>;
 
+
+
 export const driverSchema = z.object({
-  name: z.string().min(1, 'الاسم مطلوب'),
-  email: z.string().email('البريد الإلكتروني غير صالح'),
-  phone: z.string().min(1, 'رقم الهاتف مطلوب'),
-  address: z.string().min(1, 'العنوان مطلوب'),
-  password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
+  name: z
+    .string()
+    .trim()
+    .nonempty('الاسم مطلوب'),
+
+  email: z
+    .string()
+    .trim()
+    .email('صيغة البريد الإلكتروني غير صحيحة'),
+
+  phone: z
+    .string()
+    .trim()
+    .nonempty('رقم الهاتف مطلوب')
+    .regex(/^\d{10}$/, 'رقم الهاتف يجب أن يحتوي على 10 أرقام فقط'),
+
+  address: z
+    .string()
+    .trim()
+    .nonempty('العنوان مطلوب'),
+
+  password: z
+    .string()
+    .min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
 });
+
 
 interface Field {
   name: keyof DriverFormData;
   type: string;
   placeholder: string;
   register: UseFormRegisterReturn;
+  maxLength?: number;
   error?: string;
 }
 
@@ -47,6 +70,7 @@ export const getDriverFields = (
       type: 'tel',
       placeholder: 'رقم الهاتف',
       register: register('phone'),
+      maxLength: 10,
       error: errors.phone?.message as string,
     },
     {
@@ -58,7 +82,7 @@ export const getDriverFields = (
     },
     {
       name: 'password',
-      type: 'password',
+      type: 'text',
       placeholder: 'كلمة المرور',
       register: register('password'),
       error: errors.password?.message as string,

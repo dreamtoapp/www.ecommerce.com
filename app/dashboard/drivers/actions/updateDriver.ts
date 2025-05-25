@@ -1,48 +1,95 @@
-"use server";
+'use server';
+
 import db from '@/lib/prisma';
 import { UserRole } from '@prisma/client';
+
+import { driverSchema } from '../helper/zodAndInputs';
+
+type ValidationResult<T> = { success: true; data: T } | { success: false; errors: Record<string, string[]> };
+
+function formDataToObject(formData: FormData): Record<string, any> {
+  const data: Record<string, any> = {};
+  formData.forEach((value, key) => {
+    data[key] = value;
+  });
+  return data;
+}
+
+function validateDriverData(data: Record<string, any>): ValidationResult<typeof driverSchema._type> {
+  const result = driverSchema.safeParse(data);
+  if (!result.success) {
+    return {
+      success: false,
+      errors: result.error.flatten().fieldErrors,
+    };
+  }
+  return { success: true, data: result.data };
+}
+
+async function isEmailOrPhoneTaken(email: string, phone: string, excludeId: string) {
+  return await db.user.findFirst({
+    where: {
+      OR: [
+        { AND: [{ phone }, { NOT: { id: excludeId } }] },
+        { AND: [{ email }, { NOT: { id: excludeId } }] },
+      ],
+    },
+  });
+}
 
 export async function updateDriver(formData: FormData) {
   try {
     const driverId = formData.get('id') as string;
     if (!driverId) {
-      throw new Error('Driver ID is required');
+      return {
+        ok: false,
+        msg: 'معرّف السائق مطلوب',
+        errors: { id: ['معرّف السائق مطلوب'] },
+      };
     }
 
-    const data = {
-      phone: formData.get('phone') as string,
-      name: formData.get('name') as string,
-      email: formData.get('email') as string | null,
-      address: formData.get('address') as string | null,
-      latitude: formData.get('latitude') as string,
-      longitude: formData.get('longitude') as string,
-    };
+    const rawData = formDataToObject(formData);
 
-    // Check if phone or email already exists for another user
-    const existingUser = await db.user.findFirst({
-      where: {
-        OR: [
-          { phone: data.phone, NOT: { id: driverId } },
-          { email: data.email, NOT: { id: driverId } },
-        ],
-      },
-    });
+    const validation = validateDriverData(rawData);
+    if (!validation.success) {
+      return {
+        ok: false,
+        msg: 'يرجى تصحيح الأخطاء في النموذج',
+        errors: validation.errors,
+      };
+    }
 
+    const { email, phone, ...rest } = validation.data;
+
+    const existingUser = await isEmailOrPhoneTaken(email, phone, driverId);
     if (existingUser) {
-      return { msg: 'رقم الهاتف أو البريد الإلكتروني موجود بالفعل لمستخدم آخر' };
+      return {
+        ok: false,
+        msg: 'رقم الهاتف أو البريد الإلكتروني موجود بالفعل لمستخدم آخر',
+        errors: {
+          phone: ['رقم الهاتف أو البريد الإلكتروني موجود بالفعل'],
+          email: ['رقم الهاتف أو البريد الإلكتروني موجود بالفعل'],
+        },
+      };
     }
 
     await db.user.update({
       where: { id: driverId },
       data: {
-        ...data,
+        ...rest,
+        email,
+        phone,
         role: UserRole.DRIVER,
       },
     });
 
-    return { msg: 'تم تحديث بيانات السائق بنجاح' };
+    return { ok: true, msg: 'تم تحديث بيانات السائق بنجاح' };
   } catch (error) {
     console.error('Error updating driver:', error);
-    throw new Error('Failed to update driver');
+    return {
+      ok: false,
+      msg: 'حدث خطأ غير متوقع أثناء تحديث بيانات السائق، يرجى المحاولة لاحقاً',
+      errors: {},
+    };
   }
 }

@@ -1,21 +1,20 @@
-// app/dashboard/drivers/components/EditDriverDialog.tsx
-'use client'; // Mark as a Client Component
+'use client';
 
-import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
+import AppDialog from '@/components/app-dialog';
+import FormError from '@/components/form-error';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 import { updateDriver } from '../actions/updateDriver';
+import {
+  DriverFormData,
+  driverSchema,
+  getDriverFields,
+} from '../helper/zodAndInputs';
 
 interface EditDriverDialogProps {
   driver: {
@@ -23,6 +22,7 @@ interface EditDriverDialogProps {
     name: string;
     email: string;
     phone: string | null;
+    address?: string | null; // Allow null
     password?: string | null; // Allow null
     imageUrl?: string | null;
   };
@@ -30,108 +30,75 @@ interface EditDriverDialogProps {
 }
 
 export default function EditDriverDialog({ driver, children }: EditDriverDialogProps) {
-  const [formData, setFormData] = useState({
-    name: driver.name,
-    email: driver.email,
-    phone: driver.phone || '', // Default null phone to empty string for input
-    password: driver.password || '',
-    imageFile: null as File | null, // File for image upload
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm<DriverFormData>({
+    resolver: zodResolver(driverSchema),
+    mode: 'onChange',
+    defaultValues: {
+      name: driver.name,
+      email: driver.email,
+      phone: driver.phone || '', // Default null phone to empty string for input
+      address: driver.address || '', // Default null address to empty string for input
+      password: driver.address || '',
+    },
   });
-  const [loading, setLoading] = useState(false);
 
-  // Handle form input changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, files } = e.target;
-
-    if (name === 'imageFile' && files && files.length > 0) {
-      setFormData({ ...formData, imageFile: files[0] }); // Set the uploaded file
-    } else {
-      setFormData({ ...formData, [name]: value }); // Update text fields
-    }
-  };
-
-  // Handle form submission
-  const handleSubmit = async () => {
+  const onSubmit = async (formData: DriverFormData) => {
     try {
-      setLoading(true);
-      const fd = new FormData();
-      fd.append('id', driver.id);
-      fd.append('name', formData.name);
-      fd.append('email', formData.email);
-      fd.append('phone', formData.phone);
-      fd.append('password', formData.password);
-      if (formData.imageFile) {
-        fd.append('imageFile', formData.imageFile);
+      const form = new FormData();
+      form.append('id', driver.id); // Add the driver id to the form for backend update
+      for (const key in formData) {
+        if (Object.prototype.hasOwnProperty.call(formData, key)) {
+          form.append(key, formData[key as keyof DriverFormData] ?? '');
+        }
       }
-      await updateDriver(fd);
-      window.location.reload();
-    } catch (e) {
-      let errorMessage = 'Failed to update driver.';
-      if (e instanceof Error) {
-        errorMessage = e.message;
+
+
+      const result = await updateDriver(form);
+      if (result.ok) {
+        toast.success(result.msg || 'تم إضافة السائق بنجاح');
+        reset();
+        setTimeout(() => window.location.reload(), 1200);
+      } else {
+        toast.error(result.msg || 'حدث خطأ يرجى المحاولة لاحقاً');
       }
-      console.error('Error updating driver:', errorMessage);
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      toast.error('فشل في إرسال البيانات، يرجى المحاولة لاحقاً');
+      console.error('فشل في إرسال البيانات:', err);
     }
   };
 
   return (
-    <Dialog>
-      {/* Trigger for opening the dialog */}
-      <DialogTrigger asChild>{children}</DialogTrigger>
+    <AppDialog
+      trigger={children}
+      title="تعديل بيانات السائق"
+      description="يرجى إدخال بيانات السائق"
 
-      {/* Dialog Content */}
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Edit Driver</DialogTitle>
-          <DialogDescription>Update the details of the driver below.</DialogDescription>
-        </DialogHeader>
+    >
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div>
+          {getDriverFields(register, errors).map((input) => (
+            <div key={input.name} className="mb-4">
+              <Input
+                {...input.register}
+                type={input.type}
+                placeholder={input.placeholder}
+                disabled={isSubmitting}
+                maxLength={input.maxLength}
+              />
+              <FormError message={input.error} />
+            </div>
+          ))}
 
-        {/* Form Fields */}
-        <div className='space-y-4'>
-          {/* Name Field */}
-          <Input
-            name='name'
-            placeholder='Driver Name'
-            value={formData.name}
-            onChange={handleChange}
-          />
-
-          {/* Email Field */}
-          <Input
-            name='email'
-            type='email'
-            placeholder='Email'
-            value={formData.email}
-            onChange={handleChange}
-          />
-
-          {/* Phone Field */}
-          <Input
-            name='phone'
-            placeholder='Phone Number'
-            value={formData.phone}
-            onChange={handleChange}
-          />
-          <Input
-            name='password'
-            placeholder='password '
-            value={formData.password}
-            onChange={handleChange}
-          />
-
-          {/* Image Upload Field */}
-          <Input name='imageFile' type='file' accept='image/*' onChange={handleChange} />
         </div>
-
-        {/* Dialog Footer with Submit Button */}
-        <DialogFooter>
-          <Button onClick={handleSubmit} disabled={loading}>
-            {loading ? 'Updating...' : 'Update Driver'}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'جارٍ الحفظ...' : 'حفظ السائق'}
+        </Button>
+      </form>
+    </AppDialog>
   );
 }
