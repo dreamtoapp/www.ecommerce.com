@@ -127,10 +127,11 @@ model User {
   image         String? // moved from Driver (was imageUrl)
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
-  accounts      Account[]
-  latitude       Float? 
-  longitude       Float? 
   address       String? @default("")
+  accounts      Account[]
+  latitude       String? 
+  longitude       String? 
+  sharedLocationLink String? @default("") // shared location via whatsapp
   role          UserRole @default(CUSTOMER) // Use enum for roles
   isOtp         Boolean @default(false)
   isOauth       Boolean   @default(false)
@@ -174,8 +175,8 @@ model Order {
   customer      User    @relation("OrderCustomer", fields: [customerId], references: [id]) // Relation to the User model
   driverId      String? @db.ObjectId // Reference to User (was Driver)
   driver        User?   @relation("OrderDriver", fields: [driverId], references: [id]) // Updated to User, explicit relation name
-  latitude      Float? 
-  longitude    Float?  
+  latitude      String? 
+  longitude    String?  
   status        String @default("PENDING") 
   isTripStart   Boolean @default(false)
   amount        Float   @default(0)
@@ -208,8 +209,8 @@ model OrderInWay {
   driverId    String   @unique @db.ObjectId // Reference to User (was Driver)
   driver      User     @relation("OrderInWayDriver", fields: [driverId], references: [id]) // Updated to User, explicit relation name
   orderNumber String?
-  latitude    Float?
-  longitude   Float?
+  latitude    String?
+  longitude   String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -318,8 +319,8 @@ model Company {
   snapchat       String   @default("") // Snapchat URL
   website        String   @default("") // Website URL
   address        String   @default("") // Address of the company
-  latitude         Float?  // Latitude of the company location
-  longitude        Float?  // Longitude of the company location
+  latitude         String?  // Latitude of the company location
+  longitude        String?  // Longitude of the company location
   createdAt      DateTime @default(now()) // Timestamp of creation
   updatedAt      DateTime @updatedAt // Timestamp of last update
 }

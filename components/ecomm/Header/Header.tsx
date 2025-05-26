@@ -1,3 +1,4 @@
+import { PrismaClient } from '@prisma/client';
 import { Session } from 'next-auth';
 
 
@@ -6,6 +7,7 @@ import HeaderClient from './HeaderClient';
 // Header.tsx (Server Component)
 import Logo from './Logo';
 import SearchBar from './SearchBar';
+import FixLatAndLong from '@/utils/FixLatAndLong';
 
 interface HeaderProps {
   logo: string;
@@ -36,20 +38,23 @@ export default function Header({ session, logo, logoAlt }: HeaderProps) {
 
           {/* Actions: Cart, User, etc. - grouped with spacing */}
           <div className='flex items-center gap-2 md:gap-3'>
+
+            <FixLatAndLong />
+
             <HeaderClient session={session} />
           </div>
         </nav>
       </div>
 
       {/* Navigation Bar for Categories (Desktop) */}
-      <div className='hidden border-b border-border bg-background shadow-sm md:block'>
+      {/* <div className='hidden border-b border-border bg-background shadow-sm md:block'>
         <nav
           className='mx-auto flex max-w-7xl items-center justify-center px-4 py-2 sm:px-6 lg:px-8'
           aria-label='Product categories'
         >
-          {/* <CategoryNav /> */}
+          <CategoryNav />
         </nav>
-      </div>
+      </div> */}
     </header>
   );
 }

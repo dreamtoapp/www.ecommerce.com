@@ -14,8 +14,8 @@ import {
 } from '@/components/ui/dialog';
 
 interface MapProps {
-  latitude?: number | null;
-  longitude?: number | null;
+  latitude?: number | 0;
+  longitude?: number | 0;
   zoom?: number;
 }
 

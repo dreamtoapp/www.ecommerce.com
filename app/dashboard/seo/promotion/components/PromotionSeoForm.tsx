@@ -1,12 +1,20 @@
 // PromotionSeoForm client component
 "use client";
-import React, { useState } from "react";
+import React, { useState } from 'react';
+
+import { toast } from 'sonner';
+
+import InfoTooltip from '@/components/InfoTooltip';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import InfoTooltip from '@/components/ui/InfoTooltip';
-import { toast } from 'sonner';
 
 const LOCALES = [
   { code: 'ar-SA', label: 'العربية' },

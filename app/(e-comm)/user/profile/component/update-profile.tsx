@@ -1,287 +1,201 @@
 'use client';
-import { useActionState, useEffect, useState } from 'react';
-import { EyeOff, Eye, MapPin, Globe, Loader2, ExternalLink, AlertCircle } from 'lucide-react'; // Import directly
-import { iconVariants } from '@/lib/utils'; // Import CVA variants
 
-// Removed Icon import: import { Icon } from '@/components/icons';
+import { useState } from 'react';
+
+import {
+  LocateFixed,
+  Lock,
+  Mail,
+  MapPin,
+  Phone,
+  User,
+} from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+
+import AddImage from '@/components/AddImage';
+import FormError from '@/components/form-error';
+import InfoTooltip from '@/components/InfoTooltip';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { User } from '@prisma/client';
+import { Skeleton } from '@/components/ui/skeleton'; // ✅ import skeleton
+import useAccurateGeolocation from '@/hooks/use-geo';
+import { zodResolver } from '@hookform/resolvers/zod';
 
-import useAccurateGeolocation from '../../../../../hooks/use-geo';
 import { updateUserProfile } from '../action/update-user-profile';
+import {
+  getDriverFields,
+  UserFormData,
+  UserSchema,
+} from '../helper/userZodAndInputs';
 
-const UserProfileForm = ({ userData }: { userData: User }) => {
-
-  const [showPassword, setShowPassword] = useState(false);
-  const [state, fromAction, ispending] = useActionState(updateUserProfile, {
-    success: false,
-    message: '',
+export default function UserProfileForm({ userData }: { userData: UserFormData }) {
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm<UserFormData>({
+    resolver: zodResolver(UserSchema),
+    mode: 'onChange',
+    defaultValues: {
+      name: userData.name ?? '',
+      phone: userData.phone ?? '',
+      email: userData.email ?? '',
+      address: userData.address ?? '',
+      password: userData.password ?? '',
+      latitude: userData.latitude?.toString(),
+      longitude: userData.longitude?.toString(),
+      id: userData.id ?? '',
+      image: userData.image ?? '',
+    },
   });
 
   const {
-    geoLatitude,
-    geoLongitude,
-    geoError,
-    geoIsLoading,
-    getGeolocation,
-    getGoogleMapsLink,
-  } = useAccurateGeolocation({
-    accuracyThreshold: 10,
-    maxRetries: 1,
-  });
+    latitude,
+    longitude,
+    accuracy,
+    googleMapsLink,
+    loading,
+  } = useAccurateGeolocation(); // ✅ now includes loading state
 
-  useEffect(() => {
-    getGeolocation();
-  }, [getGeolocation]); // Add dependency
+  const [coordsApproved, setCoordsApproved] = useState(false);
 
-  useEffect(() => {
-    if (state.success) {
-      window.location.reload();
+  const handleApproveCoords = () => {
+    if (latitude && longitude) {
+      setValue('latitude', latitude.toString());
+      setValue('longitude', longitude.toString());
+      toast.success('تم تحديث الإحداثيات تلقائيًا');
+      setCoordsApproved(true);
     }
-  }, [state.success]);
+  };
+
+  const onSubmit = async (formData: UserFormData) => {
+    try {
+      const result = await updateUserProfile({ ...formData });
+
+      if (result.ok) {
+        toast.success(result.msg || 'تم تحديث المعلومات بنجاح');
+        reset();
+        setTimeout(() => window.location.reload(), 1200);
+      } else {
+        toast.error(result.msg || 'حدث خطأ يرجى المحاولة لاحقاً');
+      }
+    } catch (err) {
+      toast.error('فشل في إرسال البيانات، يرجى المحاولة لاحقاً');
+      console.error('فشل في إرسال البيانات:', err);
+    }
+  };
 
   return (
-    <form
-      action={fromAction}
-      className='mx-auto max-w-2xl space-y-6 rounded-xl border border-gray-100 bg-white p-8 shadow-xl'
-      dir='rtl'
-    >
-      <div className='space-y-3 text-center'>
-        <h2 className='text-3xl font-bold text-gray-900'>الملف الشخصي</h2>
-        <p className='text-gray-600'>إدارة إعدادات الحساب وتحديث المعلومات</p>
-        <p className='text-gray-600'>المعرف:{userData.phone}</p>
+    <div className="max-w-2xl mx-auto p-6 rounded-2xl shadow-md border bg-background">
+      <div className="flex items-center justify-between mb-6 w-full">
+        <div className="space-y-3 text-center">
+          <h2 className="text-3xl font-bold text-foreground">الملف الشخصي</h2>
+          <p className="text-muted-foreground">إدارة إعدادات الحساب وتحديث المعلومات</p>
+          <p className="text-sm text-muted-foreground bg-muted px-3 py-1 inline-block rounded-md">
+            المعرف: <span className="font-mono">{userData.phone}</span>
+          </p>
+        </div>
+        <div className="relative h-28 w-36 overflow-hidden rounded-lg bg-muted/20">
+          <AddImage
+            url={userData.image}
+            alt={`${userData.name}'s profile`}
+            recordId={userData.id}
+            table="user"
+            cloudinaryPreset={"amwag_driver"}
+            onUploadComplete={(url) => console.log('Uploaded to:', url)}
+          />
+        </div>
       </div>
 
-      {/* Form Fields */}
-      <div className='space-y-5'>
-        {/* User ID */}
-
-        {/* Name */}
-        <div className='space-y-2'>
-          <Label htmlFor='name' className='font-medium text-gray-700'>
-            الاسم الكامل
-          </Label>
-          <Input
-            id='name'
-            name='name'
-            defaultValue={userData?.name || ''}
-            placeholder='أدخل اسمك'
-            required
-            className='w-full focus:border-transparent focus:ring-2 focus:ring-blue-500'
-          />
+      {/* ✅ Enhanced Coordinates Box with Loading Skeleton */}
+      <div className="my-6 p-4 border rounded-xl bg-muted text-sm text-muted-foreground space-y-2">
+        <div className="flex items-center gap-2">
+          <LocateFixed className="w-4 h-4" />
+          <span className="font-medium animate-pulse">الإحداثيات التلقائية:</span>
+          {loading ? (
+            <Skeleton className="h-8 w-[70%] rounded" />
+          ) : latitude && longitude ? (
+            <>
+              <span className="font-mono">
+                {latitude.toFixed(6)}, {longitude.toFixed(6)}
+              </span>
+              {accuracy && <span>({accuracy.toFixed(0)} متر)</span>}
+            </>
+          ) : (
+            <span>غير متاحة حالياً</span>
+          )}
         </div>
 
-        {/* Grid for Phone and Email */}
-        <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
-          <div className='space-y-2'>
-            <Label htmlFor='email' className='font-medium text-gray-700'>
-              البريد الإلكتروني
-            </Label>
-            <Input
-              id='email'
-              name='email'
-              type='email'
-              defaultValue={userData.email || ''}
-              placeholder='أدخل البريد الإلكتروني'
-              required
-              className='w-full'
-            />
-          </div>
-          <div className='space-y-2'>
-            <Label htmlFor='password' className='font-medium text-gray-700'>
-              كلمة المرور
-            </Label>
-            <div className='relative'>
-              <Input
-                id='password'
-                name='password'
-                type={showPassword ? 'text' : 'password'}
-                defaultValue={userData.password || ''}
-                className='w-full pr-10'
-              />
-              <Button
-                type='button'
-                variant='ghost'
-                size='sm'
-                className='absolute left-0 top-0 h-full px-3 py-2 hover:bg-transparent'
-                onClick={() => setShowPassword(!showPassword)}
-                disabled={ispending}
-              >
-                {showPassword ? (
-                  <EyeOff className={iconVariants({ size: 'sm', className: 'text-gray-500' })} aria-hidden='true' /> // Use direct import + CVA
-                ) : (
-                  <Eye className={iconVariants({ size: 'sm', className: 'text-gray-500' })} aria-hidden='true' /> // Use direct import + CVA
-                )}
-                <span className='sr-only'>
-                  {showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
-                </span>
-              </Button>
-            </div>
-            <p className='text-sm text-gray-500'>اتركه فارغًا إذا لم ترد التغيير</p>
-          </div>
-        </div>
-        {/* Address */}
-        <div className='space-y-2'>
-          <Label htmlFor='address' className='font-medium text-gray-700'>
-            العنوان
-          </Label>
-          <Textarea
-            id='address'
-            name='address'
-            defaultValue={userData.address || ''}
-            placeholder='أدخل عنوانك'
-            rows={3}
-            className='w-full resize-none'
-          />
-        </div>
-        {/* Google Maps Link */}
-        <div className='rounded-lg border border-gray-200 bg-white p-4 shadow-sm'>
-          {/* Section Header */}
-          <div className='mb-4 flex items-center gap-2'>
-            <MapPin className={iconVariants({ size: 'sm', className: 'text-blue-600' })} /> {/* Use direct import + CVA */}
-            <h3 className='text-lg font-medium text-gray-800'>الموقع الحالي</h3>
-          </div>
-
-          {/* Coordinates Display */}
-          <div className='space-y-4 rounded-lg border border-gray-200 bg-gray-50 p-4'>
-            <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
-              {/* Coordinates Display */}
-              <div className='flex items-center gap-3'>
-                <div className='rounded-full border border-gray-200 bg-white p-2 shadow-sm'>
-                  <Globe className={iconVariants({ size: 'sm', className: 'text-blue-600' })} /> {/* Use direct import + CVA */}
-                </div>
-                <div className='flex flex-col'>
-                  <span className='text-xs font-medium text-gray-500'>الإحداثيات الحالية</span>
-                  <div className='font-mono text-sm text-gray-800'>
-                    {geoLatitude?.toFixed(7) ?? '--.--'} :خط العرض
-                    <span className='mx-2 text-gray-400'>|</span>
-                    {geoLongitude?.toFixed(7) ?? '--.--'} :خط الطول
-                  </div>
-                </div>
-              </div>
-
-              {/* Location Button */}
-            </div>
-            <div className='flex w-full items-center justify-end gap-4 border-t pt-4'>
-              <Button
-                type='button'
-                variant='outline'
-                size='sm'
-                className='group flex items-center gap-2 border-blue-600 text-blue-600 transition-all hover:bg-blue-50 hover:text-blue-700'
-                onClick={() => {
-                  (document.getElementById('latitude') as HTMLInputElement).value =
-                    geoLatitude?.toString() || '';
-                  (document.getElementById('longitude') as HTMLInputElement).value =
-                    geoLongitude?.toString() || '';
-                }}
-                disabled={geoIsLoading || !geoLatitude || !geoLongitude}
-              >
-                {geoIsLoading ? (
-                  <>
-                    <Loader2 className={iconVariants({ size: 'xs', animation: 'spin' })} /> {/* Use direct import + CVA */}
-                    جاري التحديد...
-                  </>
-                ) : (
-                  <>
-                    <MapPin // Use direct import + CVA
-                      className={iconVariants({ size: 'xs', className: 'transition-transform group-hover:scale-110' })}
-                    />
-                    استخدام الموقع الحالي
-                  </>
-                )}
-              </Button>
-
-              {/* Google Maps Link */}
-              {geoLatitude && geoLongitude && (
-                <div className='border-gray-200'>
-                  <a
-                    href={getGoogleMapsLink() ?? '#'}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 transition-all hover:border-blue-600 hover:shadow-sm'
-                  >
-                    <span className='text-sm font-medium text-blue-600 hover:text-blue-700'>
-                      عرض الموقع على خرائط جوجل
-                    </span>
-                    <ExternalLink className={iconVariants({ size: 'xs', className: 'text-blue-600' })} /> {/* Use direct import + CVA */}
-                  </a>
-                </div>
-              )}
-            </div>
-            {/* Error State */}
-            {geoError && (
-              <div className='mt-4 flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-3'>
-                <AlertCircle className={iconVariants({ size: 'sm', className: 'flex-shrink-0 text-red-600' })} /> {/* Use direct import + CVA */}
-                <div className='flex-1'>
-                  <p className='text-sm font-medium text-red-700'>خطأ في تحديد الموقع</p>
-                  <p className='text-xs text-red-600'>{geoError}</p>
-                </div>
-                <Button
-                  variant='ghost'
-                  size='sm'
-                  className='text-red-700 hover:bg-red-100'
-                  onClick={getGeolocation}
-                >
-                  إعادة المحاولة
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Coordinates */}
-        <div className='grid grid-cols-1 gap-6 sm:grid-cols-2'>
-          <div className='space-y-2'>
-            <Label htmlFor='latitude' className='font-medium text-gray-700'>
-              خط العرض
-            </Label>
-            <Input
-              id='latitude'
-              name='latitude'
-              type='text'
-              inputMode='numeric'
-              defaultValue={userData.latitude}
-              placeholder='أدخل خط العرض'
-              className='w-full'
-            />
-          </div>
-          <div className='space-y-2'>
-            <Label htmlFor='longitude' className='font-medium text-gray-700'>
-              خط الطول
-            </Label>
-            <Input
-              id='longitude'
-              name='longitude'
-              type='text'
-              inputMode='numeric'
-              defaultValue={userData.longitude}
-              placeholder='أدخل خط الطول'
-              className='w-full'
-            />
-          </div>
-        </div>
-        {state.message && (
-          <div
-            className={`mt-4 rounded p-3 ${state.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}
+        {!loading && googleMapsLink && (
+          <a
+            href={googleMapsLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-blue-600 underline"
           >
-            {state.message}
-          </div>
+            <MapPin className="w-4 h-4" /> عرض على خرائط Google
+          </a>
         )}
 
-        {/* Submit Button */}
-        <Button
-          type='submit'
-          className='w-full rounded-xl bg-blue-600 py-3 text-lg font-semibold transition-transform hover:scale-[1.01] hover:bg-blue-700'
-          disabled={ispending}
-        >
-          حفظ التغييرات
-        </Button>
+        {!loading && !coordsApproved && latitude && longitude && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleApproveCoords}
+            className="mt-2"
+          >
+            استخدام هذه الإحداثيات
+          </Button>
+        )}
       </div>
-    </form>
-  );
-};
 
-export default UserProfileForm;
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+        {getDriverFields(register, errors).map((section) => (
+          <div key={section.section} className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-md font-semibold text-foreground">{section.section}</h3>
+              {section.hint && (
+                <InfoTooltip content="يمكنك الحصول على خط العرض والطول من خلال مشاركة الموقع معك من خرائط Google أو أي تطبيق GPS آخر." />
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {section.fields.map((field) => (
+                <div key={field.name} className={field.className}>
+                  <div className="relative">
+                    <Input
+                      {...field.register}
+                      type={field.type}
+                      placeholder={field.placeholder}
+                      disabled={isSubmitting}
+                      maxLength={field.maxLength}
+                      className="pl-10"
+                    />
+                    {field.name === 'name' && <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />}
+                    {field.name === 'phone' && <Phone className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />}
+                    {field.name === 'email' && <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />}
+                    {field.name === 'password' && <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />}
+                    {(field.name === 'latitude' || field.name === 'longitude') && (
+                      <LocateFixed className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    )}
+                  </div>
+                  <FormError message={field.error} />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+
+        <div className="text-center">
+          <Button type="submit" disabled={isSubmitting} className="w-full sm:w-48">
+            {isSubmitting ? 'جارٍ الحفظ...' : 'حفظ المعلومات'}
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+}

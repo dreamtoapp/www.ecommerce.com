@@ -9,25 +9,16 @@ import { ThemeProvider } from '../provider/theme-provider';
 import WebVitalsCollector from '@/components/seo/WebVitalsCollector';
 
 export const metadata: Metadata = {
-  title: 'amwag',
+  title: 'Dream To App',
   manifest: '/manifest.webmanifest', // Automatically mapped
   // themeColor: "#2196f3",
   appleWebApp: {
     capable: true,
-    title: 'amwag',
+    title: 'Dream To App',
     statusBarStyle: 'black-translucent',
   },
 };
 
-// export function head() {
-//   return (
-//     <>
-//       {/* Removed preload links for fallback AVIF and WebP images for Lighthouse retest */}
-//       {/* <link rel="preload" as="image" href="/fallback/fallback.avif" type="image/avif" crossOrigin="anonymous" /> */}
-//       {/* <link rel="preload" as="image" href="/fallback/fallback.webp" type="image/webp" crossOrigin="anonymous" /> */}
-//     </>
-//   );
-// }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const locale = 'ar'; // Hardcoded for now

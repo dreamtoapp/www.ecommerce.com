@@ -1,14 +1,23 @@
 // UniversalSeoForm.tsx
 'use client';
 
-import React, { useState } from 'react';
-import { EntityType } from '@prisma/client';
+import React, {
+  useActionState,
+  useState,
+} from 'react';
+
+import InfoTooltip from '@/components/InfoTooltip';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import InfoTooltip from '@/components/ui/InfoTooltip';
-import { useActionState } from 'react';
+import { EntityType } from '@prisma/client';
 
 export type UniversalSeoFormProps = {
   defaultValues: {

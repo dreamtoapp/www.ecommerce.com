@@ -105,8 +105,8 @@ const CustomerCardAction = React.memo(
   }: {
     phone: string;
     address: string;
-    latitude: string;
-    longitude: string;
+    latitude: number;
+    longitude: number;
   }) => (
     <div className='flex items-center gap-4 self-end'>
       <Button
@@ -178,8 +178,8 @@ longitude */}
       <CustomerCardAction
         phone={order.customer.phone || ''}
         address={order.customer.address || ''}
-        latitude={order.customer.latitude || ''}
-        longitude={order.customer.longitude || ''}
+        latitude={order.customer.latitude || 0}
+        longitude={order.customer.longitude || 0}
       />
     </div>
     {/* TODO:check the schema to get driver name */}

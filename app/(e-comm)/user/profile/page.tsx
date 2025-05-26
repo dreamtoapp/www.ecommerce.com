@@ -1,8 +1,9 @@
-import { userProfile } from './action/action';
-import EmptyState from '../../../../components/warinig-msg';
-import UserProfileForm from './component/update-profile';
 import { redirect } from 'next/navigation';
+
+import EmptyState from '../../../../components/warinig-msg';
 import getSession from '../../../../lib/getSession';
+import { userProfile } from './action/action';
+import UserProfileForm from './component/update-profile';
 
 async function ProfilePage({ searchParams }: { searchParams: Promise<{ id?: string }> }) {
   const resolvedSearchParams = await searchParams;
@@ -18,7 +19,17 @@ async function ProfilePage({ searchParams }: { searchParams: Promise<{ id?: stri
   const userData = await userProfile(userId);
   if (!userData) return <EmptyState message='المستخدم غير موجود' />;
 
-  return <UserProfileForm userData={userData} />;
+  return <UserProfileForm userData={{
+    id: userData.id ?? '',
+    image: userData.image ?? '',
+    name: userData.name ?? '',
+    email: userData.email ?? '',
+    phone: userData.phone ?? '',
+    address: userData.address ?? '',
+    password: userData.password ?? '',
+    latitude: userData.latitude?.toString(),
+    longitude: userData.longitude?.toString(),
+  }} />;
 }
 
 export default ProfilePage;

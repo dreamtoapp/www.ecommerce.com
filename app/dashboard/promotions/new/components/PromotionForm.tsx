@@ -17,12 +17,12 @@ import type {
 } from '@/app/dashboard/products/actions/get-products-for-select';
 import ImageUpload
   from '@/components/image-upload'; // Assuming for promotion image
+import InfoTooltip from '@/components/InfoTooltip';
 import InputField from '@/components/InputField';
 import TextareaField from '@/components/TextareaField';
 import { Badge } from '@/components/ui/badge'; // Added Badge import
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import InfoTooltip from '@/components/ui/InfoTooltip';
 import { Label } from '@/components/ui/label';
 import {
   Select,

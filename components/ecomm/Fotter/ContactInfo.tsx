@@ -19,8 +19,8 @@ const ContactInfo = ({
   email?: string;
   phone?: string;
   address?: string;
-  latitude?: string;
-  longitude?: string;
+  latitude?: number;
+  longitude?: number;
 }) => {
 
 
@@ -32,8 +32,8 @@ const ContactInfo = ({
       <p className='text-sm text-muted-foreground'>{address}</p>
       {/* Professional Button to Open Dialog */}
       <Map
-        latitude={latitude ? parseFloat(latitude) : null}
-        longitude={longitude ? parseFloat(longitude) : null}
+        latitude={latitude ? latitude : 0}
+        longitude={longitude ? longitude : 0}
       />
     </div>
   );

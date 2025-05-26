@@ -1,7 +1,8 @@
-// app/dashboard/drivers/components/DeleteDriverAlert.tsx
-'use client'; // Mark as a Client Component
+'use client';
 
 import { useState } from 'react';
+
+import { toast } from 'sonner';
 
 import {
   AlertDialog,
@@ -26,38 +27,33 @@ export default function DeleteDriverAlert({ driverId, children }: DeleteDriverAl
   const [loading, setLoading] = useState(false);
 
   const handleDelete = async () => {
-    try {
-      setLoading(true);
-      await deleteDriver(driverId); // Call the server action to delete the driver
-      window.location.reload(); // Refresh the page after deletion
-    } catch (e) {
-      let errorMessage = 'Failed to delete driver.';
-      if (e instanceof Error) {
-        errorMessage = e.message;
-      }
-      console.error('Error deleting driver:', errorMessage);
-    } finally {
-      setLoading(false);
+    setLoading(true);
+    const res = await deleteDriver(driverId);
+
+    toast[res.success ? 'success' : 'error'](res.msg);
+
+    setLoading(false);
+
+    if (res.success) {
+      window.location.reload();
     }
   };
 
   return (
     <AlertDialog>
-      {/* Trigger for opening the alert */}
       <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
 
-      {/* Alert Content */}
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. The driver will be permanently deleted.
+            لا يمكن التراجع عن هذا الإجراء. سيتم حذف السائق نهائيًا.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={loading}>إلغاء</AlertDialogCancel>
           <AlertDialogAction onClick={handleDelete} disabled={loading}>
-            {loading ? 'Deleting...' : 'Delete'}
+            {loading ? 'جارٍ الحذف...' : 'حذف'}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

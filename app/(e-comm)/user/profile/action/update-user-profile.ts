@@ -1,59 +1,70 @@
 'use server';
-import { auth } from '@/auth';
+
 import db from '@/lib/prisma';
-import { prevState } from '@/types/commonType';
+import { UserFormData, UserSchema } from '../helper/userZodAndInputs';
 
-export const updateUserProfile = async (_prevState: prevState, formData: FormData) => {
+export async function updateUserProfile(formData: UserFormData) {
   try {
-    // 1. Get authenticated user
-    const session = await auth();
-    // const session = await getSession();
-    if (!session?.user) {
-      return { success: false, message: 'لابد من التسجيل لاتمام العتحديث' };
-    }
-    const userId = session.user.id;
+    // ✅ Validate input using Zod
+    const parseResult = UserSchema.safeParse(formData);
 
-    // 2. Get existing user data
+    if (!parseResult.success) {
+      return {
+        ok: false,
+        msg: 'يرجى تصحيح الأخطاء في النموذج',
+        errors: parseResult.error.flatten().fieldErrors,
+      };
+    }
+
+    const data = parseResult.data;
+
+    if (!data.phone) {
+      return {
+        ok: false,
+        msg: 'رقم الهاتف مطلوب لتحديث المستخدم',
+        errors: {},
+      };
+    }
+
+    // ✅ ابحث عن المستخدم باستخدام رقم الهاتف فقط
     const existingUser = await db.user.findUnique({
-      where: { id: userId },
+      where: { phone: data.phone },
     });
+
     if (!existingUser) {
-      return { success: false, message: 'معلومات العميل غير متوفرة حاليا ' };
+      return {
+        ok: false,
+        msg: 'المستخدم غير موجود',
+        errors: {},
+      };
     }
 
-    // Extract form data
-    const updateData = {
-      name: formData.get('name') as string | undefined,
-      // phone: formData.get('phone') as string | undefined,
-      email: formData.get('email') as string | undefined,
-      password: formData.get('password') as string | undefined,
-      address: formData.get('address') as string | undefined,
-      latitude: formData.get('latitude') as string | undefined,
-      longitude: formData.get('longitude') as string | undefined,
+    // ✅ استخرج القيم الفعلية فقط للتحديث
+    const updateData: any = {
+      name: data.name || undefined,
+      email: data.email || undefined,
+      address: data.address || undefined,
+      password: data.password || undefined,
+      latitude: data.latitude ? parseFloat(data.latitude) : undefined,
+      longitude: data.longitude ? parseFloat(data.longitude) : undefined,
     };
 
-    // 3. Check if the new email already exists in the database
-    if (updateData.email && updateData.email !== existingUser.email) {
-      const emailExists = await db.user.findFirst({
-        where: { email: updateData.email },
-      });
-
-      if (emailExists) {
-        return { success: false, message: 'البريد الإلكتروني الجديد مستخدم بالفعل' };
-      }
-    }
-
-    // 4. Update the user profile
+    // ✅ نفّذ التحديث
     await db.user.update({
-      where: { id: userId },
-      data: {
-        ...updateData,
-      },
+      where: { id: existingUser.id },
+      data: updateData,
     });
 
-    return { success: true, message: 'تم التحديث بنجاح' };
+    return {
+      ok: true,
+      msg: 'تم تحديث بيانات المستخدم بنجاح',
+    };
   } catch (error) {
-    console.error('Update failed:', error);
-    return { success: false, message: 'Update failed' };
+    console.error('Error updating user profile:', error);
+    return {
+      ok: false,
+      msg: 'حدث خطأ غير متوقع أثناء تحديث المستخدم، يرجى المحاولة لاحقاً',
+      errors: {},
+    };
   }
-};
+}

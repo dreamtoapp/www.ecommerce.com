@@ -1,4 +1,4 @@
-// Main menu items for dashboard sidebar (Restructured for enhanced UX)
+// app/dashboard/components/menuConfig.ts
 import {
   AlertTriangle,
   CheckCircle,
@@ -6,11 +6,13 @@ import {
   CreditCard,
   FileText,
   Gift,
+  Handshake,
   Home,
   Info,
   Layers,
   LayoutDashboard,
   LayoutGrid,
+  Megaphone,
   Newspaper,
   Package,
   PieChart,
@@ -26,109 +28,91 @@ import {
   XCircle,
 } from 'lucide-react';
 
-// Define type for menu items (assuming it's defined in AppSidebar.tsx or a shared types file)
-// For clarity here if this file were standalone:
-/*
-interface MenuItem {
-  title: string;
-  url: string;
-  icon: ElementType;
-  children?: MenuItem[];
-}
-
-interface MenuGroup {
-  label: string;
-  items: MenuItem[];
-}
-*/
-
 export const menuGroups = [
   {
-    label: 'نظرة عامة', // Overview
+    label: 'الرئيسية', // Home / Overview
     items: [
-      { title: 'لوحة التحكم الرئيسية', url: '/dashboard', icon: LayoutDashboard },
-      { title: 'المتجر الإلكتروني', url: '/', icon: Home }, // Link to e-commerce homepage
+      { title: 'لوحة المعلومات', url: '/dashboard', icon: LayoutDashboard },
+      { title: 'عرض المتجر', url: '/', icon: Home },
     ],
   },
   {
-    label: 'إدارة الطلبات', // Order Management
+    label: 'الطلبات', // Orders
     items: [
-      { title: 'إدارة الطلبات', url: '/dashboard/orders-management', icon: Layers }, // Main view
-
-      { title: 'قيد الانتظار', url: '/dashboard/orders-management/status/pending', icon: Clock },
-      { title: 'في الطريق', url: '/dashboard/orders-management/status/in-way', icon: Truck },
-      { title: 'تم التسليم', url: '/dashboard/orders-management/status/delivered', icon: CheckCircle },
-      { title: 'ملغي', url: '/dashboard/orders-management/status/canceled', icon: XCircle },
-
-
-
-
+      { title: 'كل الطلبات', url: '/dashboard/orders-management', icon: Layers },
+      { title: 'قيد المعالجة', url: '/dashboard/orders-management/status/pending', icon: Clock },
+      { title: 'قيد التوصيل', url: '/dashboard/orders-management/status/in-way', icon: Truck },
+      { title: 'تم التوصيل', url: '/dashboard/orders-management/status/delivered', icon: CheckCircle },
+      { title: 'ملغاة', url: '/dashboard/orders-management/status/canceled', icon: XCircle },
     ],
   },
   {
-    label: 'نظرة عامة على التقارير', // Reports Overview
+    label: 'التقارير والتحليلات',
     items: [
-      { title: 'نظرة عامة على التقارير', url: '/dashboard/reports', icon: PieChart },
+      { title: 'نظرة عامة', url: '/dashboard/reports', icon: PieChart },
     ],
   },
   {
-    label: 'إدارة العمليات', // Operations Management
+    label: 'إدارة الفريق',
     items: [
-      { title: 'إدارة السائقين', url: '/dashboard/drivers', icon: Truck },
-      { title: 'جدولة الورديات', url: '/dashboard/shifts', icon: Timer },
+      { title: 'المشرفون', url: '/dashboard/user-mangment/admin', icon: Handshake },
+      { title: 'المسوقون', url: '/dashboard/user-mangment/marketer', icon: Megaphone },
+      { title: 'العملاء', url: '/dashboard/user-mangment/customer', icon: Users2 },
+      { title: 'السائقون', url: '/dashboard/user-mangment/drivers', icon: Truck },
+      { title: 'جداول العمل', url: '/dashboard/shifts', icon: Timer },
     ],
   },
   {
-    label: 'إدارة المنتجات', // Product Catalog
+    label: 'المنتجات والمخزون',
     items: [
-      { title: 'المنتجات', url: '/dashboard/products-control', icon: Package },
+      { title: 'إدارة المنتجات', url: '/dashboard/products-control', icon: Package },
       { title: 'الأصناف', url: '/dashboard/categories', icon: LayoutGrid },
       { title: 'الموردون', url: '/dashboard/suppliers', icon: ShoppingBasket },
     ],
   },
   {
-    label: 'التسويق والعروض', // Marketing & Promotions
+    label: 'التسويق والعروض',
     items: [
-      { title: 'إدارة العروض', url: '/dashboard/promotions', icon: Gift },
-      { title: 'النشرات الإخبارية', url: '/dashboard/clientnews', icon: Newspaper },
-      { title: 'الدليل والإرشادات', url: '/seo/documentation', icon: FileText },
+      { title: 'العروض الترويجية', url: '/dashboard/promotions', icon: Gift },
+      { title: 'النشرة البريدية', url: '/dashboard/clientnews', icon: Newspaper },
+      { title: 'المحتوى الإرشادي', url: '/seo/documentation', icon: FileText },
     ],
   },
   {
-    label: 'إدارة العملاء', // Customer Management
+    label: 'تجربة العملاء',
     items: [
       { title: 'قائمة العملاء', url: '/dashboard/users', icon: Users2 },
-      { title: 'مراسلات العملاء', url: '/dashboard/clientsubmission', icon: Users },
+      { title: 'رسائل العملاء', url: '/dashboard/clientsubmission', icon: Users },
     ],
   },
   {
-    label: 'المصروفات', // Financials
+    label: 'المعاملات المالية',
     items: [
-      { title: 'المصروفات', url: '/dashboard/expenses', icon: CreditCard },
+      { title: 'سجل المصروفات', url: '/dashboard/expenses', icon: CreditCard },
     ],
   },
   {
-    label: 'النظام والإعدادات', // System & Settings
+    label: 'الإعدادات والنظام',
     items: [
       { title: 'الإعدادات العامة', url: '/dashboard/settings', icon: Settings },
-      { title: 'المستخدمون والصلاحيات', url: '/dashboard/users-permissions', icon: ShieldCheck },
-      { title: 'التنبيهات', url: '/dashboard/alerts', icon: AlertTriangle },
+      { title: 'الصلاحيات والمستخدمون', url: '/dashboard/users-permissions', icon: ShieldCheck },
+      { title: 'الإشعارات والتنبيهات', url: '/dashboard/alerts', icon: AlertTriangle },
       { title: 'الدعم الفني', url: '/dashboard/maintinance', icon: Wrench },
-      { title: 'الدليل والإرشادات', url: '/dashboard/guidelines', icon: Info },
-      { title: 'بذر البيانات', url: '/dashboard/dataSeed', icon: Layers },
+      { title: 'الدليل والتعليمات', url: '/dashboard/guidelines', icon: Info },
+      { title: 'تهيئة البيانات', url: '/dashboard/dataSeed', icon: Layers },
     ],
   },
   {
-    label: 'إدارة الـ SEO', // SEO Management
+    label: 'تحسين محركات البحث (SEO)',
     items: [
-      { title: 'تحليلات SEO', url: '/dashboard/seo', icon: Target },
-      { title: 'SEO الصفحة الرئيسية', url: '/dashboard/seo/home', icon: Home },
-      { title: 'SEO من نحن', url: '/dashboard/seo/about', icon: Info },
-      { title: 'SEO المدونة', url: '/dashboard/seo/blog', icon: Newspaper },
-      { title: 'SEO المنتجات', url: '/dashboard/seo/product', icon: Package },
-      { title: 'SEO العروض', url: '/dashboard/seo/promotion', icon: Gift },
-      { title: 'SEO الأصناف', url: '/dashboard/seo/category', icon: LayoutGrid },
-      { title: 'SEO Performance', url: '/dashboard/seo/performance', icon: PieChart }, // Added performance dashboard
+      { title: 'تحليلات الأداء', url: '/dashboard/seo', icon: Target },
+      { title: 'الصفحة الرئيسية', url: '/dashboard/seo/home', icon: Home },
+      { title: 'صفحة من نحن', url: '/dashboard/seo/about', icon: Info },
+      { title: 'مدونة الموقع', url: '/dashboard/seo/blog', icon: Newspaper },
+      { title: 'صفحات المنتجات', url: '/dashboard/seo/product', icon: Package },
+      { title: 'صفحات العروض', url: '/dashboard/seo/promotion', icon: Gift },
+      { title: 'صفحات الأصناف', url: '/dashboard/seo/category', icon: LayoutGrid },
+      { title: 'أداء SEO', url: '/dashboard/seo/performance', icon: PieChart },
     ],
   },
 ];

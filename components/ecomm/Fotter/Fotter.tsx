@@ -38,8 +38,8 @@ interface FooterProps {
   email?: string;
   phone?: string;
   address?: string;
-  latitude?: string;
-  longitude?: string;
+  latitude?: number;
+  longitude?: number;
   companyName?: string;
   facebook?: string;
   instagram?: string;
@@ -73,8 +73,8 @@ const Footer = ({
             email={email}
             phone={phone}
             address={address}
-            latitude={latitude}
-            longitude={longitude}
+            latitude={latitude || 0}
+            longitude={longitude || 0}
           />
 
           <Newsletter />

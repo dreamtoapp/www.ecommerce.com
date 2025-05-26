@@ -1,4 +1,3 @@
-
 import {
   AlertTriangle,
   CheckCircle,
@@ -6,8 +5,8 @@ import {
 } from 'lucide-react';
 
 import BackButton from '@/components/BackButton';
+import InfoTooltip from '@/components/InfoTooltip';
 import { Button } from '@/components/ui/button';
-import InfoTooltip from '@/components/ui/InfoTooltip';
 import { EntityType } from '@prisma/client';
 
 import { getSeoEntryByEntity } from './actions/seo';

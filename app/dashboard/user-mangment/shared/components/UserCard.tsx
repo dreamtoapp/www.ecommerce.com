@@ -1,8 +1,5 @@
 'use client'; // Mark as a Client Component
-import {
-  Pencil,
-  Trash2,
-} from 'lucide-react'; // Import directly
+import { Trash2 } from 'lucide-react'; // Import directly
 
 import AddImage from '@/components/AddImage';
 // Removed Icon import: import { Icon } from '@/components/icons';
@@ -14,9 +11,10 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { iconVariants } from '@/lib/utils'; // Import CVA variants
+import { UserRole } from '@prisma/client';
 
-import DeleteDriverAlert from './DeleteDriverAlert';
-import EditDriverDialog from './EditDriverDialog';
+import DeleteDriverAlert from './DeleteUser';
+import AddUser from './UserUpsert';
 
 type DriverCardProps = {
   driver: {
@@ -24,11 +22,17 @@ type DriverCardProps = {
     name: string;
     email: string | null;
     phone: string | null;
+    role: UserRole;
+    address?: string | null;
+    password?: string | null;
+    sharedLocationLink?: string | null;
     image?: string | null;
+    latitude?: string | null;
+    longitude?: string | null;
   };
 };
 
-export default function DriverCard({ driver }: DriverCardProps) {
+export default function UserCard({ driver }: DriverCardProps) {
   const safeDriver = {
     ...driver,
     name: driver.name || 'No Name',
@@ -74,11 +78,30 @@ export default function DriverCard({ driver }: DriverCardProps) {
       {/* Card Footer */}
       <CardFooter className='flex justify-between border-t border-border bg-muted/50 p-4'>
         {/* Edit Driver Dialog */}
-        <EditDriverDialog driver={safeDriver}>
+        {/* <EditDriverDialog driver={safeDriver}>
           <button className='flex items-center gap-1 text-primary hover:underline'>
-            <Pencil className={iconVariants({ size: 'xs' })} /> {/* Use direct import + CVA */}
+            <Pencil className={iconVariants({ size: 'xs' })} /> 
           </button>
-        </EditDriverDialog>
+        </EditDriverDialog> */}
+
+
+
+        <AddUser
+          role={driver.role}
+          mode='update'
+          title={"تعديل سائق"}
+          description={"يرجى إدخال بيانات السائق"}
+          defaultValues={{
+            name: driver.name,
+            email: driver.email || '',
+            phone: driver.phone || '',
+            address: driver.address || '',
+            password: driver.password || '',
+            sharedLocationLink: driver.sharedLocationLink || '',
+            latitude: driver.latitude || '',
+            longitude: driver.longitude || '',
+          }} />
+
 
         {/* Delete Driver Alert */}
         <DeleteDriverAlert driverId={safeDriver.id}>

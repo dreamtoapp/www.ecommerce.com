@@ -1,155 +1,141 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-
-import { toast } from 'sonner';
+import { useEffect, useRef, useState } from 'react';
 
 type GeolocationOptions = {
   enableHighAccuracy?: boolean;
   timeout?: number;
   maximumAge?: number;
   accuracyThreshold?: number;
-  maxRetries?: number; // Maximum retry attempts
+  maxRetries?: number;
 };
 
-type GeolocationState = {
-  geoLatitude: number | null;
-  geoLongitude: number | null;
-  geoAccuracy: number | null;
-  geoError: string | null;
-  geoIsLoading: boolean;
+type GeolocationResult = {
+  latitude: number | null;
+  longitude: number | null;
+  accuracy: number | null;
+  googleMapsLink: string | null;
+  loading: boolean;
+  statusMessage: string | null;
+  errorMessage: string | null;
 };
 
-const useAccurateGeolocation = (options: GeolocationOptions = {}) => {
-  const [state, setState] = useState<GeolocationState>({
-    geoLatitude: null,
-    geoLongitude: null,
-    geoAccuracy: null,
-    geoError: null,
-    geoIsLoading: false,
-  });
+const useAccurateGeolocation = (options: GeolocationOptions = {}): GeolocationResult => {
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
+  const [accuracy, setAccuracy] = useState<number | null>(null);
+
+  // ✅ Make sure skeleton sees these right away
+  const [loading, setLoading] = useState<boolean>(true);
+  const [statusMessage, setStatusMessage] = useState<string | null>('جارٍ تحديد الموقع...');
+
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const retryCountRef = useRef(0);
   const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
+  const bestCoordsRef = useRef<Omit<GeolocationResult, 'loading' | 'statusMessage' | 'errorMessage'>>({
+    latitude: null,
+    longitude: null,
+    accuracy: null,
+    googleMapsLink: null,
+  });
 
-  // Cleanup function to clear timers
-  const clearResources = () => {
-    if (timeoutIdRef.current) {
-      clearTimeout(timeoutIdRef.current);
-      timeoutIdRef.current = null;
-    }
-  };
+  // Destructure and apply defaults for safe deps
+  const {
+    enableHighAccuracy = true,
+    timeout = 30000,
+    maximumAge = 0,
+    accuracyThreshold = 10,
+    maxRetries = 3,
+  } = options;
 
-  // Function to fetch geolocation
-  const getGeolocation = useCallback(() => {
-    const defaultOptions: GeolocationOptions = {
-      enableHighAccuracy: true,
-      timeout: 30000, // 30 seconds
-      maximumAge: 0,
-      accuracyThreshold: 10, // 10 meters
-      maxRetries: 3, // 3 retries
+  useEffect(() => {
+    retryCountRef.current = 0;
+    setLoading(true);
+    setStatusMessage('جارٍ تحديد الموقع...');
+    setErrorMessage(null);
+
+    const clearTimer = () => {
+      if (timeoutIdRef.current) {
+        clearTimeout(timeoutIdRef.current);
+        timeoutIdRef.current = null;
+      }
     };
 
-    const mergedOptions = { ...defaultOptions, ...options };
-    retryCountRef.current = 0;
+    const updateBestCoords = (lat: number, lng: number, acc: number) => {
+      const isBetter = bestCoordsRef.current.accuracy == null || acc < bestCoordsRef.current.accuracy!;
+      if (isBetter) {
+        bestCoordsRef.current = {
+          latitude: lat,
+          longitude: lng,
+          accuracy: acc,
+          googleMapsLink: `https://www.google.com/maps?q=${lat},${lng}`,
+        };
+        setLatitude(lat);
+        setLongitude(lng);
+        setAccuracy(acc);
+        setStatusMessage(`📍 تم تحديد الموقع بدقة ${acc.toFixed(1)} متر`);
+      }
 
-    setState((prev) => ({
-      ...prev,
-      geoIsLoading: true, // Start loading
-      geoError: null,
-    }));
+      if (acc <= accuracyThreshold) {
+        setLoading(false);
+        clearTimer();
+      } else if (retryCountRef.current < maxRetries) {
+        retryCountRef.current += 1;
+        setStatusMessage(`الدقة الحالية ${acc.toFixed(1)} متر، إعادة المحاولة...`);
+        timeoutIdRef.current = setTimeout(tryGetLocation, 5000);
+      } else {
+        setStatusMessage(`أفضل دقة تم الوصول إليها: ${acc.toFixed(1)} متر`);
+        setLoading(false);
+        clearTimer();
+      }
+    };
 
-    const attemptFetch = () => {
+    const tryGetLocation = () => {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude, accuracy } = position.coords;
-
-          if (accuracy <= (mergedOptions.accuracyThreshold || 10)) {
-            setState((prev) => ({
-              ...prev,
-              geoLatitude: latitude,
-              geoLongitude: longitude,
-              geoAccuracy: accuracy,
-              geoError: null,
-              geoIsLoading: false, // Loading complete
-            }));
-            toast.success(`دقة الموقع: ${accuracy.toFixed(1)}m`);
-          } else {
-            retryCountRef.current += 1;
-
-            // Always update state with the best available location
-            setState((prev) => ({
-              ...prev,
-              geoLatitude: latitude,
-              geoLongitude: longitude,
-              geoAccuracy: accuracy,
-              geoIsLoading: true, // Loading continues for retry
-            }));
-
-            if (retryCountRef.current < (mergedOptions.maxRetries || 3)) {
-              timeoutIdRef.current = setTimeout(attemptFetch, 5000); // Retry after 5 seconds
-              toast.warning(`الدقة ${accuracy}m. جاري إعادة المحاولة...`);
-            } else {
-              setState((prev) => ({
-                ...prev,
-                geoError: `أفضل دقة متاحة: ${accuracy.toFixed(1)}m`,
-                geoIsLoading: false, // Loading complete after max retries
-              }));
-              // toast.error(`أقصى دقة: ${accuracy.toFixed(1)}m`);
-            }
-          }
+        (pos) => {
+          const { latitude: lat, longitude: lng, accuracy: acc } = pos.coords;
+          updateBestCoords(lat, lng, acc);
         },
-        (error) => {
-          let errorMessage = 'فشل تحديد الموقع';
-          switch (error.code) {
-            case error.PERMISSION_DENIED:
-              errorMessage = 'السماح بالوصول إلى الموقع مطلوب';
+        (err) => {
+          let msg = 'فشل تحديد الموقع';
+          switch (err.code) {
+            case err.PERMISSION_DENIED:
+              msg = 'يجب السماح بالوصول إلى الموقع';
               break;
-            case error.POSITION_UNAVAILABLE:
-              errorMessage = 'الخدمة غير متاحة';
+            case err.POSITION_UNAVAILABLE:
+              msg = 'معلومات الموقع غير متوفرة';
               break;
-            case error.TIMEOUT:
-              if (retryCountRef.current < (mergedOptions.maxRetries || 3)) {
-                setState((prev) => ({
-                  ...prev,
-                  geoIsLoading: true, // Loading starts again for retry
-                }));
-
-                timeoutIdRef.current = setTimeout(attemptFetch, 5000);
-                return;
-              }
-              errorMessage = 'انتهى الوقت. تأكد من اتصال GPS';
+            case err.TIMEOUT:
+              msg = 'انتهت المهلة، تأكد من تفعيل GPS';
               break;
           }
-
-          setState((prev) => ({
-            ...prev,
-            geoError: errorMessage,
-            geoIsLoading: false, // Loading complete after error
-          }));
-          toast.error(errorMessage);
+          setErrorMessage(msg);
+          setStatusMessage(null);
+          setLoading(false);
+          clearTimer();
         },
         {
-          enableHighAccuracy: mergedOptions.enableHighAccuracy,
-          timeout: mergedOptions.timeout,
-          maximumAge: mergedOptions.maximumAge,
-        },
+          enableHighAccuracy,
+          timeout,
+          maximumAge,
+        }
       );
     };
 
-    attemptFetch();
-  }, [options]);
-
-  // Cleanup resources on unmount
-  useEffect(() => {
-    return () => clearResources();
-  }, []);
+    tryGetLocation();
+    return () => clearTimer();
+  }, [enableHighAccuracy, timeout, maximumAge, accuracyThreshold, maxRetries]);
 
   return {
-    ...state,
-    getGeolocation,
-    getGoogleMapsLink: () => {
-      if (!state.geoLatitude || !state.geoLongitude) return null;
-      return `https://www.google.com/maps?q=${state.geoLatitude},${state.geoLongitude}`;
-    },
+    latitude,
+    longitude,
+    accuracy,
+    googleMapsLink:
+      typeof latitude === 'number' && typeof longitude === 'number'
+        ? `https://www.google.com/maps?q=${latitude},${longitude}`
+        : null,
+    loading,
+    statusMessage,
+    errorMessage,
   };
 };
 

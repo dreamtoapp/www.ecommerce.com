@@ -2,12 +2,20 @@
 
 // Product SEO Form Component
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
+
 import { toast } from 'sonner';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+
+import InfoTooltip from '@/components/InfoTooltip';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import InfoTooltip from '@/components/ui/InfoTooltip';
 
 const LOCALES = [
   { code: 'ar-SA', label: 'العربية' },
