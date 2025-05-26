@@ -18,6 +18,7 @@ interface AddImageProps {
   cloudinaryPreset: string;
   onUploadComplete?: (url: string) => void;
   autoUpload?: boolean;
+  folder?: string; // Optional folder for Cloudinary
 }
 
 const AddImage: React.FC<AddImageProps> = ({
@@ -29,6 +30,7 @@ const AddImage: React.FC<AddImageProps> = ({
   cloudinaryPreset,
   onUploadComplete,
   autoUpload = false,
+  folder = '', // Default to empty string if not provided
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | undefined>(url);
@@ -75,6 +77,9 @@ const AddImage: React.FC<AddImageProps> = ({
     formData.append('recordId', recordId);
     formData.append('table', table);
     formData.append('cloudinaryPreset', cloudinaryPreset);
+    if (folder) {
+      formData.append('folder', folder); // Append folder if provided
+    }
 
     const xhr = new XMLHttpRequest();
 

@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
     const recordId = formData.get('recordId') as string | null;
     const table = formData.get('table') as TableName | null;
     const cloudinaryPreset = formData.get('cloudinaryPreset') as string | null;
+    const folder = formData.get('folder') as string | null;
 
     // ✅ Log inputs for debugging
     console.log('Incoming Upload Request:');
@@ -30,6 +31,7 @@ export async function POST(req: NextRequest) {
     console.log('recordId:', recordId);
     console.log('table:', table);
     console.log('cloudinaryPreset:', cloudinaryPreset);
+    console.log('folder:', folder);
 
     if (!file || !recordId || !table || !cloudinaryPreset) {
       return NextResponse.json({
@@ -58,7 +60,7 @@ export async function POST(req: NextRequest) {
     const dataUri = `data:${file.type};base64,${buffer.toString('base64')}`;
 
     // Upload to Cloudinary
-    const imageUrl = await uploadImageToCloudinary(dataUri, cloudinaryPreset);
+    const imageUrl = await uploadImageToCloudinary(dataUri, cloudinaryPreset, folder || '');
     console.log('Image uploaded to Cloudinary:', imageUrl);
 
     // Update record in DB

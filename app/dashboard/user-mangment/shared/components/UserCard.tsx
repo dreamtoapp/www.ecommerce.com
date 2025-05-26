@@ -58,7 +58,8 @@ export default function UserCard({ driver }: DriverCardProps) {
             alt={`${safeDriver.name}'s profile`}
             recordId={safeDriver.id}
             table="user"
-            cloudinaryPreset={"amwag_driver"}
+            cloudinaryPreset={"E-comm"}
+            folder={`E-comm/users/${safeDriver.role}`}
             onUploadComplete={(url) => console.log('Uploaded to:', url)}
           />
         </div>
@@ -77,12 +78,7 @@ export default function UserCard({ driver }: DriverCardProps) {
 
       {/* Card Footer */}
       <CardFooter className='flex justify-between border-t border-border bg-muted/50 p-4'>
-        {/* Edit Driver Dialog */}
-        {/* <EditDriverDialog driver={safeDriver}>
-          <button className='flex items-center gap-1 text-primary hover:underline'>
-            <Pencil className={iconVariants({ size: 'xs' })} /> 
-          </button>
-        </EditDriverDialog> */}
+
 
 
 

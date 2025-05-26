@@ -13,9 +13,10 @@ cloudinary.v2.config({
  * @param preset - Cloudinary upload preset
  * @returns Optimized secure URL string
  */
-export async function uploadImageToCloudinary(filePath: string, preset: string): Promise<string> {
+export async function uploadImageToCloudinary(filePath: string, preset: string, folder: string): Promise<string> {
   const result = await cloudinary.v2.uploader.upload(filePath, {
     upload_preset: preset,
+    folder: folder,
   });
 
   // Generate an optimized URL with auto format, quality, and responsive width
