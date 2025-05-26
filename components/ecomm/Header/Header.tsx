@@ -1,13 +1,12 @@
-import { PrismaClient } from '@prisma/client';
 import { Session } from 'next-auth';
 
+import FixLatAndLong from '@/utils/FixLatAndLong';
 
 // import NavLinks from './NavLinks'; 
 import HeaderClient from './HeaderClient';
 // Header.tsx (Server Component)
 import Logo from './Logo';
 import SearchBar from './SearchBar';
-import FixLatAndLong from '@/utils/FixLatAndLong';
 
 interface HeaderProps {
   logo: string;

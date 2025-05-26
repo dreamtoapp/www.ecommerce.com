@@ -2,6 +2,14 @@
 
 import dynamic from 'next/dynamic';
 
+import { Separator } from '@/components/ui/separator';
+
+import AboutUs from './AboutUs';
+import ContactInfo from './ContactInfo';
+import Copyright from './Copyright';
+import QuickLinks from './QuickLinks';
+import SocialMedia from './SocialMedia';
+
 // Dynamic import for Newsletter (client-only, interactive)
 const Newsletter = dynamic(() => import('./Newsletter'), {
   ssr: false,
@@ -24,22 +32,13 @@ const SupportPingButton = dynamic(
   },
 );
 
-
-import { Separator } from '@/components/ui/separator';
-
-import AboutUs from './AboutUs';
-import ContactInfo from './ContactInfo';
-import Copyright from './Copyright';
-import QuickLinks from './QuickLinks';
-import SocialMedia from './SocialMedia';
-
 interface FooterProps {
   aboutus?: string;
   email?: string;
   phone?: string;
   address?: string;
-  latitude?: number;
-  longitude?: number;
+  latitude?: string;
+  longitude?: string;
   companyName?: string;
   facebook?: string;
   instagram?: string;
@@ -73,8 +72,8 @@ const Footer = ({
             email={email}
             phone={phone}
             address={address}
-            latitude={latitude || 0}
-            longitude={longitude || 0}
+            latitude={latitude || ''}
+            longitude={longitude || ''}
           />
 
           <Newsletter />

@@ -52,8 +52,8 @@ export default function DriverTracker({
       await updateDriverLocation({
         driverId,
         orderId,
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
+        latitude: position.coords.latitude.toString() || '',
+        longitude: position.coords.longitude.toString() || '',
       });
 
       setTimeLeft(intervalSeconds.current);

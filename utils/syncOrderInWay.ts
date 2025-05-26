@@ -18,8 +18,8 @@ export async function syncOrderInWay() {
             orderId: order.id,
             driverId: order.driverId,
             orderNumber: order.orderNumber,
-            latitude: order.latitude ? order.latitude : 0,
-            longitude: order.longitude ? order.longitude : 0,
+            latitude: order.latitude ? order.latitude : '',
+            longitude: order.longitude ? order.longitude : '',
           },
         });
         addedCount++;

@@ -1,17 +1,11 @@
 // seedData.ts
-import {
-
-  ORDER_STATUS,
-  // Remove unused imports
-  // DiscountType,
-  // PromotionType,
-} from '@/constant/order-status';
+import { ORDER_STATUS } from '@/constant/order-status';
 import { faker } from '@faker-js/faker/locale/ar'; // Use Arabic locale
 import {
   Prisma,
-  UserRole,
-  User,
   Product,
+  User,
+  UserRole,
 } from '@prisma/client';
 
 import {
@@ -1014,8 +1008,8 @@ async function generateFashionOrders(count: number, shiftId: string) {
           items: {
             create: items,
           },
-          latitude: faker.location.latitude(),
-          longitude: faker.location.longitude(),
+          latitude: faker.location.latitude().toString(),
+          longitude: faker.location.longitude().toString(),
           isTripStart: orderStatus === ORDER_STATUS.IN_TRANSIT,
           resonOfcancel:
             orderStatus === 'CANCELED'
@@ -1050,8 +1044,8 @@ async function generateFashionOrders(count: number, shiftId: string) {
               orderId: createdOrder.id,
               driverId: driverId,
               orderNumber: orderNumber,
-              latitude: faker.location.latitude(),
-              longitude: faker.location.longitude(),
+              latitude: faker.location.latitude().toString(),
+              longitude: faker.location.longitude().toString(),
             },
           });
         } else {

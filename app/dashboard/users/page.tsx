@@ -43,7 +43,7 @@ export default async function UserManagement() {
                 </Link>
 
                 <EditUser userId={user.id} />
-                <Map latitude={parseFloat(user.latitude)} longitude={parseFloat(user.longitude)} />
+                <Map latitude={user.latitude ?? ''} longitude={user.longitude ?? ''} />
                 {/* <TomTomMap
                   latitude={25.1972}
                   longitude={55.2744}

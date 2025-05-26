@@ -12,8 +12,8 @@ export async function CreateOrderInDb(orderData: {
   phone: string;
   name: string;
   address: string;
-  lat: number;
-  lng: number;
+  lat: string;
+  lng: string;
   cart: OrderCartItem[];
   totalAmount: number;
   totalItems: number;

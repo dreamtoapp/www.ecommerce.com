@@ -1,13 +1,25 @@
 'use client';
-import { useEffect, useState } from 'react';
+import {
+  useEffect,
+  useState,
+} from 'react';
 
 import { Pencil } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { FaInfoCircle, FaSpinner } from 'react-icons/fa';
+import {
+  FaInfoCircle,
+  FaSpinner,
+} from 'react-icons/fa';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCheckIsLogin } from '@/hooks/use-check-islogin';
@@ -58,8 +70,8 @@ const CheckOutPage = () => {
         phone: session!.phone ?? '',
         name: session!.name ?? '',
         address: session!.address ?? '',
-        lat: session!.latitude ?? 0,
-        lng: session!.longitude ?? 0,
+        lat: session!.latitude ?? '',
+        lng: session!.longitude ?? '',
         cart: formattedCart,
         totalAmount: getTotalPrice(),
         totalItems: getTotalItems(),

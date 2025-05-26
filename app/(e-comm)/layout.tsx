@@ -27,8 +27,8 @@ export default async function EcommerceLayout({ children }: { children: React.Re
           email={companyData?.email}
           phone={companyData?.phoneNumber}
           address={companyData?.address}
-          latitude={companyData?.latitude || 0}
-          longitude={companyData?.longitude || 0}
+          latitude={companyData?.latitude || ''}
+          longitude={companyData?.longitude || ''}
           facebook={companyData?.facebook}
           instagram={companyData?.instagram}
           twitter={companyData?.twitter}

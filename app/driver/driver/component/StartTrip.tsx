@@ -1,8 +1,9 @@
 'use client';
 
+import { Rocket } from 'lucide-react'; // Import directly
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Rocket } from 'lucide-react'; // Import directly
+
 import { iconVariants } from '@/lib/utils'; // Import CVA variants
 
 // Removed Icon import: import { Icon } from '@/components/icons';
@@ -12,8 +13,8 @@ import { startTrip } from '../action/startTrip';
 interface Props {
   orderId: string;
   driverId: string;
-  latitude: number;
-  longitude: number;
+  latitude: string;
+  longitude: string;
   driverName: string;
 }
 

@@ -11,8 +11,8 @@ const isValidId = (id: string) => /^[0-9a-f]{24}$/.test(id);
 export const startTrip = async (
   orderId: string,
   driverId: string,
-  latitude: number,
-  longitude: number,
+  latitude: string,
+  longitude: string,
 ): Promise<Result> => {
   if (!isValidId(orderId) || !isValidId(driverId)) {
     return { success: false, error: 'Invalid ID format' };
@@ -57,8 +57,8 @@ export const startTrip = async (
 export const updateCoordinates = async (
   orderId: string,
   driverId: string,
-  latitude: number,
-  longitude: number,
+  latitude: string,
+  longitude: string,
 ): Promise<Result> => {
   if (!isValidId(orderId) || !isValidId(driverId)) {
     return { success: false, error: 'Invalid ID format' };

@@ -6,9 +6,15 @@ import {
 
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import {
+  Calendar,
+  Car,
+  List,
+  Phone,
+  RefreshCw,
+  User,
+} from 'lucide-react'; // Import directly
 import { toast } from 'sonner';
-import { Calendar, RefreshCw, List, User, Phone, Car } from 'lucide-react'; // Import directly
-import { iconVariants } from '@/lib/utils'; // Import CVA variants
 
 // Removed Icon import: import { Icon } from '@/components/icons';
 import { Button } from '@/components/ui/button';
@@ -19,33 +25,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { iconVariants } from '@/lib/utils'; // Import CVA variants
+import { Order } from '@/types/databaseTypes';
 
 import {
   startTrip,
   updateCoordinates,
 } from '../action/startTrip';
-
-interface Order {
-  id: string;
-  orderNumber: string;
-  status: string;
-  driverId: string | null;
-  amount: number;
-  shift: { name: string };
-  createdAt: Date;
-  updatedAt: Date;
-  customer: {
-    phone: string;
-    name: string;
-    latitude: string;
-    longitude: string;
-  };
-  driver: {
-    id: string;
-    name: string;
-    phone: string;
-  } | null;
-}
 
 export default function DriverOrderCard({ order }: { order: Order }) {
   const UPDATE_INTERVAL = 300;
@@ -67,8 +53,8 @@ export default function DriverOrderCard({ order }: { order: Order }) {
       const result = await startTrip(
         order.id,
         driverId,
-        position.coords.latitude,
-        position.coords.longitude,
+        position.coords.latitude.toString(),
+        position.coords.longitude.toString(),
       );
 
       if (result.success) {
@@ -105,8 +91,8 @@ export default function DriverOrderCard({ order }: { order: Order }) {
                 await updateCoordinates(
                   order.id,
                   driverId,
-                  position.coords.latitude,
-                  position.coords.longitude,
+                  position.coords.latitude.toString(),
+                  position.coords.longitude.toString(),
                 );
                 setCountdown(UPDATE_INTERVAL);
               } catch {

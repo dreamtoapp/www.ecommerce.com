@@ -5,8 +5,8 @@ import db from '@/lib/prisma';
 export const updateDriverLocation = async (data: {
   driverId: string;
   orderId: string;
-  latitude: number;
-  longitude: number;
+  latitude: string;
+  longitude: string;
 }) => {
   try {
     const updatedOrder = await db.orderInWay.update({

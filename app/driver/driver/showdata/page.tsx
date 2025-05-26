@@ -1,4 +1,3 @@
-
 import {
   DollarSign,
   FileText,
@@ -6,7 +5,10 @@ import {
   User,
 } from 'lucide-react'; // Import directly
 
-import { ORDER_STATUS, OrderStatus } from '@/constant/order-status';
+import {
+  ORDER_STATUS,
+  OrderStatus,
+} from '@/constant/order-status';
 import { iconVariants } from '@/lib/utils'; // Import CVA variants
 
 // Removed Icon import: import { Icon } from '@/components/icons';
@@ -18,8 +20,8 @@ import {
   CardHeader,
   CardTitle,
 } from '../../../../components/ui/card';
-import StartTrip from '../component/StartTrip';
 import { getOrderByStatus } from '../action/getOrderByStatus';
+import StartTrip from '../component/StartTrip';
 
 async function page({
   searchParams,
@@ -108,8 +110,8 @@ async function page({
                 <StartTrip
                   orderId={order.id}
                   driverId={driverId}
-                  latitude={parseFloat(order.customer.latitude)}
-                  longitude={parseFloat(order.customer.longitude)}
+                  latitude={order.customer.latitude ?? ''}
+                  longitude={order.customer.longitude ?? ''}
                   driverName={order?.driver?.name ?? ''}
                 />
               </CardFooter>

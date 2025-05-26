@@ -1,7 +1,10 @@
 'use client';
 import { useState } from 'react';
-import { Map, MapPinOff } from 'lucide-react'; // Import directly
-import { iconVariants } from '@/lib/utils'; // Import CVA variants
+
+import {
+  Map,
+  MapPinOff,
+} from 'lucide-react'; // Import directly
 
 // Removed Icon import: import { Icon } from '@/components/icons';
 import { Button } from '@/components/ui/button';
@@ -12,10 +15,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { iconVariants } from '@/lib/utils'; // Import CVA variants
 
 interface MapProps {
-  latitude?: number | 0;
-  longitude?: number | 0;
+  latitude?: string | '';
+  longitude?: string | '';
   zoom?: number;
 }
 
@@ -24,9 +28,9 @@ const GoogleMap = ({ latitude, longitude, }: MapProps) => {
 
   // Check if valid coordinates are provided
   const isLatitudeValid =
-    latitude !== undefined && latitude !== null && latitude >= -90 && latitude <= 90;
+    latitude !== undefined && latitude !== null && latitude !== '' && parseFloat(latitude) >= -90 && parseFloat(latitude) <= 90;
   const isLongitudeValid =
-    longitude !== undefined && longitude !== null && longitude >= -180 && longitude <= 180;
+    longitude !== undefined && longitude !== null && longitude !== '' && parseFloat(longitude) >= -180 && parseFloat(longitude) <= 180;
   const hasValidCoordinates = isLatitudeValid && isLongitudeValid;
 
   // Construct a Google Maps embed URL for high-accuracy display without API key

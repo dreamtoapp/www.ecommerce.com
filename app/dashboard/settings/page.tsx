@@ -8,6 +8,7 @@ import { useGeolocated } from 'react-geolocated';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
+import { Company } from '@/types/databaseTypes';
 
 import { fetchCompany } from './actions/fetchCompany';
 import { saveCompany } from './actions/saveCompnay';
@@ -15,7 +16,6 @@ import GeneralInfoSection from './component/GeneralInfoSection';
 import LocationSection from './component/LocationSection';
 import SettingsSkeleton from './component/SettingsSkeleton';
 import SocialMediaSection from './component/SocialMediaSection';
-import { Company } from '@/types/databaseTypes';
 
 // Main Component
 export default function SettingsPage() {
@@ -118,8 +118,8 @@ export default function SettingsPage() {
             errors={errors}
             isGeolocationAvailable={isGeolocationAvailable} // Correct prop name
             // isGeolocationEnabled={isGeolocationEnabled} // Remove incorrect prop
-            latitude={latitude}
-            longitude={longitude}
+            currentLatitude={latitude}
+            currentLongitude={longitude}
             setLatitude={setLatitude}
             setLongitude={setLongitude}
           />

@@ -7,7 +7,7 @@ import {
 
 import { useRouter } from 'next/navigation';
 
-import { fetchCompany } from '@/app/dashboard/setting/actions/fetchCompany';
+import { fetchCompany } from '@/app/dashboard/settings/actions/fetchCompany';
 import { Button } from '@/components/ui/button';
 import ExportAnalyticsPdfButton from '@/components/ui/ExportAnalyticsPdfButton';
 import {
@@ -15,6 +15,7 @@ import {
   OrderHistoryItem,
   SalesByMonthData,
 } from '@/types/analytics';
+import { Company } from '@/types/databaseTypes';
 
 import AnalyticsChart from './AnalyticsChart';
 import ChartTypeSwitcher from './ChartTypeSwitcher';
@@ -23,7 +24,6 @@ import DateRangePicker from './DateRangePicker';
 import ProductInfo from './ProductInfo';
 import ProductOrderHistoryTable from './ProductOrderHistoryTable';
 import ProductRatingsSection from './ProductRatingsSection';
-import { Company } from '@/types/databaseTypes';
 
 export default function ClientAnalyticsDashboard({
   analytics,

@@ -221,8 +221,8 @@ model LocationHistory {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   driverId  String // Should reference User.id
   orderId   String?
-  latitude  Float? // Latitude of the location
-  longitude Float? // Longitude of the location
+  latitude  String? // Latitude of the location
+  longitude String? // Longitude of the location
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

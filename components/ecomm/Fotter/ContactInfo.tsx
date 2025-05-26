@@ -1,6 +1,5 @@
 'use client';
 
-
 import dynamic from 'next/dynamic';
 
 // Dynamic import for Map (potentially heavy component)
@@ -19,8 +18,8 @@ const ContactInfo = ({
   email?: string;
   phone?: string;
   address?: string;
-  latitude?: number;
-  longitude?: number;
+  latitude?: string;
+  longitude?: string;
 }) => {
 
 
@@ -32,8 +31,8 @@ const ContactInfo = ({
       <p className='text-sm text-muted-foreground'>{address}</p>
       {/* Professional Button to Open Dialog */}
       <Map
-        latitude={latitude ? latitude : 0}
-        longitude={longitude ? longitude : 0}
+        latitude={latitude ? latitude : ''}
+        longitude={longitude ? longitude : ''}
       />
     </div>
   );
