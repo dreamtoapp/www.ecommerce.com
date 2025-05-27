@@ -15,6 +15,7 @@ interface AddImageProps {
   className?: string;
   recordId: string;
   table: string;
+  tableField: string;
   cloudinaryPreset: string;
   onUploadComplete?: (url: string) => void;
   autoUpload?: boolean;
@@ -29,6 +30,7 @@ const AddImage: React.FC<AddImageProps> = ({
   table,
   cloudinaryPreset,
   onUploadComplete,
+  tableField = 'image', // Default to 'image' if not provided
   autoUpload = false,
   folder = '', // Default to empty string if not provided
 }) => {
@@ -76,6 +78,7 @@ const AddImage: React.FC<AddImageProps> = ({
     formData.append('file', imageFile);
     formData.append('recordId', recordId);
     formData.append('table', table);
+    formData.append('tableField', tableField);
     formData.append('cloudinaryPreset', cloudinaryPreset);
     if (folder) {
       formData.append('folder', folder); // Append folder if provided

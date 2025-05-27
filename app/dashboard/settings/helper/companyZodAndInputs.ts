@@ -10,6 +10,7 @@ import { z } from 'zod';
 
 // ✅ Zod Schema
 export const CompanySchema = z.object({
+  id: z.string().trim().nonempty('الاسم الكامل مطلوب').optional(),
   fullName: z.string().trim().nonempty('الاسم الكامل مطلوب').optional(),
   email: z.string().trim().email('صيغة البريد الإلكتروني غير صحيحة').optional(),
   phoneNumber: z.string().trim().nonempty('رقم الهاتف مطلوب').optional(),
@@ -49,6 +50,9 @@ interface Field {
   register: UseFormRegisterReturn;
   error?: string;
   className?: string;
+  customContent?: boolean;
+  fullWidith?: boolean;
+
 }
 
 interface FieldSection {
@@ -56,6 +60,7 @@ interface FieldSection {
   hint?: boolean;
   fields: Field[];
   customContent?: ReactNode;
+  hasImage?: boolean;
 }
 
 // ✅ Input Field Generator
@@ -67,10 +72,16 @@ export const getCompanyFields = (
       section: 'البيانات الأساسية',
       fields: [
         { name: 'fullName', type: 'text', placeholder: 'الاسم الكامل', register: register('fullName'), error: errors.fullName?.message },
+
         { name: 'email', type: 'email', placeholder: 'البريد الإلكتروني', register: register('email'), error: errors.email?.message },
+
         { name: 'phoneNumber', type: 'tel', placeholder: 'رقم الهاتف', register: register('phoneNumber'), error: errors.phoneNumber?.message },
+
         { name: 'whatsappNumber', type: 'tel', placeholder: 'رقم الواتساب', register: register('whatsappNumber'), error: errors.whatsappNumber?.message },
-        { name: 'address', type: 'text', placeholder: 'العنوان', register: register('address'), error: errors.address?.message, className: 'col-span-2' },
+        { name: 'bio', type: 'text', placeholder: 'نبذة عن الشركة (اختياري)', register: register('bio'), error: errors.bio?.message, className: 'col-span-2', fullWidith: true, },
+
+        { name: 'address', type: 'text', placeholder: 'العنوان', register: register('address'), error: errors.address?.message, className: 'col-span-2', fullWidith: true },
+
       ]
     },
     {
@@ -78,15 +89,17 @@ export const getCompanyFields = (
       hint: true,
       customContent: null, // سنضيفها من الخارج
       fields: [
-        { name: 'bio', type: 'text', placeholder: 'نبذة عن الشركة (اختياري)', register: register('bio'), error: errors.bio?.message, className: 'col-span-2' },
+
         { name: 'latitude', type: 'text', placeholder: 'خط العرض', register: register('latitude'), error: errors.latitude?.message },
         { name: 'longitude', type: 'text', placeholder: 'خط الطول', register: register('longitude'), error: errors.longitude?.message },
       ]
     },
     {
       section: 'معلومات ضريبية',
+      hint: true,
+      hasImage: true,
       fields: [
-        { name: 'taxNumber', type: 'text', placeholder: 'الرقم الضريبي', register: register('taxNumber'), error: errors.taxNumber?.message },
+        { name: 'taxNumber', type: 'text', placeholder: 'الرقم الضريبي', register: register('taxNumber'), error: errors.taxNumber?.message, customContent: true, },
 
       ]
     },

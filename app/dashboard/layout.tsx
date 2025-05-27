@@ -20,7 +20,6 @@ export default async function Layout({ children }: { children: React.ReactNode }
   if (!session?.user || (userRole !== UserRole.ADMIN && userRole !== 'ADMIN')) {
     return redirect('/auth/login');
   }
-  console.log({ session })
 
 
 

@@ -154,11 +154,11 @@ export default function CompanyProfileForm({ company }: CompanyProfileFormProps)
   const locationSection = sections.find((s) => s.section === "الوصف والموقع")
   if (locationSection) {
     locationSection.customContent = (
-      <div className="space-y-4">
+      <>
         <GeolocationCard />
         <input type="hidden" {...register("latitude")} />
         <input type="hidden" {...register("longitude")} />
-      </div>
+      </>
     )
   }
 
@@ -197,23 +197,11 @@ export default function CompanyProfileForm({ company }: CompanyProfileFormProps)
               </CardHeader>
 
               <CardContent className={cn("space-y-6", hasImage ? "grid md:grid-cols-3 gap-6" : "")}>
-                {customContent && <div className="md:col-span-3">{customContent}</div>}
 
-                {hasImage && (
-                  <div className="md:col-span-1">
-                    <AddImage
-                      url={company?.taxQrImage || ''}
-                      alt={`${company?.fullName || 'الشركة'} شعار`}
-                      recordId={company?.id || ''}
-                      table="company"
-                      tableField="taxQrImage"
-                      folder="E-comm/Company/Profile"
-                      cloudinaryPreset="E-comm"
-                    />
-                  </div>
-                )}
 
                 <div className={cn("space-y-6", hasImage ? "md:col-span-2" : "")}>
+                  {customContent && <div className="mb-4">{customContent}</div>}
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {fields.map(({ name, type, placeholder, register, error, fullWidith }) => (
                       <div
@@ -248,6 +236,20 @@ export default function CompanyProfileForm({ company }: CompanyProfileFormProps)
                     ))}
                   </div>
                 </div>
+                {hasImage && (
+                  <div className="p-2 group h-28 w-36 overflow-hidden rounded-lg border border-dashed border-muted hover:border-primary hover:bg-muted/40 transition-colors duration-200 cursor-pointer">
+                    <AddImage
+                      url={company?.taxQrImage || ''}
+                      alt={`${company?.fullName || 'الشركة'} شعار`}
+                      recordId={company?.id || ''}
+                      table="company"
+                      tableField="taxQrImage"
+                      folder="E-comm/Company/Profile"
+                      cloudinaryPreset="E-comm"
+                    />
+
+                  </div>
+                )}
               </CardContent>
             </Card>
           )

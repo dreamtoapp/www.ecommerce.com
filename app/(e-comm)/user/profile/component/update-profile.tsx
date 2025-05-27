@@ -104,8 +104,11 @@ export default function UserProfileForm({ userData }: { userData: UserFormData }
             alt={`${userData.name}'s profile`}
             recordId={userData.id}
             table="user"
-            cloudinaryPreset={"amwag_driver"}
-            onUploadComplete={(url) => console.log('Uploaded to:', url)}
+            tableField='image'
+            folder={`E-comm/Users/ProfileImage/${userData.id}`}
+            cloudinaryPreset={"E-comm"}
+
+            onUploadComplete={() => toast.success("تم رفع الصورة بنجاح")} // show notification on upload
           />
         </div>
       </div>

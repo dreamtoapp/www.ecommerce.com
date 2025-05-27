@@ -5,11 +5,7 @@ import React, {
   useState,
 } from 'react'; // Import ElementType
 
-import {
-  ChevronsUpDown,
-  Home,
-  LayoutDashboard,
-} from 'lucide-react';
+import { ChevronsUpDown } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
 import Link from '@/components/link';
@@ -17,7 +13,6 @@ import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
-  SidebarHeader,
   SidebarRail,
 } from '@/components/ui/sidebar';
 
@@ -45,22 +40,7 @@ export default function AppSidebar() {
 
   return (
     <Sidebar side={side} className='flex h-screen flex-col border-r bg-background  rtl:text-right'>
-      <SidebarHeader className='flex flex-col items-center gap-2 border-b bg-background p-4'>
-        <div className='mb-1 flex w-full items-center justify-center gap-4'>
-          <Link
-            href='/'
-            className='flex items-center justify-center rounded-lg p-2 transition hover:bg-accent'
-          >
-            <Home className='h-6 w-6 text-primary' />
-          </Link>
-          <Link
-            href='/dashboard'
-            className='flex items-center justify-center rounded-lg p-2 transition hover:bg-accent'
-          >
-            <LayoutDashboard className='h-6 w-6 text-primary' />
-          </Link>
-        </div>
-      </SidebarHeader>
+
       <SidebarContent className='flex-1 overflow-y-auto p-2 '>
         {menuGroups.map((group, i) => {
           const isCollapsed = collapsedGroups.includes(i);

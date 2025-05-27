@@ -1,5 +1,6 @@
 'use client'; // Mark as a Client Component
 import { Trash2 } from 'lucide-react'; // Import directly
+import { toast } from 'sonner';
 
 import AddImage from '@/components/AddImage';
 // Removed Icon import: import { Icon } from '@/components/icons';
@@ -58,9 +59,10 @@ export default function UserCard({ driver }: DriverCardProps) {
             alt={`${safeDriver.name}'s profile`}
             recordId={safeDriver.id}
             table="user"
+            tableField='image'
             cloudinaryPreset={"E-comm"}
             folder={`E-comm/users/${safeDriver.role}`}
-            onUploadComplete={(url) => console.log('Uploaded to:', url)}
+            onUploadComplete={() => toast.success("تم رفع الصورة بنجاح")} // 
           />
         </div>
 
