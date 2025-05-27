@@ -1,63 +1,40 @@
 'use server';
-import db from '@/lib/prisma';
-import { ImageToCloudinary } from '@/lib/cloudinary/uploadImageToCloudinary';
-import { Company } from '@/types/databaseTypes';
 
-export const saveCompany = async (formData: FormData): Promise<void> => {
+import { z } from 'zod';
+
+import db from '@/lib/prisma';
+
+import { CompanySchema } from '../helper/companyZodAndInputs';
+
+export async function saveCompany(rawData: unknown) {
   try {
-    const companyData = collectData(formData);
+    // ✅ 1. التحقق من صحة البيانات باستخدام Zod
+    const formData = CompanySchema.parse(rawData);
+
+    // 🔍 2. البحث عن شركة موجودة مسبقًا (نمط singleton)
     const existingCompany = await db.company.findFirst();
 
-    if (formData.has('logo')) {
-      const ImageData = await ImageToCloudinary(
-        formData.get('logo') as File,
-        process.env.CLOUDINARY_UPLOAD_PRESET_ASSETS || '',
-      );
+    // ♻️ 3. التحديث أو الإنشاء حسب وجود الشركة
+    const company = await db.company.upsert({
+      where: { id: existingCompany?.id ?? '000000000000000000000000' },
+      update: formData,
+      create: formData,
+    });
 
-      // const { secure_url, public_id } = await uploadImage(imageFile);
-      const imageUrl = ImageData.result?.secure_url;
+    // ✅ 4. إرجاع الشركة بعد الحفظ
+    return { success: true, company };
 
-      companyData.logo = imageUrl;
-    } else {
-      console.warn('No imageUrl');
-    }
-
-    if (existingCompany) {
-      // Update the existing company
-      await db.company.update({
-        where: { id: existingCompany.id },
-        data: companyData,
-      });
-    } else {
-      // Create a new company
-      await db.company.create({ data: companyData });
-    }
   } catch (error) {
-    console.error('Error saving company:', error);
-    throw new Error('Failed to save company.');
+    console.error('❌ Failed to save company:', error);
+
+    // ❌ 5. إرجاع خطأ بطريقة واضحة
+    return {
+      success: false,
+      message:
+        error instanceof z.ZodError
+          ? 'بيانات غير صالحة. يرجى مراجعة الحقول.'
+          : 'حدث خطأ أثناء حفظ بيانات الشركة.',
+      details: error instanceof z.ZodError ? error.flatten() : null,
+    };
   }
-};
-const collectData = (formData: FormData): Partial<Company> => {
-  const data = Object.fromEntries(formData.entries());
-  return {
-    fullName: String(data.fullName || ''),
-    email: String(data.email || ''),
-    phoneNumber: String(data.phoneNumber || ''),
-    whatsappNumber: String(data.whatsappNumber || ''),
-    // logo: String(data.logo || ""),
-    profilePicture: String(data.profilePicture || ''),
-    bio: String(data.bio || ''),
-    taxNumber: String(data.taxNumber || ''),
-    taxQrImage: String(data.taxQrImage || ''),
-    twitter: String(data.twitter || ''),
-    linkedin: String(data.linkedin || ''),
-    instagram: String(data.instagram || ''),
-    tiktok: String(data.tiktok || ''),
-    facebook: String(data.facebook || ''),
-    snapchat: String(data.snapchat || ''),
-    website: String(data.website || ''),
-    address: String(data.address || ''),
-    latitude: String(data.latitude || ''),
-    longitude: String(data.longitude || ''),
-  };
-};
+}
