@@ -1,7 +1,6 @@
 'use server';
 
 import db from '@/lib/prisma';
-import { Slugify } from '@/utils/slug';
 
 import {
   SupplierFormData,
@@ -58,7 +57,6 @@ async function createSupplier(data: SupplierFormData) {
   await db.supplier.create({
     data: {
       name: data.name,
-      slug: Slugify(data.name),
       email: data.email,
       phone: data.phone,
       address: data.address,
@@ -90,7 +88,6 @@ async function updateSupplier(data: SupplierFormData) {
     where: { id: data.id },
     data: {
       name: data.name,
-      slug: Slugify(data.name),
       email: data.email,
       phone: data.phone,
       address: data.address,

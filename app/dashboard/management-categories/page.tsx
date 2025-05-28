@@ -1,50 +1,41 @@
-import { PlusCircle } from 'lucide-react';
-import Link from 'next/link';
 
-import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { getSuppliers } from './actions/get-supplier';
+import SupplierCard from './components/SupplierCard';
+import AddSupplier from './components/SupplierUpsert';
 
-import { getCategories } from './actions/get-categories';
-import CategoryDataTable from './components/CategoryDataTable';
-
-export const metadata = {
-  title: "إدارة الأصناف | لوحة التحكم",
-  description: "عرض، إنشاء، تعديل، وحذف أصناف المنتجات.",
-};
-
-export default async function CategoriesPage() {
-  const result = await getCategories();
-
-  if (!result.success) {
-    // Consider a more user-friendly error display or logging
-    return <p className="text-red-500">خطأ: {result.error}</p>;
-  }
-
-  const categories = result.categories || [];
+export default async function SuppliersPage() {
+  const suppliers = await getSuppliers();
 
   return (
-    <div className="container mx-auto py-10" dir="rtl"> {/* Added RTL direction */}
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">إدارة الأصناف</h1>
-        <Button asChild>
-          <Link href="/dashboard/categories/new">
-            <PlusCircle className="ml-2 h-4 w-4" /> {/* Adjusted margin for RTL */}
-            إضافة صنف جديد
-          </Link>
-        </Button>
-      </div>
-      {categories.length > 0 ? (
-        <CategoryDataTable categories={categories} />
-      ) : (
-        <div className="text-center py-10">
-          <p className="text-xl text-muted-foreground">لم يتم العثور على أصناف.</p>
-          <Button asChild className="mt-4">
-            <Link href="/dashboard/categories/new">
-              <PlusCircle className="ml-2 h-4 w-4" /> {/* Adjusted margin for RTL */}
-              إنشاء أول صنف لك
-            </Link>
-          </Button>
+    <div className="flex min-h-screen flex-col p-4 md:p-6">
+      {/* Header */}
+      <header className="mb-6 flex items-center justify-between">
+        <div className='flex items-center gap-4'>
+          <h1 className="text-2xl font-bold text-foreground">إدارة الموردين</h1>
+          <Badge variant="outline">{suppliers.length}</Badge>
         </div>
-      )}
+
+
+        <AddSupplier
+          mode='new'
+          title={"إضافة مورد"}
+          description={"يرجى إدخال بيانات المورد"}
+          defaultValues={{
+            type: '',
+            name: '',
+            email: '',
+            phone: '',
+            address: '',
+          }} />
+      </header>
+
+      {/* Supplier list */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {suppliers.map((supplier) => (
+          <SupplierCard key={supplier.id} supplier={supplier} />
+        ))}
+      </div>
     </div>
   );
 }

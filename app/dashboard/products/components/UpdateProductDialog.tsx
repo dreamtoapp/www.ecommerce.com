@@ -5,7 +5,7 @@ import {
 
 import {
   getCategories,
-} from '@/app/dashboard/management-categories/actions/get-categories';
+} from '@/app/dashboard/management-categories-1/actions/get-categories';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -14,9 +14,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Product } from '@/types/databaseTypes';;
+import { Product } from '@/types/databaseTypes';
 
 import UpdateProductForm from './UpdateProductForm';
+
+;
 
 interface UpdateProductDialogProps {
   product: Product;

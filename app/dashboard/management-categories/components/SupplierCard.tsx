@@ -3,13 +3,11 @@
 import {
   BarChart2,
   Eye,
-  PackageSearch,
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 
 import AddImage from '@/components/AddImage';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Supplier } from '@/types/databaseTypes';
 
@@ -66,12 +64,9 @@ export default function SupplierCard({
       </div>
 
       <div className="flex flex-1 flex-col p-4 space-y-2">
-        <div className='flex items-center justify-between'>
-          <h3 className="text-lg font-semibold truncate" title={name}>
-            {name}
-          </h3>
-          <Badge variant={"outline"} className='flex items-center gap-2 text-muted-foreground'><PackageSearch className='h-4 w-4 ' />{products.length}</Badge>
-        </div>
+        <h3 className="text-lg font-semibold truncate" title={name}>
+          {name} {products.length}
+        </h3>
         <p className="text-sm text-muted-foreground truncate" title={email}>
           {email || '-'}
         </p>
