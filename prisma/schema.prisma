@@ -523,6 +523,17 @@ model Category {
   updatedAt   DateTime  @updatedAt
 }
 
+model CategoryProduct {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  categoryId  String   @db.ObjectId
+  productId   String   @db.ObjectId
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade) // If a category is deleted, remove assignments
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade) // If a product is deleted, remove assignments
+  assignedAt  DateTime @default(now())
+
+  @@unique([categoryId, productId])
+}
+
 // Model for Category Translations
 model CategoryTranslation {
   id             String   @id @default(auto()) @map("_id") @db.ObjectId
@@ -538,16 +549,7 @@ model CategoryTranslation {
 }
 
 // Join table for Category and Product (Many-to-Many)
-model CategoryProduct {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  categoryId  String   @db.ObjectId
-  productId   String   @db.ObjectId
-  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade) // If a category is deleted, remove assignments
-  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade) // If a product is deleted, remove assignments
-  assignedAt  DateTime @default(now())
 
-  @@unique([categoryId, productId])
-}
 
 model AnalyticsSettings {
   id                   String   @id @default(auto()) @map("_id") @db.ObjectId

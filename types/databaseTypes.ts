@@ -109,3 +109,29 @@ export const supplierIncludeRelation = {
 export type Supplier = Prisma.SupplierGetPayload<{
   include: typeof supplierIncludeRelation;
 }>;
+
+export const categoryIncludeRelation = {
+  productAssignments: {
+    include: {
+      product: true,
+    },
+  },
+} satisfies Prisma.CategoryInclude;
+
+export type CategoryWithProducts = Prisma.CategoryGetPayload<{
+  include: typeof categoryIncludeRelation;
+}>;
+
+
+
+export const productIncludeRelation = {
+  categoryAssignments: {
+    include: {
+      category: true,
+    },
+  },
+} satisfies Prisma.ProductInclude;
+
+export type ProductWithCategories = Prisma.ProductGetPayload<{
+  include: typeof productIncludeRelation;
+}>;

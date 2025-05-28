@@ -1,53 +1,62 @@
 'use client';
 
-import { Edit, Plus } from 'lucide-react';
+import {
+  Edit,
+  Plus,
+} from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { zodResolver } from '@hookform/resolvers/zod';
 
 import AppDialog from '@/components/app-dialog';
 import FormError from '@/components/form-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { iconVariants } from '@/lib/utils';
+import { zodResolver } from '@hookform/resolvers/zod';
 
+import { upsertCategory } from '../actions/upsertCategory';
+// ✅ NEW
 import {
-  SupplierFormData,
-  SupplierSchema,
-  getSupplierFields,
-} from '../helper/supplierZodAndInputs';
-import { upsertSupplier } from '../actions/upsertSupplier'; // You’ll need to rename this accordingly
+  CategoryFormData,
+  CategorySchema,
+  getCategoryFields,
+} from '../helper/categoryZodAndInputs';
 
-interface AddSupplierProps {
+interface AddCategoryProps {
   mode: 'new' | 'update';
-  defaultValues: SupplierFormData;
+  defaultValues: CategoryFormData;
   title?: string;
   description?: string;
 }
 
-export default function AddSupplier({
+export default function CategoryUpsert({
   mode,
   defaultValues,
   title,
   description,
-}: AddSupplierProps) {
+}: AddCategoryProps) {
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
-  } = useForm<SupplierFormData>({
-    resolver: zodResolver(SupplierSchema),
+  } = useForm<CategoryFormData>({
+    resolver: zodResolver(CategorySchema),
     mode: 'onChange',
-    defaultValues: defaultValues ?? {},
+    defaultValues: {
+      id: defaultValues.id,
+      name: defaultValues.name,
+      slug: defaultValues.slug,
+      description: defaultValues.description ?? undefined,
+    },
   });
 
-  const onSubmit = async (formData: SupplierFormData) => {
+  const onSubmit = async (formData: CategoryFormData) => {
     try {
-      const result = await upsertSupplier(formData, mode);
+      const result = await upsertCategory(formData, mode); // ✅ Call category action
 
       if (result.ok) {
-        toast.success(result.msg || 'تم حفظ بيانات المورد بنجاح');
+        toast.success(result.msg || 'تم حفظ بيانات التصنيف بنجاح');
         reset();
         setTimeout(() => window.location.reload(), 1200);
       } else {
@@ -85,7 +94,7 @@ export default function AddSupplier({
       mode={mode}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {getSupplierFields(register, errors).map((section) => (
+        {getCategoryFields(register, errors).map((section) => (
           <div key={section.section} className="space-y-3">
             <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200">
               {section.section}

@@ -3,9 +3,6 @@ import {
   useState,
 } from 'react';
 
-import {
-  getCategories,
-} from '@/app/dashboard/management-categories-1/actions/get-categories';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -16,6 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { Product } from '@/types/databaseTypes';
 
+import { getCategories } from '../actions/get-categories';
 import UpdateProductForm from './UpdateProductForm';
 
 ;

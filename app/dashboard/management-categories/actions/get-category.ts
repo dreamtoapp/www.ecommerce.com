@@ -1,11 +1,11 @@
 'use server';
 import db from '@/lib/prisma';
-import { supplierIncludeRelation } from '@/types/databaseTypes';
+import { categoryIncludeRelation } from '@/types/databaseTypes';
 
-export async function getSuppliers() {
+export async function getCategories() {
   try {
-    const suppliers = await db.supplier.findMany({
-      include: supplierIncludeRelation,
+    const suppliers = await db.category.findMany({
+      include: categoryIncludeRelation,
       orderBy: {
         createdAt: 'desc', // Optional: order by creation date
       }

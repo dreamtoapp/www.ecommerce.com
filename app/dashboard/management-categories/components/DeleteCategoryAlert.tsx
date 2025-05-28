@@ -1,4 +1,5 @@
 'use client';
+
 import { useState } from 'react';
 
 import {
@@ -7,6 +8,7 @@ import {
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogClose,
@@ -18,30 +20,28 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 
-import { Button } from '../../../../components/ui/button';
-import { deleteSupplier } from '../actions/deleteSupplier';
+import { deleteCategory } from '../actions/deleteCategory';
 
-interface DeleteSupplierAlertProps {
-  supplierId: string;
+interface DeleteCategoryAlertProps {
+  categoryId: string;
 }
 
-export default function DeleteSupplierAlert({ supplierId }: DeleteSupplierAlertProps) {
+export default function DeleteCategoryAlert({ categoryId }: DeleteCategoryAlertProps) {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleDelete = async () => {
     setIsProcessing(true);
     try {
-      const result = await deleteSupplier(supplierId);
+      const result = await deleteCategory(categoryId);
 
       if (result.success) {
         Swal.fire({
           icon: 'success',
           title: 'تم الحذف بنجاح',
-          text: 'تم إزالة بيانات العنصر بشكل نهائي من النظام',
+          text: 'تم إزالة بيانات التصنيف من النظام',
           confirmButtonText: 'تم',
           confirmButtonAriaLabel: 'تأكيد استلام رسالة النجاح',
         });
-        // window.location.reload();
         return;
       }
 
@@ -69,11 +69,10 @@ export default function DeleteSupplierAlert({ supplierId }: DeleteSupplierAlertP
       <DialogTrigger asChild>
         <Button
           variant='outline'
-          size={"icon"}
-          className='size-10 flex  flex-row-reverse hover:bg-destructive/90 hover:text-destructive-foreground'
-          aria-label='فتح نافذة حذف العنصر'
+          size='icon'
+          className='size-10 flex flex-row-reverse hover:bg-destructive/90 hover:text-destructive-foreground'
+          aria-label='فتح نافذة حذف التصنيف'
         >
-
           <Trash className='h-4 w-4 text-destructive' aria-hidden />
         </Button>
       </DialogTrigger>
@@ -84,9 +83,7 @@ export default function DeleteSupplierAlert({ supplierId }: DeleteSupplierAlertP
         aria-labelledby='deleteConfirmationHeading'
         dir='rtl'
       >
-        {/* Accessibility-required title */}
-
-        <DialogTitle id='deleteConfirmationHeading'>تأكيد الحذف النهائي للمورد</DialogTitle>
+        <DialogTitle id='deleteConfirmationHeading'>تأكيد الحذف النهائي للتصنيف</DialogTitle>
 
         <DialogHeader>
           <DialogTitle className='text-right text-xl font-bold text-destructive'>
@@ -94,14 +91,14 @@ export default function DeleteSupplierAlert({ supplierId }: DeleteSupplierAlertP
           </DialogTitle>
 
           <DialogDescription className='text-right text-sm text-muted-foreground/90'>
-            سيتم حذف جميع بيانات العنصر بما في ذلك:
+            سيتم حذف جميع بيانات التصنيف بما في ذلك:
           </DialogDescription>
 
           <div className='text-right text-muted-foreground/90'>
             <ul className='list-disc space-y-2 pr-4'>
               <li>المنتجات المرتبطة</li>
-              <li>سجل التعاملات</li>
-              <li>بيانات الاتصال</li>
+              <li>سجل الفئات الفرعية</li>
+              <li>بيانات الوصف والترتيب</li>
             </ul>
           </div>
         </DialogHeader>

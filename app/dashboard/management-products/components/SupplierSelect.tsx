@@ -100,7 +100,7 @@ export default function SupplierSelect({
                   style={{ lineHeight: 0 }}
                 >
                   <Image
-                    src={selected.logo!}
+                    src={selected.logo.trim()!}
                     alt={selected.name}
                     width={26}
                     height={26}
