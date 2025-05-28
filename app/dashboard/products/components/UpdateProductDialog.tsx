@@ -5,7 +5,7 @@ import {
 
 import {
   getCategories,
-} from '@/app/dashboard/categories/actions/get-categories';
+} from '@/app/dashboard/management-categories/actions/get-categories';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,

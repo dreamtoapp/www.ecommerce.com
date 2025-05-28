@@ -1,4 +1,5 @@
 'use client';
+
 import {
   useEffect,
   useState,
@@ -18,7 +19,7 @@ import {
   Star,
   User,
   Wallet,
-} from 'lucide-react'; // Import icons directly
+} from 'lucide-react';
 import { Session } from 'next-auth';
 
 import Link from '@/components/link';
@@ -27,32 +28,29 @@ import {
   AvatarFallback,
   AvatarImage,
 } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import { UserRole } from '@/constant/enums';
-// Removed Icon import: import { Icon } from '@/components/icons';
-import {
-  cn,
-  iconVariants,
-} from '@/lib/utils'; // Correct import path for CVA variants
+import { iconVariants } from '@/lib/utils';
 import { useCartStore } from '@/store/cartStore';
 
 import { userLogOut } from '../../../app/(e-comm)/auth/action';
-import { Button } from '../../ui/button';
 
 interface UserMenuProps {
-  session: Session | null; // Allow null
+  session: Session | null;
 }
 
 export default function UserMenu({ session }: UserMenuProps) {
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isClearingCart, setIsClearingCart] = useState(false);
   const { clearCart, getTotalItems } = useCartStore();
 
@@ -66,29 +64,11 @@ export default function UserMenu({ session }: UserMenuProps) {
     try {
       setIsClearingCart(true);
       clearCart();
-      // Small delay to show the loading state
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((res) => setTimeout(res, 500));
     } finally {
       setIsClearingCart(false);
     }
   };
-
-  if (!session) {
-    return (
-      <Button
-        variant='outline'
-        asChild
-        className='group border-primary/20 transition-all duration-200 ease-in-out hover:border-primary/40 hover:bg-primary/10'
-      >
-        <Link href='/auth/login' className='flex items-center gap-2 px-4 py-2'>
-          <LogIn // Use direct import
-            className={iconVariants({ size: 'xs', className: 'text-primary transition-transform group-hover:scale-110' })}
-          />
-          <span className='font-medium text-primary'>دخول</span>
-        </Link>
-      </Button>
-    );
-  }
 
   const logOut = async () => {
     try {
@@ -99,222 +79,153 @@ export default function UserMenu({ session }: UserMenuProps) {
     }
   };
 
+  if (!session) {
+    return (
+      <Button variant='outline' asChild className='group border-primary/20 hover:border-primary/40 hover:bg-primary/10'>
+        <Link href='/auth/login' className='flex items-center gap-2 px-4 py-2'>
+          <LogIn className={iconVariants({ size: 'xs', className: 'text-primary group-hover:scale-110' })} />
+          <span className='font-medium text-primary'>دخول</span>
+        </Link>
+      </Button>
+    );
+  }
+
+  const navLinks = [
+    {
+      href: `/user/profile?id=${session.user.id}`,
+      label: 'الملف الشخصي',
+      icon: <User className={iconVariants({ size: 'xs', className: 'text-primary' })} />,
+    },
+    {
+      href: `/user/statement?id=${session.user.id}`,
+      label: 'الحركات المالية',
+      icon: <Wallet className={iconVariants({ size: 'xs', className: 'text-emerald-500' })} />,
+    },
+    {
+      href: `/user/purchase-history`,
+      label: 'سجل المشتريات',
+      icon: <ShoppingBag className={iconVariants({ size: 'xs', className: 'text-blue-500' })} />,
+    },
+    {
+      href: `/user/ratings`,
+      label: 'تقييماتي',
+      icon: <Star className={iconVariants({ size: 'xs', className: 'text-amber-500' })} />,
+    },
+    {
+      href: `/user/wishlist`,
+      label: 'المفضلة',
+      icon: <Heart className={iconVariants({ size: 'xs', className: 'text-red-500' })} />,
+    },
+    {
+      href: `/user/setting`,
+      label: 'الاعدادات',
+      icon: <Settings className={iconVariants({ size: 'xs', className: 'text-primary' })} />,
+    },
+
+  ];
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant='ghost' // Reverted to 'ghost'
-          aria-label={`قائمة المستخدم - ${session.user.name}`}
-          className={cn(
-            'group flex items-center gap-3 rounded-lg p-3 transition-all duration-200', // Removed hover:bg-accent/20
-            'relative ring-offset-background focus-visible:outline-none',
-            'focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2', // Made ring semi-transparent
-            'transform hover:scale-[1.02]' // Kept scale effect
-          )}
-        >
-          <div className='relative'>
-            {/* The Avatar's group-hover for border and shadow will provide feedback */}
-            <Avatar className='h-10 w-10 border-2 border-primary/10 transition-all group-hover:border-primary/50 group-hover:shadow-md'>
-              {/* Reverted Avatar size and border styles */}
-              <AvatarImage src={session.user.image || '/default-avatar.png'} alt={`${session.user.name}'s profile`} />
-              <AvatarFallback className='bg-gradient-to-br from-primary/10 to-muted/10 font-medium text-primary'>
-                {session.user.name?.[0]?.toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            {session.user.role === UserRole.ADMIN && (
-              <BadgeAlert // Use direct import
-                className={iconVariants({ size: 'xs', className: 'absolute -bottom-1 -right-1 fill-destructive/20 text-destructive' })} // Reverted badge position
-              />
-            )}
-          </div>
-          <span
-            className='hidden truncate text-sm font-semibold text-foreground/90 sm:inline' // Reverted: removed group-hover:text-primary
-          >
-            {session.user.name}
-          </span>
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button variant='ghost' className='flex items-center gap-3 p-3'>
+          <Avatar className='h-10 w-10 border-2 border-primary/10 group-hover:border-primary/50 group-hover:shadow-md'>
+            <AvatarImage src={session.user.image || '/default-avatar.png'} alt={session.user.name || 'User'} />
+            <AvatarFallback className='bg-muted/10 text-primary'>
+              {session.user.name?.[0]?.toUpperCase() || '?'}
+            </AvatarFallback>
+          </Avatar>
+          <span className='hidden text-sm font-semibold sm:inline'>{session.user.name}</span>
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align='end'
-        className='w-60 rounded-xl border-border bg-background p-1 shadow-xl'
-        sideOffset={10}
-      >
-        <DropdownMenuLabel className='flex items-center justify-between rounded-t-lg bg-muted/20 px-4 py-2'>
-          <span className='text-sm font-semibold text-foreground'>الحساب</span>
+      </SheetTrigger>
+
+      <SheetContent side='right' className='w-[320px] p-4'>
+        <div className='flex items-center justify-between '>
+
+          <SheetTitle className='text-lg font-semibold mb-2 mt-5'>حسابي</SheetTitle>
           {session.user.role === UserRole.ADMIN && (
             <span className='flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-1 text-xs text-destructive'>
-              <BadgeAlert className={iconVariants({ size: 'xs' })} /> {/* Use direct import */}
+              <BadgeAlert className={iconVariants({ size: 'xs' })} />
               مدير النظام
             </span>
           )}
-        </DropdownMenuLabel>
+        </div>
+        <SheetDescription className='text-sm text-muted-foreground'>
+          يمكنك إدارة إعدادات حسابك هنا.
+        </SheetDescription>
+        <SheetHeader className='mb-4  flex items-center justify-between border-b pb-2'>
+          <div className='flex items-center gap-3 justify-between w-full'>
+            <span className='text-sm font-semibold'>مرحباً، {session.user.name}</span>
+            {session.user.role === UserRole.ADMIN &&
 
-        <DropdownMenuSeparator className='my-1 bg-border/50' />
+              <Link href={`/dashboard`} className='border-primary/20 hover:border-primary/40 hover:bg-primary/10'>
+                <Lock className={iconVariants({ size: 'xs', className: 'text-purple-500' })} />
+                <span className='font-medium text-primary'>لوحة التحكم</span>
+              </Link>
+            }
+          </div>
 
-        {/* Profile Link */}
-        <DropdownMenuItem asChild>
-          <Link
-            href={`/user/profile?id=${session.user.id}`}
-            className='flex items-center justify-between rounded-md px-4 py-2 transition-all duration-150 hover:bg-accent/20'
-          >
-            <div className='flex items-center gap-3'>
-              <div className='rounded-md bg-primary/10 p-2'>
-                <User className={iconVariants({ size: 'xs', className: 'text-primary' })} /> {/* Use direct import */}
-              </div>
-              <span className='text-sm font-medium'>الملف الشخصي</span>
-            </div>
-            <ChevronRight className={iconVariants({ size: 'xs', className: 'text-muted-foreground' })} /> {/* Use direct import */}
-          </Link>
-        </DropdownMenuItem>
 
-        {/* Financial Transactions */}
-        <DropdownMenuItem asChild>
-          <Link
-            href={`/user/statement?id=${session.user.id}`}
-            className='flex items-center justify-between rounded-md px-4 py-2 transition-all duration-150 hover:bg-accent/20'
-          >
-            <div className='flex items-center gap-3'>
-              <div className='rounded-md bg-emerald-500/10 p-2'>
-                <Wallet className={iconVariants({ size: 'xs', className: 'text-emerald-500' })} /> {/* Use direct import */}
-              </div>
-              <span className='text-sm font-medium'>الحركات المالية</span>
-            </div>
-            <ChevronRight className={iconVariants({ size: 'xs', className: 'text-muted-foreground' })} /> {/* Use direct import */}
-          </Link>
-        </DropdownMenuItem>
 
-        {/* Purchase History */}
-        <DropdownMenuItem asChild>
-          <Link
-            href={`/user/purchase-history`}
-            className='flex items-center justify-between rounded-md px-4 py-2 transition-all duration-150 hover:bg-accent/20'
-          >
-            <div className='flex items-center gap-3'>
-              <div className='rounded-md bg-blue-500/10 p-2'>
-                <ShoppingBag className={iconVariants({ size: 'xs', className: 'text-blue-500' })} /> {/* Use direct import */}
-              </div>
-              <span className='text-sm font-medium'>سجل المشتريات</span>
-            </div>
-            <ChevronRight className={iconVariants({ size: 'xs', className: 'text-muted-foreground' })} /> {/* Use direct import */}
-          </Link>
-        </DropdownMenuItem>
+        </SheetHeader>
 
-        {/* Rating History */}
-        <DropdownMenuItem asChild>
-          <Link
-            href={`/user/ratings`}
-            className='flex items-center justify-between rounded-md px-4 py-2 transition-all duration-150 hover:bg-accent/20'
-          >
-            <div className='flex items-center gap-3'>
-              <div className='rounded-md bg-amber-500/10 p-2'>
-                <Star className={iconVariants({ size: 'xs', className: 'text-amber-500' })} /> {/* Use direct import */}
-              </div>
-              <span className='text-sm font-medium'>تقييماتي</span>
-            </div>
-            <ChevronRight className={iconVariants({ size: 'xs', className: 'text-muted-foreground' })} /> {/* Use direct import */}
-          </Link>
-        </DropdownMenuItem>
-
-        {/* Wishlist */}
-        <DropdownMenuItem asChild>
-          <Link
-            href={`/user/wishlist`}
-            className='flex items-center justify-between rounded-md px-4 py-2 transition-all duration-150 hover:bg-accent/20'
-          >
-            <div className='flex items-center gap-3'>
-              <div className='rounded-md bg-red-500/10 p-2'>
-                <Heart className={iconVariants({ size: 'xs', className: 'text-red-500' })} /> {/* Use direct import */}
-              </div>
-              <span className='text-sm font-medium'>المفضلة</span>
-            </div>
-            <ChevronRight className={iconVariants({ size: 'xs', className: 'text-muted-foreground' })} /> {/* Use direct import */}
-          </Link>
-        </DropdownMenuItem>
-
-        {/* Setting */}
-        <DropdownMenuItem asChild>
-          <Link
-            href={`/user/setting`}
-            className='flex items-center justify-between rounded-md px-4 py-2 transition-all duration-150 hover:bg-accent/20'
-          >
-            <div className='flex items-center gap-3'>
-              <div className='rounded-md bg-emerald-500/10 p-2'>
-                <Settings className={iconVariants({ size: 'xs', className: 'text-secondary' })} /> {/* Use direct import */}
-              </div>
-              <span className='text-sm font-medium'>الاعدادات</span>
-            </div>
-            <ChevronRight className={iconVariants({ size: 'xs', className: 'text-muted-foreground' })} /> {/* Use direct import */}
-          </Link>
-        </DropdownMenuItem>
-
-        {/* Admin Dashboard */}
-        {session.user.role === UserRole.ADMIN && (
-          <>
-            <DropdownMenuSeparator className='my-1 bg-border/50' />
-            <DropdownMenuItem asChild>
+        <ScrollArea className='h-[calc(100vh-180px)] pr-2'>
+          <div className='space-y-1'>
+            {navLinks.map(({ href, label, icon }) => (
               <Link
-                href='/dashboard'
-                className='flex items-center justify-between rounded-md px-4 py-2 transition-all duration-150 hover:bg-accent/20'
+                key={href}
+                href={href}
+                className='flex items-center justify-between rounded-md px-3 py-2 hover:bg-accent/20 transition'
               >
                 <div className='flex items-center gap-3'>
-                  <div className='rounded-md bg-purple-500/10 p-2'>
-                    <Lock className={iconVariants({ size: 'xs', className: 'text-purple-500' })} /> {/* Use direct import */}
-                  </div>
-                  <span className='text-sm font-medium'>لوحة التحكم</span>
+                  <div className='rounded-md bg-muted p-2'>{icon}</div>
+                  <span className='text-sm'>{label}</span>
                 </div>
-                <ChevronRight className={iconVariants({ size: 'xs', className: 'text-muted-foreground' })} /> {/* Use direct import */}
+                <ChevronRight className={iconVariants({ size: 'xs', className: 'text-muted-foreground' })} />
               </Link>
-            </DropdownMenuItem>
-          </>
-        )}
+            ))}
 
-        <DropdownMenuSeparator className='my-1 bg-border/50' />
+            {getTotalItems() > 0 && (
+              <button
+                onClick={handleClearCart}
+                disabled={isClearingCart}
+                className='flex w-full items-center justify-between rounded-md px-3 py-2 text-destructive hover:bg-destructive/10 transition'
+              >
+                <div className='flex items-center gap-3'>
+                  <div className='rounded-md bg-destructive/10 p-2'>
+                    {isClearingCart ? (
+                      <Loader2 className={iconVariants({ size: 'xs', animation: 'spin', className: 'text-destructive' })} />
+                    ) : (
+                      <ShoppingCart className={iconVariants({ size: 'xs', className: 'text-destructive' })} />
+                    )}
+                  </div>
+                  <span className='text-sm'>
+                    {isClearingCart ? 'جاري إفراغ السلة...' : 'إفراغ سلة التسوق'}
+                  </span>
+                </div>
+              </button>
+            )}
 
-        {/* Cart Actions */}
-        {getTotalItems() > 0 && (
-          <>
-            <DropdownMenuItem
-              onClick={handleClearCart}
-              disabled={isClearingCart}
-              className='flex cursor-pointer items-center justify-between rounded-md px-4 py-2 text-destructive transition-all duration-150 hover:bg-destructive/10'
+            <button
+              onClick={logOut}
+              disabled={isLoggingOut}
+              className='flex w-full items-center justify-between rounded-md px-3 py-2 text-destructive hover:bg-destructive/10 transition'
             >
               <div className='flex items-center gap-3'>
                 <div className='rounded-md bg-destructive/10 p-2'>
-                  {isClearingCart ? (
-                    <Loader2 className={iconVariants({ size: 'xs', animation: 'spin', className: 'text-destructive' })} /> // Use direct import
+                  {isLoggingOut ? (
+                    <Loader2 className={iconVariants({ size: 'xs', animation: 'spin', className: 'text-destructive' })} />
                   ) : (
-                    <ShoppingCart className={iconVariants({ size: 'xs', className: 'text-destructive' })} /> // Use direct import
+                    <LogOut className={iconVariants({ size: 'xs', className: 'text-destructive' })} />
                   )}
                 </div>
-                <span className='text-sm font-medium'>
-                  {isClearingCart ? 'جاري إفراغ السلة...' : 'إفراغ سلة التسوق'}
+                <span className='text-sm'>
+                  {isLoggingOut ? 'جاري الخروج...' : 'تسجيل الخروج'}
                 </span>
               </div>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator className='my-1 bg-border/50' />
-          </>
-        )}
-
-        {/* Logout Button */}
-        <DropdownMenuItem
-          onClick={logOut}
-          disabled={isLoggingOut}
-          className='flex cursor-pointer items-center justify-between rounded-md px-4 py-2 text-destructive transition-all duration-150 hover:bg-destructive/10'
-        >
-          <div className='flex items-center gap-3'>
-            <div className='rounded-md bg-destructive/10 p-2'>
-              {isLoggingOut ? (
-                <Loader2 className={iconVariants({ size: 'xs', animation: 'spin', className: 'text-destructive' })} /> // Use direct import
-              ) : (
-                <LogOut className={iconVariants({ size: 'xs', className: 'text-destructive' })} /> // Use direct import
-              )}
-            </div>
-            <span className='text-sm font-medium'>
-              {isLoggingOut ? 'جاري الخروج...' : 'تسجيل الخروج'}
-            </span>
+            </button>
           </div>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </ScrollArea>
+      </SheetContent>
+    </Sheet>
   );
 }

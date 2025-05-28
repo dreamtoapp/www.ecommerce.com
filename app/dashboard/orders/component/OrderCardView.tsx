@@ -7,7 +7,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 
 import { Skeleton } from '@/components/ui/skeleton';
 
-import { fetchOrdersAction } from '../../action/fetchOrders';
+import { fetchOrdersAction } from '../../management-dashboard/action/fetchOrders';
 import OrderCard from './OrderCard';
 import { Order } from '@/types/databaseTypes';
 

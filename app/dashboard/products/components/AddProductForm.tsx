@@ -20,7 +20,8 @@ import { Label } from '@/components/ui/label';
 // } from '@/components/ui/tabs';
 import InputField from '../../../../components/InputField';
 import TextareaField from '../../../../components/TextareaField';
-import SupplierSelect from '../../products-control/components/SupplierSelect';
+import SupplierSelect
+  from '../../management-products/components/SupplierSelect';
 import { createProduct } from '../actions';
 
 interface SimpleCategory {

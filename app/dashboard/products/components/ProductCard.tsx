@@ -26,9 +26,11 @@ import {
 import { iconVariants } from '@/lib/utils';
 
 import CardImage from '../../../../components/CardImage';
-import { deleteProduct } from '../../products-control/actions/deleteProduct';
+import {
+  deleteProduct,
+} from '../../management-products/actions/deleteProduct';
 import ConfirmDeleteDialog
-  from '../../products-control/components/ConfirmDeleteDialog';
+  from '../../management-products/components/ConfirmDeleteDialog';
 
 interface ProductCardProps {
   product: {

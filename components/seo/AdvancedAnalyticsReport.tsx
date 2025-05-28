@@ -1,7 +1,7 @@
 // AdvancedAnalyticsReport.tsx
 "use client";
 import { useEffect, useState } from "react";
-import { getWebVitalsAnalytics } from "@/app/dashboard/seo/performance/analytics-report";
+import { getWebVitalsAnalytics } from "@/app/dashboard/management-seo/performance/analytics-report";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

@@ -22,7 +22,6 @@ import {
   Request as PrismaRequest,
   Review as PrismaReview,
   Shift as PrismaShift,
-  Supplier as PrismaSupplier,
   SupplierTranslation as PrismaSupplierTranslation,
   SupportPing as PrismaSupportPing,
   Term as PrismaTerm,
@@ -56,7 +55,7 @@ export type Reply = PrismaReply;
 export type Request = PrismaRequest;
 export type Review = PrismaReview;
 export type Shift = PrismaShift;
-export type Supplier = PrismaSupplier;
+// export type Supplier = PrismaSupplier;
 export type SupplierTranslation = PrismaSupplierTranslation;
 export type SupportPing = PrismaSupportPing;
 export type Term = PrismaTerm;
@@ -99,4 +98,14 @@ export const orderInWayIncludeRelation = {
 
 export type OrderInWay = Prisma.OrderInWayGetPayload<{
   include: typeof orderInWayIncludeRelation;
+}>;
+
+
+export const supplierIncludeRelation = {
+  products: true,
+} satisfies Prisma.SupplierInclude;
+
+// Type for Supplier with included relations
+export type Supplier = Prisma.SupplierGetPayload<{
+  include: typeof supplierIncludeRelation;
 }>;

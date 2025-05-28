@@ -38,7 +38,7 @@ import {
 } from '@/lib/formatCurrency'; // Assuming you have this utility
 
 import DateRangePicker
-  from '../../products-control/analytics/[id]/DateRangePicker'; // Re-use existing
+  from '../../management-products/analytics/[id]/DateRangePicker'; // Re-use existing
 import {
   OverallAnalyticsData as AnalyticsDataType,
 } from '../actions/getOverallAnalytics'; // Import type

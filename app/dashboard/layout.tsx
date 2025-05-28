@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 
 import AppSidebar
-  from '@/app/dashboard/components/AppSidebar'; // Reverted to Old sidebar
+  from '@/app/dashboard/management-dashboard/components/AppSidebar'; // Reverted to Old sidebar
 import { auth } from '@/auth';
 import {
   SidebarProvider,

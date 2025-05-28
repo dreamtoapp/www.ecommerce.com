@@ -1,7 +1,7 @@
 'use client';
 import { ChevronLeftIcon } from 'lucide-react';
 import { usePathname } from 'next/navigation';
-import { menuGroups } from '../../helpers/mainMenu';
+import { menuGroups } from '../../management-dashboard/helpers/mainMenu';
 
 import type { ElementType } from 'react';
 

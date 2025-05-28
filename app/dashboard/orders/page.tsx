@@ -1,6 +1,6 @@
 // app/dashboard/page.tsx
-import { fetchAnalytics } from '../action/fetchAnalytics';
-import { fetchOrdersAction } from '../action/fetchOrders';
+import { fetchAnalytics } from '../management-dashboard/action/fetchAnalytics';
+import { fetchOrdersAction } from '../management-dashboard/action/fetchOrders';
 import DashboardHeader from './component/DashboardHeader';
 import OrderCardView from './component/OrderCardView';
 
