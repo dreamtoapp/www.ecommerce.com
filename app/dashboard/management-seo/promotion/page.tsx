@@ -7,7 +7,6 @@ import { getAllPromotionsWithSeoStatus } from './actions/get-all-promotions-seo'
 
 export default async function PromotionSeoListPage() {
   const promotions = await getAllPromotionsWithSeoStatus();
-  console.log(promotions);
   return (
     <div>
       <h1 className="text-2xl font-bold mb-4">إدارة SEO للعروض</h1>

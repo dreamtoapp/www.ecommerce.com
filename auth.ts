@@ -1,5 +1,3 @@
-// console.warn("NEXTAUTH_URL at runtime:", process.env.NEXTAUTH_URL);
-
 import NextAuth from 'next-auth';
 import { Adapter } from 'next-auth/adapters';
 
@@ -8,6 +6,7 @@ import { PrismaAdapter } from '@auth/prisma-adapter';
 import { getAccountById, getUserById } from './app/(e-comm)/auth/action';
 import authConfig from './auth.config';
 import db from './lib/prisma';
+import { getNextAuthURL } from './lib/auth-dynamic-config';
 
 export const {
   auth,
@@ -18,6 +17,11 @@ export const {
   trustHost: true,
   adapter: PrismaAdapter(db) as Adapter,
   session: { strategy: 'jwt' },
+  basePath: '/api/auth',
+  // Dynamic URL configuration for Vercel deployments
+  ...(process.env.NODE_ENV === 'production' && {
+    url: getNextAuthURL(),
+  }),
   ...authConfig,
   callbacks: {
     async jwt({ token, trigger }) {

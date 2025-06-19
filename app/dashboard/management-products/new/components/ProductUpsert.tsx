@@ -10,9 +10,9 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Package, Building2, Tag, Settings, Image, Images, Save } from 'lucide-react';
+import { Package, Building2, Tag, Settings, Image as ImageIcon, Images, Save } from 'lucide-react';
 import { toast } from 'sonner';
-import { ProductFormData, ProductSchema, getProductFields } from '../helpers/productZodAndInputs';
+import { ProductFormData, ProductSchema } from '../helpers/productZodAndInputs';
 import { useRouter } from 'next/navigation';
 import { createProduct } from '../actions/create-product';
 import { updateProduct } from '../actions/update-product';
@@ -265,7 +265,7 @@ export default function ProductUpsert({
                                         </div>
                                         <div className="text-sm text-feature-products space-y-3">
                                             <div className="flex items-start gap-3">
-                                                <Image className="h-4 w-4 text-feature-products mt-0.5 flex-shrink-0 icon-enhanced" />
+                                                <ImageIcon className="h-4 w-4 text-feature-products mt-0.5 flex-shrink-0 icon-enhanced" />
                                                 <p><strong>الصورة الرئيسية:</strong> الصورة التي تظهر في بطاقة المنتج والقوائم الرئيسية</p>
                                             </div>
                                             <div className="flex items-start gap-3">

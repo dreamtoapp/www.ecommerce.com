@@ -27,7 +27,7 @@ export default {
           throw new Error('Invalid credentials');
         }
 
-        const user = await db.user.findUnique({
+        const user = await db.user.findFirst({
           where: { phone },
         });
 
@@ -39,14 +39,14 @@ export default {
           name: user.name || undefined,
           email: user.email || undefined,
           role: user.role || '',
-          phone: user.phone || '', // Ensure phone is always a string
-          address: user.address || '', // Default if nullable
+          phone: user.phone || '',
+          address: user.address || '',
           latitude: user.latitude?.toString() || '0',
           longitude: user.longitude?.toString() || '0',
           image: user.image || null,
           emailVerified: user.emailVerified?.toISOString() || null,
-          isOauth: user.isOauth || false, // Default if nullable
-          isOtp: user.isOtp || false, // Default if nullable
+          isOauth: user.isOauth || false,
+          isOtp: user.isOtp || false,
         };
       },
     }),

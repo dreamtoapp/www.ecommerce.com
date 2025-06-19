@@ -18,6 +18,7 @@ export interface UpdateProductInput {
   requiresShipping?: boolean;
   hasQualityGuarantee?: boolean;
   manageInventory?: boolean;
+  slug?: string;
 }
 
 export async function updateProduct(data: UpdateProductInput) {
