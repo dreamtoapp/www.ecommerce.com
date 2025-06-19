@@ -3,3 +3,245 @@ description:
 globs:
 alwaysApply: false
 ---
+# Theme-Compatible Color System
+
+## 🌙 Theme Compatibility (CRITICAL RULE)
+
+### 🚫 **NEVER Use Hardcoded Colors**
+```tsx
+// ❌ WRONG - Hardcoded colors don't adapt to themes
+<div className="bg-blue-500 text-white border-green-400">
+<Icon className="text-red-500" />
+<Card className="border-l-purple-500">
+<Button className="bg-orange-600 hover:bg-orange-700">
+```
+
+### ✅ **ALWAYS Use Semantic Colors**
+```tsx
+// ✅ CORRECT - Semantic colors adapt to light/dark themes
+<div className="bg-primary text-primary-foreground border-success">
+<Icon className="text-destructive" />
+<Card className="border-l-primary">
+<Button className="bg-primary hover:bg-primary/90">
+```
+
+## 🎨 Semantic Color System
+
+### 📊 Core Semantic Colors
+| Semantic Class | Usage | Purpose |
+|---------------|-------|---------|
+| `primary` | Main brand actions, important elements | Blue theme-adaptive |
+| `secondary` | Secondary actions, less important elements | Gray theme-adaptive |
+| `success` | Positive states, products, completed actions | Green theme-adaptive |
+| `warning` | Caution states, settings, pending actions | Orange theme-adaptive |
+| `destructive` | Errors, dangerous actions, critical alerts | Red theme-adaptive |
+| `muted` | Subtle backgrounds, disabled states | Gray theme-adaptive |
+| `accent` | Highlights, analytics, special content | Purple theme-adaptive |
+
+### 🎯 Feature-Based Semantic Mapping
+| Feature Category | Primary Color | Icon Color | Border Color |
+|------------------|---------------|------------|--------------|
+| **Products & Inventory** | `success` | `text-success` | `border-l-success` |
+| **Users & Authentication** | `primary` | `text-primary` | `border-l-primary` |
+| **Analytics & Reports** | `accent` | `text-accent` | `border-l-accent` |
+| **Settings & System** | `warning` | `text-warning` | `border-l-warning` |
+| **Orders & Commerce** | `primary` | `text-primary` | `border-l-primary` |
+| **Marketing & Promotions** | `accent` | `text-accent` | `border-l-accent` |
+| **Communication** | `primary` | `text-primary` | `border-l-primary` |
+| **Suppliers & Partners** | `secondary` | `text-secondary` | `border-l-secondary` |
+
+## 🃏 Semantic Card Patterns
+
+### Product Management Card
+```tsx
+<Card className="shadow-lg border-l-4 border-l-success">
+  <CardHeader className="pb-4">
+    <CardTitle className="flex items-center gap-2 text-xl">
+      <Package className="h-5 w-5 text-success" />
+      إدارة المنتجات
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    {/* Product content */}
+  </CardContent>
+</Card>
+```
+
+### User Management Card
+```tsx
+<Card className="shadow-lg border-l-4 border-l-primary">
+  <CardHeader className="pb-4">
+    <CardTitle className="flex items-center gap-2 text-xl">
+      <Users className="h-5 w-5 text-primary" />
+      إدارة المستخدمين
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    {/* User content */}
+  </CardContent>
+</Card>
+```
+
+### Analytics Card
+```tsx
+<Card className="shadow-lg border-l-4 border-l-accent">
+  <CardHeader className="pb-4">
+    <CardTitle className="flex items-center gap-2 text-xl">
+      <BarChart3 className="h-5 w-5 text-accent" />
+      التحليلات والتقارير
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    {/* Analytics content */}
+  </CardContent>
+</Card>
+```
+
+### Settings Card
+```tsx
+<Card className="shadow-lg border-l-4 border-l-warning">
+  <CardHeader className="pb-4">
+    <CardTitle className="flex items-center gap-2 text-xl">
+      <Settings className="h-5 w-5 text-warning" />
+      إعدادات النظام
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    {/* Settings content */}
+  </CardContent>
+</Card>
+```
+
+### Supplier Management Card
+```tsx
+<Card className="shadow-lg border-l-4 border-l-secondary">
+  <CardHeader className="pb-4">
+    <CardTitle className="flex items-center gap-2 text-xl">
+      <Building2 className="h-5 w-5 text-secondary" />
+      إدارة الموردين
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    {/* Supplier content */}
+  </CardContent>
+</Card>
+```
+
+## 🌈 Background and Notification Colors
+
+### ✅ Semantic Background Classes
+```tsx
+// Information and notes
+<div className="bg-muted/50 border border-muted text-muted-foreground">
+<div className="bg-primary/10 border border-primary text-primary">
+<div className="bg-success/10 border border-success text-success">
+<div className="bg-warning/10 border border-warning text-warning">
+<div className="bg-destructive/10 border border-destructive text-destructive">
+
+// Card backgrounds
+<Card className="bg-card text-card-foreground">
+<Card className="bg-background text-foreground">
+```
+
+### 🎨 Note and Alert Patterns
+```tsx
+// Success note
+<div className="p-4 bg-success/10 border border-success rounded-lg">
+  <p className="text-sm text-success">
+    ✅ تم حفظ البيانات بنجاح
+  </p>
+</div>
+
+// Information note
+<div className="p-4 bg-primary/10 border border-primary rounded-lg">
+  <p className="text-sm text-primary">
+    💡 معلومة مهمة للمستخدم
+  </p>
+</div>
+
+// Warning note
+<div className="p-4 bg-warning/10 border border-warning rounded-lg">
+  <p className="text-sm text-warning">
+    ⚠️ تحذير أو تنبيه
+  </p>
+</div>
+```
+
+## 📋 Semantic Color Rules
+
+### 🎯 Mandatory Rules
+1. **NEVER use hardcoded colors** (blue-500, green-400, red-600, etc.)
+2. **ALWAYS use semantic colors** (primary, success, warning, destructive, etc.)
+3. **Match border and icon colors** using same semantic class
+4. **Use opacity variants** (/10, /20, /50) for backgrounds
+5. **Test in both light and dark themes** before deployment
+
+### 📏 Component Color Guidelines
+| Component Type | Border | Icon | Text | Background |
+|---------------|--------|------|------|------------|
+| **Product Components** | `border-l-success` | `text-success` | `text-foreground` | `bg-card` |
+| **User Components** | `border-l-primary` | `text-primary` | `text-foreground` | `bg-card` |
+| **Analytics Components** | `border-l-accent` | `text-accent` | `text-foreground` | `bg-card` |
+| **Settings Components** | `border-l-warning` | `text-warning` | `text-foreground` | `bg-card` |
+| **Error Components** | `border-l-destructive` | `text-destructive` | `text-foreground` | `bg-card` |
+
+## 🚫 Color Anti-Patterns
+
+### ❌ NEVER Do This:
+```tsx
+// Hardcoded colors
+<Card className="border-l-blue-500">
+<Icon className="text-green-600" />
+<div className="bg-red-100 text-red-800">
+<Button className="bg-purple-500 hover:bg-purple-600">
+<div className="text-gray-700 bg-gray-50">
+
+// Mixed hardcoded and semantic
+<Card className="border-l-primary bg-blue-50">
+<div className="bg-primary/10 text-green-600">
+```
+
+### ✅ Always Do This:
+```tsx
+// Semantic colors only
+<Card className="border-l-primary">
+<Icon className="text-primary" />
+<div className="bg-destructive/10 text-destructive">
+<Button className="bg-primary hover:bg-primary/90">
+<div className="text-muted-foreground bg-muted/50">
+
+// Consistent semantic usage
+<Card className="border-l-primary bg-primary/5">
+<div className="bg-primary/10 text-primary">
+```
+
+## 🎯 Implementation Checklist
+
+Before implementing any UI component, ensure:
+- ✅ No hardcoded color classes (blue-500, green-400, etc.)
+- ✅ Only semantic color classes used
+- ✅ Border and icon colors match semantically
+- ✅ Background colors use semantic variants with opacity
+- ✅ Text colors use appropriate foreground classes
+- ✅ Component tested in light mode
+- ✅ Component tested in dark mode
+- ✅ Follows feature-based color mapping
+- ✅ Uses consistent patterns across similar components
+
+## 🌙 Theme Testing Requirements
+
+### Mandatory Testing Steps:
+1. **Light Mode Testing** - verify all colors are visible and appropriate
+2. **Dark Mode Testing** - ensure proper contrast and readability
+3. **Theme Switching** - test real-time theme transitions
+4. **Color Accessibility** - verify WCAG contrast requirements
+5. **RTL Layout Testing** - ensure colors work correctly in Arabic
+
+### 🔧 Development Workflow:
+1. **Design with semantics** - choose semantic colors during development
+2. **Test both themes** - switch themes during development
+3. **Use opacity variants** - for backgrounds and subtle effects
+4. **Maintain consistency** - follow the established mapping
+5. **Document choices** - comment why specific semantic colors were chosen
+
+This ensures **complete theme compatibility** and **accessibility compliance**! 🎨🌙

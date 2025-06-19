@@ -19,12 +19,34 @@ alwaysApply: true
 - `i18n/config.ts` - Internationalization configuration
 - `i18n/routing.ts` - Route handling for different locales
 
-## 🔄 RTL Support
+## 🔄 RTL Support & Layout
 
 - Use Tailwind CSS RTL utilities
 - Set `dir="rtl"` on HTML element for Arabic
 - Use `dir="ltr"` for English
 - Test layout in both directions
+
+### 📐 RTL-Friendly Spacing
+- **ALWAYS use `gap` instead of `space-x-reverse`** for RTL compatibility
+- Use `gap-3` for form elements (radio/checkbox + label)
+- Use `gap-2` for icons with text
+- Use `gap-4` for component spacing
+- **Avoid `space-x-reverse`** - causes layout inconsistencies in RTL
+
+### ✅ RTL-Compatible Examples:
+```tsx
+// Form elements with proper RTL spacing
+<div className="flex items-center gap-3">
+  <RadioGroupItem value="option" id="option" />
+  <Label htmlFor="option">النص العربي</Label>
+</div>
+
+// Icon with text (works in both directions)
+<div className="flex items-center gap-2">
+  <Icon className="h-4 w-4" />
+  <span>محتوى</span>
+</div>
+```
 
 ## 📝 Translation Keys
 

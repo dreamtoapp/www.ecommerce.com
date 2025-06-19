@@ -12,6 +12,234 @@ alwaysApply: true
 - Customize components through CSS variables when needed
 - Maintain consistency across the application
 
+## 🃏 Card Design System
+
+### 🎨 Standard Card Structure
+**ALL cards MUST follow this consistent pattern:**
+
+```tsx
+<Card className="shadow-lg border-l-4 border-l-[COLOR]">
+  <CardHeader className="pb-4">
+    <CardTitle className="flex items-center gap-2 text-xl">
+      <Icon className="h-5 w-5 text-[COLOR]" />
+      Card Title
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    {/* Card content */}
+  </CardContent>
+</Card>
+```
+
+### 🌈 Color System for Cards
+
+#### Primary Colors (Main Features)
+- **Blue (`blue-500`)** - User management, profiles, authentication
+- **Green (`green-500`)** - Products, categories, success states
+- **Purple (`purple-500`)** - Analytics, reports, dashboards
+- **Orange (`orange-500`)** - Settings, configuration, system
+- **Red (`red-500`)** - Alerts, errors, critical actions
+- **Indigo (`indigo-500`)** - Orders, transactions, commerce
+- **Teal (`teal-500`)** - Communications, notifications, messages
+
+#### Secondary Colors (Supporting Features)
+- **Pink (`pink-500`)** - Promotions, marketing, special offers
+- **Yellow (`yellow-500`)** - Warnings, pending states
+- **Cyan (`cyan-500`)** - Data import/export, integrations
+- **Slate (`slate-500`)** - General information, documentation
+
+### 🎯 Card Examples by Feature
+
+#### User Management
+```tsx
+<Card className="shadow-lg border-l-4 border-l-blue-500">
+  <CardHeader className="pb-4">
+    <CardTitle className="flex items-center gap-2 text-xl">
+      <Users className="h-5 w-5 text-blue-500" />
+      إدارة المستخدمين
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    {/* User management content */}
+  </CardContent>
+</Card>
+```
+
+#### Product Management
+```tsx
+<Card className="shadow-lg border-l-4 border-l-green-500">
+  <CardHeader className="pb-4">
+    <CardTitle className="flex items-center gap-2 text-xl">
+      <Package className="h-5 w-5 text-green-500" />
+      إدارة المنتجات
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    {/* Product management content */}
+  </CardContent>
+</Card>
+```
+
+#### Analytics & Reports
+```tsx
+<Card className="shadow-lg border-l-4 border-l-purple-500">
+  <CardHeader className="pb-4">
+    <CardTitle className="flex items-center gap-2 text-xl">
+      <BarChart3 className="h-5 w-5 text-purple-500" />
+      التقارير والتحليلات
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    {/* Analytics content */}
+  </CardContent>
+</Card>
+```
+
+#### Settings & Configuration
+```tsx
+<Card className="shadow-lg border-l-4 border-l-orange-500">
+  <CardHeader className="pb-4">
+    <CardTitle className="flex items-center gap-2 text-xl">
+      <Settings className="h-5 w-5 text-orange-500" />
+      الإعدادات
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    {/* Settings content */}
+  </CardContent>
+</Card>
+```
+
+#### Orders & Commerce
+```tsx
+<Card className="shadow-lg border-l-4 border-l-indigo-500">
+  <CardHeader className="pb-4">
+    <CardTitle className="flex items-center gap-2 text-xl">
+      <ShoppingCart className="h-5 w-5 text-indigo-500" />
+      إدارة الطلبات
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    {/* Orders content */}
+  </CardContent>
+</Card>
+```
+
+#### Promotions & Marketing
+```tsx
+<Card className="shadow-lg border-l-4 border-l-pink-500">
+  <CardHeader className="pb-4">
+    <CardTitle className="flex items-center gap-2 text-xl">
+      <Percent className="h-5 w-5 text-pink-500" />
+      العروض والتسويق
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    {/* Promotions content */}
+  </CardContent>
+</Card>
+```
+
+### 📋 Icon Mapping by Feature
+
+| Feature | Icon Component | Color |
+|---------|---------------|-------|
+| Users/Auth | `Users`, `UserCheck`, `Shield` | `blue-500` |
+| Products | `Package`, `Box`, `Tag` | `green-500` |
+| Categories | `FolderTree`, `Grid3X3`, `Tag` | `green-500` |
+| Analytics | `BarChart3`, `TrendingUp`, `PieChart` | `purple-500` |
+| Settings | `Settings`, `Cog`, `Tool` | `orange-500` |
+| Orders | `ShoppingCart`, `Truck`, `Receipt` | `indigo-500` |
+| Promotions | `Percent`, `Gift`, `Megaphone` | `pink-500` |
+| Reports | `FileText`, `Download`, `Calendar` | `purple-500` |
+| Notifications | `Bell`, `MessageCircle`, `Mail` | `teal-500` |
+| Suppliers | `Building2`, `Handshake`, `Users` | `cyan-500` |
+| Inventory | `Warehouse`, `Package2`, `BarChart` | `green-500` |
+| Finance | `DollarSign`, `CreditCard`, `TrendingUp` | `yellow-500` |
+| Security | `Shield`, `Lock`, `Key` | `red-500` |
+
+### 🎨 Card Variants
+
+#### Compact Card (for smaller content)
+```tsx
+<Card className="shadow-md border-l-4 border-l-green-500">
+  <CardHeader className="pb-2">
+    <CardTitle className="flex items-center gap-2 text-lg">
+      <Icon className="h-4 w-4 text-green-500" />
+      Compact Title
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    {/* Compact content */}
+  </CardContent>
+</Card>
+```
+
+#### Large Card (for main features)
+```tsx
+<Card className="shadow-xl border-l-8 border-l-purple-500">
+  <CardHeader className="pb-6">
+    <CardTitle className="flex items-center gap-3 text-2xl">
+      <Icon className="h-6 w-6 text-purple-500" />
+      Large Feature Title
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    {/* Large content */}
+  </CardContent>
+</Card>
+```
+
+### 📐 Card Implementation Rules
+
+1. **ALWAYS use the standard card structure** with colored left border
+2. **Match icon color to border color** for consistency
+3. **Use `gap-2` between icon and title**
+4. **Use `h-5 w-5` for standard icons, `h-4 w-4` for compact**
+5. **Use `text-xl` for standard titles, `text-lg` for compact**
+6. **Include `shadow-lg` for standard elevation**
+7. **Use `pb-4` for CardHeader padding bottom**
+
+## 📐 Spacing & Layout Standards
+
+- **ALWAYS use `gap` for flex layouts** instead of `space-x` or `space-x-reverse`
+- Use `gap-3` (12px) for radio buttons and checkboxes with their labels
+- Use `gap-2` (8px) for small components and icons
+- Use `gap-4` (16px) for medium spacing between components
+- Use `gap-6` (24px) for larger section spacing
+- **Avoid `space-x-reverse`** - it causes RTL layout issues
+- Use CSS Grid `gap` for grid layouts instead of margins
+
+### ✅ Correct Examples:
+```tsx
+// Radio buttons with labels
+<div className="flex items-center gap-3">
+  <RadioGroupItem value="option1" id="option1" />
+  <Label htmlFor="option1">Option Text</Label>
+</div>
+
+// Checkbox with label
+<div className="flex items-center gap-3">
+  <Checkbox id="checkbox1" />
+  <Label htmlFor="checkbox1">Checkbox Text</Label>
+</div>
+
+// Icon with text
+<div className="flex items-center gap-2">
+  <Icon className="h-4 w-4" />
+  <span>Text</span>
+</div>
+```
+
+### ❌ Avoid:
+```tsx
+// Don't use space-x-reverse (RTL issues)
+<div className="flex items-center space-x-2 space-x-reverse">
+  <Checkbox />
+  <Label>Text</Label>
+</div>
+```
+
 ## 📝 Form Handling
 
 - Use `react-hook-form` with `zod` for validation

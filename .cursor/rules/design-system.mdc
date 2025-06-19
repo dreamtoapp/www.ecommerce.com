@@ -3,3 +3,219 @@ description:
 globs:
 alwaysApply: false
 ---
+# Design System & Visual Identity
+
+## 🎨 Visual Consistency Framework
+
+### 🃏 Card Design System (PRIMARY RULE)
+
+**ALL interface cards MUST follow this standardized pattern for complete project consistency:**
+
+```tsx
+<Card className="shadow-lg border-l-4 border-l-primary">
+  <CardHeader className="pb-4">
+    <CardTitle className="flex items-center gap-2 text-xl">
+      <Icon className="h-5 w-5 text-primary" />
+      Card Title
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    {/* Card content */}
+  </CardContent>
+</Card>
+```
+
+## 🌙 Theme Compatibility (CRITICAL RULE)
+
+### 🚫 **NEVER Use Hardcoded Colors**
+```tsx
+// ❌ WRONG - Hardcoded colors don't adapt to themes
+<div className="bg-blue-500 text-white border-green-400">
+<Icon className="text-red-500" />
+<Card className="border-l-purple-500">
+```
+
+### ✅ **ALWAYS Use Semantic Colors**
+```tsx
+// ✅ CORRECT - Semantic colors adapt to light/dark themes
+<div className="bg-primary text-primary-foreground border-success">
+<Icon className="text-destructive" />
+<Card className="border-l-primary">
+```
+
+## 🎨 Semantic Color System
+
+### 📊 Primary Semantic Colors
+| Semantic Class | Usage | Light Theme | Dark Theme |
+|---------------|-------|-------------|------------|
+| `primary` | Main brand color, important actions | Blue | Adjusted Blue |
+| `secondary` | Secondary actions, less important | Gray | Adjusted Gray |
+| `success` | Positive states, completed actions | Green | Adjusted Green |
+| `warning` | Caution states, pending actions | Yellow/Orange | Adjusted Orange |
+| `destructive` | Errors, dangerous actions | Red | Adjusted Red |
+| `muted` | Subtle backgrounds, disabled states | Light Gray | Dark Gray |
+| `accent` | Highlights, special content | Purple | Adjusted Purple |
+
+### 🎯 Feature-Based Semantic Mapping
+| Feature Category | Primary Color | Secondary Color | States |
+|------------------|---------------|-----------------|--------|
+| User Management | `primary` | `secondary` | `success`, `warning`, `destructive` |
+| Product/Inventory | `success` | `muted` | `warning`, `destructive` |
+| Analytics | `accent` | `muted` | `primary`, `success` |
+| System/Settings | `warning` | `muted` | `primary`, `destructive` |
+| Commerce/Orders | `primary` | `accent` | `success`, `warning` |
+| Marketing | `accent` | `primary` | `success`, `warning` |
+| Communication | `primary` | `success` | `warning`, `destructive` |
+
+## 🎨 Card Design with Semantic Colors
+
+### Standard Card (Default)
+```tsx
+<Card className="shadow-lg border-l-4 border-l-success">
+  <CardHeader className="pb-4">
+    <CardTitle className="flex items-center gap-2 text-xl">
+      <Package className="h-5 w-5 text-success" />
+      Product Management
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    {/* Standard content */}
+  </CardContent>
+</Card>
+```
+
+### User Management Card
+```tsx
+<Card className="shadow-lg border-l-4 border-l-primary">
+  <CardHeader className="pb-4">
+    <CardTitle className="flex items-center gap-2 text-xl">
+      <Users className="h-5 w-5 text-primary" />
+      User Management
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    {/* User content */}
+  </CardContent>
+</Card>
+```
+
+### Analytics Card
+```tsx
+<Card className="shadow-lg border-l-4 border-l-accent">
+  <CardHeader className="pb-4">
+    <CardTitle className="flex items-center gap-2 text-xl">
+      <BarChart3 className="h-5 w-5 text-accent" />
+      Analytics Dashboard
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    {/* Analytics content */}
+  </CardContent>
+</Card>
+```
+
+### Settings Card
+```tsx
+<Card className="shadow-lg border-l-4 border-l-warning">
+  <CardHeader className="pb-4">
+    <CardTitle className="flex items-center gap-2 text-xl">
+      <Settings className="h-5 w-5 text-warning" />
+      System Settings
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    {/* Settings content */}
+  </CardContent>
+</Card>
+```
+
+## 📋 Semantic Color Usage Rules
+
+### 🎯 Mandatory Rules
+1. **NEVER use hardcoded colors** (blue-500, green-400, etc.)
+2. **ALWAYS use semantic colors** (primary, success, warning, etc.)
+3. **Match border and icon colors** using same semantic class
+4. **Use consistent semantic mapping** per feature category
+5. **Test in both light and dark themes**
+
+### 📏 Semantic Color Guidelines
+| Component | Border | Icon | Text | Background |
+|-----------|--------|------|------|------------|
+| Product Cards | `border-l-success` | `text-success` | `text-foreground` | `bg-card` |
+| User Cards | `border-l-primary` | `text-primary` | `text-foreground` | `bg-card` |
+| Analytics Cards | `border-l-accent` | `text-accent` | `text-foreground` | `bg-card` |
+| Settings Cards | `border-l-warning` | `text-warning` | `text-foreground` | `bg-card` |
+| Error Cards | `border-l-destructive` | `text-destructive` | `text-foreground` | `bg-card` |
+
+## 🌈 Background and Text Colors
+
+### ✅ Semantic Background Classes
+```tsx
+// For different content types
+<div className="bg-card text-card-foreground">           // Cards
+<div className="bg-background text-foreground">          // Main background
+<div className="bg-muted text-muted-foreground">         // Subtle content
+<div className="bg-primary text-primary-foreground">     // Primary actions
+<div className="bg-secondary text-secondary-foreground"> // Secondary content
+<div className="bg-accent text-accent-foreground">       // Accented content
+```
+
+### ✅ Semantic Border Classes
+```tsx
+// For different states and features
+<div className="border-primary">      // Primary elements
+<div className="border-success">      // Success states, products
+<div className="border-warning">      // Warning states, settings
+<div className="border-destructive">  // Error states
+<div className="border-muted">        // Subtle borders
+<div className="border-accent">       // Highlighted content
+```
+
+## 🚫 Color Anti-Patterns
+
+### ❌ NEVER Do This:
+```tsx
+// Hardcoded colors that break in dark mode
+<Card className="shadow-lg border-l-4 border-l-blue-500">
+<Icon className="text-green-500" />
+<div className="bg-red-100 text-red-800">
+<Button className="bg-purple-600 hover:bg-purple-700">
+
+// Mixed hardcoded and semantic colors
+<Card className="border-l-primary bg-blue-50">
+```
+
+### ✅ Always Do This:
+```tsx
+// Semantic colors that work in all themes
+<Card className="shadow-lg border-l-4 border-l-primary">
+<Icon className="text-primary" />
+<div className="bg-destructive/10 text-destructive">
+<Button className="bg-primary hover:bg-primary/90">
+
+// Consistent semantic color usage
+<Card className="border-l-primary bg-primary/5">
+```
+
+## 🎯 Implementation Checklist
+
+Before implementing any UI component:
+- ✅ Uses only semantic color classes
+- ✅ No hardcoded color values (blue-500, etc.)
+- ✅ Border and icon colors match semantically
+- ✅ Background colors use semantic variants
+- ✅ Text colors use appropriate foreground classes
+- ✅ Component works in both light and dark themes
+- ✅ Follows feature-based color mapping
+- ✅ Uses consistent semantic patterns
+
+## 🌙 Theme Testing Requirements
+
+### Mandatory Testing:
+1. **Test in Light Mode** - ensure colors are appropriate
+2. **Test in Dark Mode** - ensure proper contrast and visibility
+3. **Test Theme Switching** - ensure smooth transitions
+4. **Verify Accessibility** - ensure sufficient contrast ratios
+5. **Check RTL Layout** - ensure colors work in Arabic layout
+
+This ensures **complete theme compatibility** and **future-proof design**! 🎨✨

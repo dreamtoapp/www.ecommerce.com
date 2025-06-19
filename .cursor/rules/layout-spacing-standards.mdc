@@ -3,3 +3,159 @@ description:
 globs:
 alwaysApply: false
 ---
+# Layout & Spacing Standards
+
+## 📐 Spacing System
+
+### 🎯 Core Principle: Use `gap` for ALL flex layouts
+
+**NEVER use `space-x` or `space-x-reverse`** - they cause RTL layout issues and inconsistent spacing.
+
+### 📏 Spacing Scale
+
+- `gap-1` (4px) - Minimal spacing for very tight elements
+- `gap-2` (8px) - Small spacing for icons with text
+- `gap-3` (12px) - **Standard for form elements** (radio/checkbox + label)
+- `gap-4` (16px) - Medium spacing between related components
+- `gap-6` (24px) - Large spacing between sections
+- `gap-8` (32px) - Extra large spacing for major layout divisions
+
+### 🎨 Component-Specific Standards
+
+#### Form Elements
+```tsx
+// Radio buttons with labels
+<div className="flex items-center gap-3">
+  <RadioGroupItem value="option1" id="option1" />
+  <Label htmlFor="option1">Option Text</Label>
+</div>
+
+// Checkboxes with labels
+<div className="flex items-center gap-3">
+  <Checkbox id="checkbox1" />
+  <Label htmlFor="checkbox1">Checkbox Text</Label>
+</div>
+
+// Form field groups
+<div className="space-y-4">
+  <div className="space-y-2">
+    <Label>Field Label</Label>
+    <Input />
+  </div>
+</div>
+```
+
+#### Icon + Text Combinations
+```tsx
+// Small icons with text
+<div className="flex items-center gap-2">
+  <Icon className="h-4 w-4" />
+  <span>Text</span>
+</div>
+
+// Larger icons or buttons
+<div className="flex items-center gap-3">
+  <Button size="sm">
+    <Icon className="h-4 w-4" />
+    Button Text
+  </Button>
+</div>
+```
+
+#### Button Groups
+```tsx
+// Action buttons
+<div className="flex gap-4">
+  <Button variant="outline">Cancel</Button>
+  <Button>Submit</Button>
+</div>
+
+// Toolbar buttons
+<div className="flex gap-2">
+  <Button size="sm" variant="ghost">
+    <Edit className="h-4 w-4" />
+  </Button>
+  <Button size="sm" variant="ghost">
+    <Delete className="h-4 w-4" />
+  </Button>
+</div>
+```
+
+#### Grid Layouts
+```tsx
+// Card grids
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  <Card>...</Card>
+  <Card>...</Card>
+  <Card>...</Card>
+</div>
+
+// Form grids
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <FormField>...</FormField>
+  <FormField>...</FormField>
+</div>
+```
+
+## 🚫 What NOT to Use
+
+### ❌ Avoid These Classes:
+- `space-x-*` - Not RTL compatible
+- `space-x-reverse` - Causes layout inconsistencies
+- `space-y-reverse` - Usually unnecessary
+- Manual margins on flex children - Use gap instead
+
+### ❌ Bad Examples:
+```tsx
+// DON'T: space-x-reverse causes RTL issues
+<div className="flex items-center space-x-2 space-x-reverse">
+  <Checkbox />
+  <Label>Text</Label>
+</div>
+
+// DON'T: Manual margins on flex children
+<div className="flex items-center">
+  <Checkbox className="mr-2" />
+  <Label>Text</Label>
+</div>
+```
+
+## 🌍 RTL Compatibility
+
+### ✅ Why `gap` is Better:
+- Works identically in LTR and RTL layouts
+- No need for direction-specific classes
+- Consistent spacing regardless of text direction
+- Simpler to maintain and debug
+
+### 🔄 Migration Strategy:
+When updating existing code:
+1. Replace `space-x-2 space-x-reverse` with `gap-2`
+2. Replace `space-x-3 space-x-reverse` with `gap-3`
+3. Test in both Arabic (RTL) and English (LTR) modes
+4. Ensure consistent visual spacing
+
+## 📱 Responsive Spacing
+
+```tsx
+// Responsive gap sizes
+<div className="flex flex-col md:flex-row gap-4 md:gap-6">
+  <div>Content 1</div>
+  <div>Content 2</div>
+</div>
+
+// Responsive grid gaps
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+  <Card>...</Card>
+</div>
+```
+
+## 🎯 Implementation Rules
+
+1. **Default to `gap-3` for form elements** (radio, checkbox + label)
+2. **Use `gap-2` for icons with text**
+3. **Use `gap-4` for related component spacing**
+4. **Use `gap-6` for section spacing**
+5. **Always test in both RTL and LTR modes**
+6. **Prefer CSS Grid `gap` over flexbox when appropriate**
+7. **Use `space-y-*` only for vertical stacking** (not RTL affected)

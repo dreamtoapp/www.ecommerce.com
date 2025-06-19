@@ -3,3 +3,177 @@ description:
 globs:
 alwaysApply: false
 ---
+# Enhanced Color System Rules
+
+## 🌈 Enhanced Feature Color Palette
+
+### 🎨 Feature-Specific Color Mapping
+
+**USE THESE ENHANCED COLORS for superior visual hierarchy and professional appearance:**
+
+#### 🛍️ Products & Inventory
+```css
+/* Rich Forest Green Theme */
+border-feature-products     /* Rich green border (all sides) */
+border-l-feature-products   /* Rich green left border only */
+text-feature-products       /* Rich green text */
+bg-feature-products         /* Rich green background */
+bg-feature-products-soft    /* Light green background */
+```
+**Icons:** `Package`, `Box`, `Tag`, `Warehouse`, `Boxes`, `Archive`
+
+#### 👤 Users & Authentication  
+```css
+/* Professional Blue Theme */
+border-feature-users        /* Rich blue border */
+text-feature-users          /* Rich blue text */
+bg-feature-users           /* Rich blue background */
+bg-feature-users-soft      /* Light blue background */
+```
+**Icons:** `Users`, `Shield`, `UserCheck`, `Key`, `Lock`, `UserPlus`
+
+#### 📊 Analytics & Reports
+```css
+/* Vibrant Purple Theme */
+border-feature-analytics    /* Rich purple border */
+text-feature-analytics      /* Rich purple text */
+bg-feature-analytics        /* Rich purple background */
+bg-feature-analytics-soft   /* Light purple background */
+```
+**Icons:** `BarChart3`, `TrendingUp`, `PieChart`, `Activity`, `LineChart`, `Target`
+
+#### ⚙️ Settings & Configuration
+```css
+/* Dynamic Orange Theme */
+border-feature-settings     /* Rich orange border */
+text-feature-settings       /* Rich orange text */
+bg-feature-settings         /* Rich orange background */
+bg-feature-settings-soft    /* Light orange background */
+```
+**Icons:** `Settings`, `Cog`, `Tool`, `Sliders`, `Wrench`, `Gear`
+
+#### 🤝 Suppliers & Partners
+```css
+/* Professional Teal Theme */
+border-feature-suppliers    /* Rich teal border */
+text-feature-suppliers      /* Rich teal text */
+bg-feature-suppliers        /* Rich teal background */
+bg-feature-suppliers-soft   /* Light teal background */
+```
+**Icons:** `Building2`, `Handshake`, `Users`, `Truck`, `Factory`, `Globe`
+
+#### 🛒 Commerce & Sales
+```css
+/* Modern Indigo Theme */
+border-feature-commerce     /* Rich indigo border */
+text-feature-commerce       /* Rich indigo text */
+bg-feature-commerce         /* Rich indigo background */
+bg-feature-commerce-soft    /* Light indigo background */
+```
+**Icons:** `ShoppingCart`, `Receipt`, `CreditCard`, `Store`, `Banknote`, `TrendingUp`
+
+### 🎯 Implementation Examples
+
+#### ✅ CORRECT Usage
+```tsx
+// Products Management Card
+<Card className="shadow-lg border-l-4 border-l-feature-products card-hover-effect">
+  <CardHeader className="pb-4">
+    <CardTitle className="flex items-center gap-2 text-xl">
+      <Package className="h-5 w-5 text-feature-products icon-enhanced" />
+      إدارة المنتجات
+    </CardTitle>
+  </CardHeader>
+  <CardContent className="bg-feature-products-soft/20">
+    {/* Content */}
+  </CardContent>
+</Card>
+
+// Analytics Dashboard Card
+<Card className="shadow-lg border-l-4 border-l-feature-analytics card-hover-effect">
+  <CardHeader className="pb-4">
+    <CardTitle className="flex items-center gap-2 text-xl">
+      <BarChart3 className="h-5 w-5 text-feature-analytics icon-enhanced" />
+      تقارير المبيعات
+    </CardTitle>
+  </CardHeader>
+  <CardContent className="bg-feature-analytics-soft/20">
+    {/* Content */}
+  </CardContent>
+</Card>
+```
+
+#### ❌ INCORRECT Usage (NEVER DO THIS)
+```tsx
+// DON'T use hardcoded colors
+<Card className="border-l-blue-500">          ❌
+<Icon className="text-green-400" />           ❌
+
+// DON'T use basic semantic colors for features  
+<Card className="border-l-primary">           ❌
+<Icon className="text-success" />             ❌
+```
+
+### 🔄 Theme Compatibility
+
+**These colors automatically adapt to light/dark themes:**
+
+#### 🌞 Light Mode
+- **Rich, saturated colors** for borders and icons
+- **Very light, subtle backgrounds** for content areas
+- **High contrast** for excellent readability
+
+#### 🌙 Dark Mode  
+- **Lighter, softer colors** for borders and icons
+- **Dark, muted backgrounds** for content areas
+- **Balanced contrast** for comfortable viewing
+
+### 🎨 Color Psychology & Mapping
+
+| Feature Category | Color Choice | Psychology | Business Impact |
+|-----------------|--------------|------------|-----------------|
+| **Products** | Rich Green | Growth, Success, Prosperity | Confidence in inventory |
+| **Users** | Professional Blue | Trust, Security, Reliability | User confidence |
+| **Analytics** | Vibrant Purple | Creativity, Insight, Premium | Data-driven decisions |
+| **Settings** | Dynamic Orange | Energy, Action, Warning | Attention to configuration |
+| **Suppliers** | Professional Teal | Partnership, Collaboration | Business relationships |
+| **Commerce** | Modern Indigo | Innovation, Premium, Authority | Sales confidence |
+
+### 🚫 Critical Restrictions
+
+#### ❌ NEVER Use These
+```css
+/* Hardcoded Colors - FORBIDDEN */
+blue-500, green-400, red-600, purple-300
+bg-blue-100, text-red-500, border-green-600
+
+/* Basic Semantic Colors for Features - AVOID */
+primary, secondary, success, warning, destructive
+(Reserve these only for generic UI elements like buttons, alerts)
+```
+
+#### ✅ ALWAYS Use These
+```css
+/* Enhanced Feature Colors - REQUIRED */
+border-feature-[category], text-feature-[category]
+bg-feature-[category], bg-feature-[category]-soft
+```
+
+### 📐 Implementation Guidelines
+
+1. **Identify the feature category** (products, users, analytics, etc.)
+2. **Use corresponding color classes** (`border-feature-products`, `text-feature-products`)
+3. **Apply consistent icon themes** from the recommended icon sets
+4. **Test in both light and dark modes** to ensure proper contrast
+5. **Ensure accessibility compliance** with sufficient color contrast ratios
+
+### 🎯 Quality Assurance Checklist
+
+Before implementing any colored component:
+- ✅ Uses enhanced feature colors (not hardcoded or basic semantic)
+- ✅ Matches feature category with appropriate color theme
+- ✅ Icons are semantically appropriate for the feature
+- ✅ Color contrast meets accessibility standards
+- ✅ Tested in both light and dark themes
+- ✅ Maintains visual hierarchy and consistency
+- ✅ Follows the established design patterns

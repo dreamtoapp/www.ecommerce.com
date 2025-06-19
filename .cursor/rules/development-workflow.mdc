@@ -13,6 +13,106 @@ AI should:
 - Refactor when code grows large or repetitive
 - Name functions clearly and semantically
 - Always write minimal, readable code (no bloat)
+- **ALWAYS follow the standardized card design system**
+- **Apply proper color coding and icons for features**
+- **Implement professional UX patterns and smooth animations**
+
+## 🎨 Enhanced Design System Requirements
+
+### 🃏 Mandatory Card Structure with Enhanced Effects
+**EVERY interface card MUST use this pattern:**
+```tsx
+<Card className="shadow-lg border-l-4 border-l-[COLOR] card-hover-effect card-border-glow">
+  <CardHeader className="pb-4">
+    <CardTitle className="flex items-center gap-2 text-xl">
+      <Icon className="h-5 w-5 text-[COLOR] icon-enhanced" />
+      Card Title
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    {/* Content */}
+  </CardContent>
+</Card>
+```
+
+### 🌈 Enhanced Feature Color System (THEME-COMPATIBLE)
+**Use NEW enhanced feature colors for superior visual hierarchy:**
+
+- **Products/Inventory**: `border-feature-products` + `text-feature-products` + `bg-feature-products-soft`
+  - Icons: `Package`, `Box`, `Tag`, `Warehouse`
+- **Users/Authentication**: `border-feature-users` + `text-feature-users` + `bg-feature-users-soft`
+  - Icons: `Users`, `Shield`, `UserCheck`, `Key`
+- **Analytics/Reports**: `border-feature-analytics` + `text-feature-analytics` + `bg-feature-analytics-soft`
+  - Icons: `BarChart3`, `TrendingUp`, `PieChart`, `Activity`
+- **Settings/Configuration**: `border-feature-settings` + `text-feature-settings` + `bg-feature-settings-soft`
+  - Icons: `Settings`, `Cog`, `Tool`, `Sliders`
+- **Suppliers/Partners**: `border-feature-suppliers` + `text-feature-suppliers` + `bg-feature-suppliers-soft`
+  - Icons: `Building2`, `Handshake`, `Users`, `Truck`
+- **Commerce/Sales**: `border-feature-commerce` + `text-feature-commerce` + `bg-feature-commerce-soft`
+  - Icons: `ShoppingCart`, `Receipt`, `CreditCard`, `Store`
+
+### 🚀 Professional UX Enhancement Guidelines
+
+#### ✨ Navigation & Back Buttons
+**ALWAYS implement enhanced BackButton in every route:**
+```tsx
+import BackButton from '@/components/BackButton';
+
+// Usage examples:
+<BackButton variant="default" />           // Standard professional
+<BackButton variant="minimal" />           // Clean minimal
+<BackButton variant="floating" />          // Modern floating
+<BackButton variant="gradient" />          // Premium gradient
+<BackButton icon="chevron" showLabel={false} /> // Icon only
+```
+
+#### 🎭 Animation & Interaction Standards
+**MANDATORY for ALL interactive elements:**
+- Use `card-hover-effect` for all cards
+- Use `btn-professional` for all buttons
+- Use `icon-enhanced` for all icons
+- Implement loading states with smooth transitions
+- Add appropriate hover effects and feedback
+
+#### 🔧 Functional Button System
+**Use functional color classes for consistent UX:**
+```tsx
+// Button colors based on function
+<Button className="btn-add">إضافة منتج</Button>           // Green for adding
+<Button className="btn-edit">تعديل</Button>               // Orange for editing  
+<Button className="btn-delete">حذف</Button>               // Red for deleting
+<Button className="btn-save">حفظ</Button>                 // Blue for saving
+<Button className="btn-cancel-outline">إلغاء</Button>     // Gray for canceling
+<Button className="btn-view-outline">عرض</Button>         // Purple for viewing
+```
+
+### 🚫 CRITICAL: Enhanced Color System Requirements
+- ❌ NEVER use hardcoded colors: `blue-500`, `green-400`, `red-600`
+- ❌ AVOID basic semantic colors for features: `primary`, `success` etc.
+- ✅ ALWAYS use enhanced feature colors: `border-feature-products`, `text-feature-analytics`
+- ✅ Reserve basic semantic colors only for generic UI elements
+
+### 📐 Enhanced Implementation Checklist
+Before creating any component:
+- ✅ Uses enhanced feature colors (no hardcoded or basic semantic colors)
+- ✅ Has appropriate hover effects (`card-hover-effect`, `btn-professional`)
+- ✅ Icons have enhancement classes (`icon-enhanced`)
+- ✅ Uses functional button colors (`btn-add`, `btn-edit`, `btn-delete`, etc.)
+- ✅ Includes BackButton with appropriate variant
+- ✅ Has loading states and smooth transitions
+- ✅ Uses gap-based spacing (no `space-x-reverse`)
+- ✅ Tested in both RTL/LTR and light/dark themes
+- ✅ Implements professional animation patterns
+
+### 🎯 Route-Specific UX Requirements
+**Every route MUST include:**
+1. **Enhanced BackButton** at the top with appropriate variant
+2. **Loading states** for all async operations
+3. **Smooth page transitions** and animations
+4. **Professional card designs** with hover effects
+5. **Consistent spacing** using gap system
+6. **Feature-appropriate color coding**
+7. **Functional button colors** based on action type
 
 ## 📚 Official Documentation
 
@@ -28,19 +128,27 @@ Follow the **latest official documentation** and **best practices** from:
 - 🔗 [NextAuth Docs](mdc:https:/next-auth.js.org) — Secure and scalable authentication
 - 🔗 [next-intl Docs](mdc:https:/next-intl-docs.vercel.app) — Multilingual support for App Router with RTL handling
 
-## 🔄 Development Process
+## 🔄 Enhanced Development Process
 
 - Start with server components by default
 - Use client components only when necessary
 - Implement proper error handling from the start
 - Write clean, maintainable code
 - Follow the established project structure
+- **Apply enhanced card design system with animations**
+- **Use feature-specific color coding throughout**
+- **Implement professional UX patterns and smooth interactions**
+- **Test all animations and transitions thoroughly**
 
-## 🎯 Code Quality
+## 🎯 Code Quality & UX Standards
 
 - Use TypeScript strictly (no any/unknown)
 - Implement proper error boundaries
 - Write testable, modular code
 - Keep functions small and focused
 - Use meaningful variable and function names
+- **Maintain superior visual consistency across all components**
+- **Follow enhanced design system patterns religiously**
+- **Ensure smooth, professional user experience in every interaction**
+- **Implement proper loading states and feedback for all operations**
 
