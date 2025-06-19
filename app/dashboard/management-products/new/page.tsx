@@ -38,21 +38,17 @@ export default async function NewProductPage() {
     const errorMessage = getFormErrorMessage(productData);
 
     return (
-      <div className="flex min-h-screen flex-col p-4 md:p-6 animate-in fade-in-50 duration-500">
-        {/* Enhanced Header with BackButton */}
-        <header className="mb-6 flex items-center justify-between">
+      <div className="container mx-auto py-8 px-4 md:px-6 animate-in fade-in-50 duration-500" dir="rtl">
+        {/* Header with BackButton and Title in same row */}
+        <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <BackButton
-              variant="minimal"
-              fallbackUrl="/dashboard/management-products"
-              className="card-hover-effect"
-            />
+            <BackButton variant="default" />
             <div className="flex items-center gap-3">
               <Plus className="h-6 w-6 text-feature-products icon-enhanced" />
               <h1 className="text-2xl font-bold text-foreground">إضافة منتج جديد</h1>
             </div>
           </div>
-        </header>
+        </div>
 
         <ProductFormFallback
           errorMessage={errorMessage || 'حدث خطأ غير متوقع'}
@@ -65,35 +61,29 @@ export default async function NewProductPage() {
 
   // Successful case - render the product form
   return (
-    <div className="flex min-h-screen flex-col p-4 md:p-6 animate-in fade-in-50 duration-500">
-      {/* Enhanced Header with Professional BackButton */}
-      <header className="mb-6 flex items-center justify-between">
+    <div className="container mx-auto py-8 px-4 md:px-6 animate-in fade-in-50 duration-500" dir="rtl">
+      {/* Header with BackButton and Title in same row */}
+      <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
-          <BackButton
-            variant="default"
-            fallbackUrl="/dashboard/management-products"
-            className="btn-professional"
-          />
+          <BackButton variant="default" />
           <div className="flex items-center gap-3">
             <Plus className="h-6 w-6 text-feature-products icon-enhanced" />
             <h1 className="text-2xl font-bold text-foreground">إضافة منتج جديد</h1>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Enhanced Product Form Container */}
-      <div className="flex-1 card-hover-effect">
-        <ProductUpsert
-          mode="new"
-          defaultValues={{
-            name: '',
-            supplierId: '',
-            categoryIds: []
-          }}
-          categories={productData.categories}
-          suppliers={productData.suppliers}
-        />
-      </div>
+      <ProductUpsert
+        mode="new"
+        defaultValues={{
+          name: '',
+          supplierId: '',
+          categoryIds: []
+        }}
+        categories={productData.categories}
+        suppliers={productData.suppliers}
+      />
     </div>
   );
 }

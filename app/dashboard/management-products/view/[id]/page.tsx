@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { Eye } from 'lucide-react';
 import { PageProps } from '@/types/commonTypes';
 import BackButton from '@/components/BackButton';
 import db from '@/lib/prisma';
@@ -53,12 +54,17 @@ export default async function ProductViewPage({ params }: PageProps<{ id: string
 
     return (
       <div className="container mx-auto py-8 px-4 md:px-6" dir="rtl">
-        <BackButton variant="default" />
-
-        <div className="mb-6 mt-6">
-          <h1 className="text-2xl font-bold text-primary md:text-3xl">
-            تفاصيل المنتج: {product.name}
-          </h1>
+        {/* Header with BackButton and Title in same row */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <BackButton variant="default" />
+            <div className="flex items-center gap-3">
+              <Eye className="h-6 w-6 text-feature-analytics icon-enhanced" />
+              <h1 className="text-2xl font-bold text-primary md:text-3xl">
+                تفاصيل المنتج: {product.name}
+              </h1>
+            </div>
+          </div>
         </div>
 
         <ProductViewContent product={productWithStats} />
@@ -69,9 +75,18 @@ export default async function ProductViewPage({ params }: PageProps<{ id: string
 
     return (
       <div className="container mx-auto py-8 px-4 md:px-6" dir="rtl">
-        <BackButton variant="default" />
+        {/* Header with BackButton and Title in same row - Error State */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <BackButton variant="default" />
+            <div className="flex items-center gap-3">
+              <Eye className="h-6 w-6 text-destructive icon-enhanced" />
+              <h1 className="text-2xl font-bold text-destructive">خطأ في تحميل المنتج</h1>
+            </div>
+          </div>
+        </div>
 
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center mt-6">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
           <h3 className="text-xl font-semibold text-red-700 mb-2">
             حدث خطأ أثناء تحميل بيانات المنتج
           </h3>

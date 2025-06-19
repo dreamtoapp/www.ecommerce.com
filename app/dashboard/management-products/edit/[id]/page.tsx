@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { Edit3 } from 'lucide-react';
 import ProductUpsert from '../../new/components/ProductUpsert';
 import { getProductFormData } from '../../new/actions/getProductData';
 import BackButton from '@/components/BackButton';
@@ -70,12 +71,19 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
     };
 
     return (
-        <div className="container mx-auto py-8" dir="rtl">
-            {/* Enhanced BackButton */}
-            <BackButton variant="default" />
+        <div className="container mx-auto py-8 px-4 md:px-6" dir="rtl">
+            {/* Header with BackButton and Title in same row */}
+            <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-4">
+                    <BackButton variant="default" />
+                    <div className="flex items-center gap-3">
+                        <Edit3 className="h-6 w-6 text-feature-products icon-enhanced" />
+                        <h1 className="text-2xl font-bold text-primary">تعديل المنتج</h1>
+                    </div>
+                </div>
+            </div>
 
-            <div className="mb-8 mt-6">
-                <h1 className="text-2xl font-bold text-primary mb-2">تعديل المنتج</h1>
+            <div className="mb-8">
                 <p className="text-sm text-muted-foreground">
                     قم بتحديث معلومات المنتج "{product.name}". الحقول المطلوبة مشار إليها بعلامة (*).
                 </p>
