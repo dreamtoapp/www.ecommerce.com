@@ -2,9 +2,7 @@
 
 import prisma from '@/lib/prisma';
 
-import {
-  applyPromotionsToProducts,
-} from '../../promotions/actions/promotionService';
+// Removed promotion imports - promotions system replaced with offers
 
 /**
  * Fetches a single category by its slug, including products
@@ -89,35 +87,36 @@ export async function getProductsByCategorySlug(categorySlug: string, page = 1, 
       const processedProduct = {
         id: product.id,
         name: product.name,
+        description: product.description,
         slug: product.slug,
         price: product.price,
-        compareAtPrice: product.compareAtPrice === null || product.compareAtPrice === undefined ? undefined : product.compareAtPrice,
-        costPrice: product.costPrice === null || product.costPrice === undefined ? undefined : product.costPrice,
-        details: product.details === null || product.details === undefined ? undefined : product.details,
-        size: product.size === null || product.size === undefined ? undefined : product.size,
+        compareAtPrice: product.compareAtPrice === undefined ? null : product.compareAtPrice,
+        costPrice: product.costPrice === undefined ? null : product.costPrice,
+        details: product.details === undefined ? null : product.details,
+        size: product.size === undefined ? null : product.size,
         published: product.published,
         outOfStock: product.outOfStock,
         imageUrl: product.imageUrl === null || product.imageUrl === undefined ? null : product.imageUrl,
-        images: Array.isArray(product.images) ? product.images : undefined,
+        images: Array.isArray(product.images) ? product.images : [],
         type: product.type,
-        stockQuantity: product.stockQuantity === null || product.stockQuantity === undefined ? undefined : product.stockQuantity,
+        stockQuantity: product.stockQuantity === undefined ? null : product.stockQuantity,
         manageInventory: product.manageInventory ?? true,
-        productCode: product.productCode === null || product.productCode === undefined ? undefined : product.productCode,
-        gtin: product.gtin === null || product.gtin === undefined ? undefined : product.gtin,
-        brand: product.brand === null || product.brand === undefined ? undefined : product.brand,
-        material: product.material === null || product.material === undefined ? undefined : product.material,
-        color: product.color === null || product.color === undefined ? undefined : product.color,
-        dimensions: product.dimensions === null || product.dimensions === undefined ? undefined : product.dimensions,
-        weight: product.weight === null || product.weight === undefined ? undefined : product.weight,
-        features: Array.isArray(product.features) ? product.features : undefined,
+        productCode: product.productCode === undefined ? null : product.productCode,
+        gtin: product.gtin === undefined ? null : product.gtin,
+        brand: product.brand === undefined ? null : product.brand,
+        material: product.material === undefined ? null : product.material,
+        color: product.color === undefined ? null : product.color,
+        dimensions: product.dimensions === undefined ? null : product.dimensions,
+        weight: product.weight === undefined ? null : product.weight,
+        features: Array.isArray(product.features) ? product.features : [],
         requiresShipping: product.requiresShipping ?? true,
-        shippingDays: product.shippingDays === null || product.shippingDays === undefined ? undefined : product.shippingDays,
-        returnPeriodDays: product.returnPeriodDays === null || product.returnPeriodDays === undefined ? undefined : product.returnPeriodDays,
+        shippingDays: product.shippingDays === undefined ? null : product.shippingDays,
+        returnPeriodDays: product.returnPeriodDays === undefined ? null : product.returnPeriodDays,
         hasQualityGuarantee: product.hasQualityGuarantee ?? true,
-        careInstructions: product.careInstructions === null || product.careInstructions === undefined ? undefined : product.careInstructions,
-        tags: Array.isArray(product.tags) ? product.tags : undefined,
+        careInstructions: product.careInstructions === undefined ? null : product.careInstructions,
+        tags: Array.isArray(product.tags) ? product.tags : [],
 
-        rating: product.rating === null || product.rating === undefined ? undefined : product.rating,
+        rating: product.rating === undefined ? null : product.rating,
         reviewCount: typeof product.reviewCount === 'number' ? product.reviewCount : 0,
         supplier: product.supplier && typeof product.supplier === 'object' ? { id: product.supplier.id, name: product.supplier.name } : null,
         supplierId: product.supplierId,
@@ -131,13 +130,11 @@ export async function getProductsByCategorySlug(categorySlug: string, page = 1, 
       return processedProduct;
     });
 
-    // Apply promotions to products
-    const productsWithPromotions = await applyPromotionsToProducts(products as any);
-
+    // Return products directly (promotions system removed)
     return {
       success: true,
       category,
-      products: productsWithPromotions,
+      products,
       totalPages: Math.ceil(totalProducts / pageSize),
       currentPage: page,
       totalProducts,

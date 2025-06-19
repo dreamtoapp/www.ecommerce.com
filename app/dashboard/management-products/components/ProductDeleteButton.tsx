@@ -1,7 +1,7 @@
 'use client';
 import { Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { iconVariants } from '@/lib/utils';
+// Removed unused import
 import { toast } from 'sonner';
 import ConfirmDeleteDialog from './ConfirmDeleteDialog';
 import { deleteProduct } from '../actions/deleteProduct';

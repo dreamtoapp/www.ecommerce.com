@@ -165,7 +165,7 @@ export const menuGroups = [
   {
     label: 'التسويق الرقمي',
     items: [
-      { title: 'العروض الترويجية', url: '/dashboard/management-promotions', icon: Tag },
+      { title: 'العروض المميزة', url: '/dashboard/management-offer', icon: Tag },
       { title: 'حملات البريد الإلكتروني', url: '/dashboard/clientnews', icon: Mailbox },
     ],
   },

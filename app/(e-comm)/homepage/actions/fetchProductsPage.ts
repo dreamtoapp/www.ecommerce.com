@@ -4,9 +4,7 @@ import db from '@/lib/prisma';
 import { Product } from '@/types/databaseTypes';;
 import { Prisma } from '@prisma/client'; // Import Prisma
 
-import {
-  applyPromotionsToProducts,
-} from '../../promotions/actions/promotionService';
+// Removed promotion imports
 
 /**
  * Server action to fetch a page of products with pagination
@@ -47,6 +45,7 @@ export async function fetchProductsPage(
       select: {
         id: true,
         name: true,
+        description: true,
         slug: true,
         price: true,
         compareAtPrice: true,
@@ -103,11 +102,9 @@ export async function fetchProductsPage(
     // Remove the extra item before returning
     const paginatedProducts = hasMore ? products.slice(0, pageSize) : products;
 
-    // Apply promotions to products
-    const productsWithPromotions = await applyPromotionsToProducts(paginatedProducts as any);
-
+    // Return products directly (promotions system removed)
     return {
-      products: productsWithPromotions,
+      products: paginatedProducts as Product[],
       hasMore,
     };
   } catch (error) {

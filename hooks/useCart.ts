@@ -6,10 +6,10 @@ import {
   useState,
 } from 'react';
 
-import {
-  DiscountedProduct,
-} from '@/app/(e-comm)/promotions/actions/promotionService';
-import { Product } from '@/types/databaseTypes';;
+import { Product } from '@/types/databaseTypes';
+
+// Note: Promotion system has been replaced with Offers system
+interface DiscountedProduct extends Product { discountedPrice: number; }
 
 // Define CartItem type
 export interface CartItem {
@@ -19,7 +19,7 @@ export interface CartItem {
 
 // Function to get the effective price of a product (original or discounted)
 const getEffectivePrice = (product: Product): number => {
-  // Check if product has discounted price property (from a promotion)
+  // Check if product has discounted price property
   if ('discountedPrice' in product) {
     return (product as DiscountedProduct).discountedPrice;
   }

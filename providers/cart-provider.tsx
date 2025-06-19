@@ -3,7 +3,7 @@
 import { createContext, useContext, ReactNode } from 'react';
 import { useCart, CartItem } from '@/hooks/useCart';
 import { Product } from '@/types/databaseTypes';;
-import { DiscountedProduct } from '@/app/(e-comm)/promotions/actions/promotionService';
+// Note: Promotion system has been replaced with Offers system
 
 // Define the context type
 interface CartContextType {
@@ -27,9 +27,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     // Add a function to get discounted price
     const getDiscountedPrice = (product: Product) => {
-        // Check if product has discounted price property (from a promotion)
+        // Check if product has discounted price property
         if ('discountedPrice' in product) {
-            return (product as DiscountedProduct).discountedPrice;
+            return (product as any).discountedPrice;
         }
         // Otherwise return regular price
         return product.price;

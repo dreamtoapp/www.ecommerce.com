@@ -4,12 +4,11 @@ import ServerCarousel from './ServerCarousel';
 
 interface Promotion {
   id: string;
-  title: string;
+  name: string; // Changed from title to name to match Offer model
   description?: string | null;
   imageUrl?: string | null;
-  discountValue?: number | null;
-  discountType?: string | null;
-  active?: boolean;
+  discountPercentage?: number | null; // Changed to match Offer model
+  isActive?: boolean; // Changed to match Offer model
 }
 
 interface PromotionSliderProps {
@@ -22,16 +21,16 @@ const SliderSection: React.FC<PromotionSliderProps> = ({ promotions }) => {
     return null;
   }
 
-  // Transform promotions to the format expected by ServerCarousel
-  const carouselItems = promotions.map((promo) => ({
-    id: promo.id,
-    url: promo.imageUrl || '/fallback/fallback.avif',
-    alt: promo.title,
-    title: promo.title,
-    description: promo.description || undefined,
-    discountValue: promo.discountValue,
-    discountType: promo.discountType,
-    linkUrl: `/promotions/${encodeURIComponent(promo.title.toLowerCase().replace(/ /g, '-'))}-${promo.id}`,
+  // Transform offers to the format expected by ServerCarousel
+  const carouselItems = promotions.map((offer) => ({
+    id: offer.id,
+    url: offer.imageUrl || '/fallback/fallback.avif',
+    alt: offer.name,
+    title: offer.name,
+    description: offer.description || undefined,
+    discountValue: offer.discountPercentage,
+    discountType: 'percentage',
+    linkUrl: `/offers/${encodeURIComponent(offer.name.toLowerCase().replace(/ /g, '-'))}-${offer.id}`,
   }));
 
   return (

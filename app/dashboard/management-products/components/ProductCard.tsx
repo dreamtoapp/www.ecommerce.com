@@ -1,14 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+// Removed unused useState import
 import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Eye, Edit3, BarChart2, Package, DollarSign, Info, CheckCircle, XCircle, Images } from 'lucide-react';
-import { iconVariants } from '@/lib/utils';
-import { buttonVariants } from '@/components/ui/button';
+// Removed unused imports
 
 import ProductDeleteButton from './ProductDeleteButton';
 
@@ -27,7 +26,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const [currentImageUrl, setCurrentImageUrl] = useState(product.imageUrl);
+  const currentImageUrl = product.imageUrl;
   const hasGallery = product.images && product.images.length > 0;
 
   return (

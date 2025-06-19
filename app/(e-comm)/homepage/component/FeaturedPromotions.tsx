@@ -3,66 +3,46 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 
 interface Promotion {
     id: string;
-    title: string;
+    name: string; // Changed from title to name to match Offer model
     description?: string | null;
     imageUrl?: string | null;
-    discountValue?: number | null;
-    discountType?: string | null;
-    startDate?: Date | null;
-    endDate?: Date | null;
-    active: boolean;
+    discountPercentage?: number | null; // Changed to match Offer model
+    isActive: boolean; // Changed to match Offer model
 }
 
 interface FeaturedPromotionsProps {
     promotions: Promotion[];
 }
 
-// Client-only date component to prevent hydration mismatch
-function ClientOnlyDate({ date }: { date: Date | string | null }) {
-    const [formattedDate, setFormattedDate] = useState('');
-
-    useEffect(() => {
-        if (date) {
-            // Only run on client after hydration is complete
-            setFormattedDate(new Date(date).toLocaleDateString('ar-SA'));
-        }
-    }, [date]);
-
-    return <>{formattedDate}</>;
-}
-
 export default function FeaturedPromotions({ promotions }: FeaturedPromotionsProps) {
-    // Only show active promotions with valid dates
-    const activePromotions = promotions.filter(promo =>
-        promo.active &&
-        (!promo.endDate || new Date(promo.endDate) > new Date()) &&
-        (!promo.startDate || new Date(promo.startDate) <= new Date())
+    // Only show active offers
+    const activePromotions = promotions.filter(offer =>
+        offer.isActive
     );
 
     if (activePromotions.length === 0) return null;
 
     return (
         <section className="my-8">
-            <h2 className="mb-4 text-2xl font-bold">العروض الخاصة</h2>
+            <h2 className="mb-4 text-2xl font-bold">العروض المميزة</h2>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {activePromotions.map((promotion, index) => (
+                {activePromotions.map((offer, index) => (
                     <motion.div
-                        key={promotion.id}
+                        key={offer.id}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
                         className="group overflow-hidden rounded-xl border shadow-sm transition-all hover:shadow-md"
                     >
-                        {/* Promotion Image */}
+                        {/* Offer Image */}
                         <div className="relative aspect-video overflow-hidden">
-                            {promotion.imageUrl ? (
+                            {offer.imageUrl ? (
                                 <Image
-                                    src={promotion.imageUrl}
-                                    alt={promotion.title}
+                                    src={offer.imageUrl}
+                                    alt={offer.name}
                                     fill
                                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -72,34 +52,25 @@ export default function FeaturedPromotions({ promotions }: FeaturedPromotionsPro
                             )}
 
                             {/* Discount Badge */}
-                            {promotion.discountValue && promotion.discountType && (
+                            {offer.discountPercentage && (
                                 <div className="absolute right-3 top-3 rounded-full bg-red-500 px-3 py-1 text-sm font-bold text-white">
-                                    {promotion.discountType === 'PERCENTAGE'
-                                        ? `${promotion.discountValue}% خصم`
-                                        : `${promotion.discountValue} ريال خصم`}
+                                    {offer.discountPercentage}% خصم
                                 </div>
                             )}
                         </div>
 
-                        {/* Promotion Details */}
+                        {/* Offer Details */}
                         <div className="p-4">
-                            <h3 className="mb-2 text-lg font-semibold">{promotion.title}</h3>
-                            {promotion.description && (
+                            <h3 className="mb-2 text-lg font-semibold">{offer.name}</h3>
+                            {offer.description && (
                                 <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">
-                                    {promotion.description}
-                                </p>
-                            )}
-
-                            {/* Dates */}
-                            {promotion.endDate && (
-                                <p className="text-xs text-muted-foreground">
-                                    ينتهي في: <ClientOnlyDate date={promotion.endDate} />
+                                    {offer.description}
                                 </p>
                             )}
 
                             {/* View Products Button */}
                             <Link
-                                href={`/promotions/${encodeURIComponent(promotion.title.toLowerCase().replace(/ /g, '-'))}-${promotion.id}`}
+                                href={`/offers/${encodeURIComponent(offer.name.toLowerCase().replace(/ /g, '-'))}-${offer.id}`}
                                 className="mt-3 inline-block rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
                             >
                                 تصفح المنتجات

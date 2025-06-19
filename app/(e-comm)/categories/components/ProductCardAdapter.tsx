@@ -9,7 +9,7 @@ import ProductCard from '@/components/product/ProductCard';
 import { useCartContext } from '@/providers/cart-provider';
 import { Product } from '@/types/databaseTypes';;
 
-import { DiscountedProduct } from '../../promotions/actions/promotionService';
+// Removed promotion imports - using standard Product type
 
 interface ProductCardAdapterProps {
     product: Product;
@@ -49,8 +49,8 @@ export default function ProductCardAdapter({ product, className }: ProductCardAd
     const adaptedProduct: Product | (Product & { compareAtPrice?: number }) = isDiscountedProduct
         ? {
             ...product,
-            price: (product as DiscountedProduct).discountedPrice,
-            compareAtPrice: (product as DiscountedProduct).originalPrice
+            price: (product as any).discountedPrice,
+            compareAtPrice: (product as any).originalPrice
         }
         : product;
 

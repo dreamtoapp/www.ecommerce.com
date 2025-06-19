@@ -5,7 +5,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { toast } from 'sonner';
 
-import PromotionBadge from '@/app/(e-comm)/promotions/component/PromotionBadge';
+// Note: PromotionBadge replaced with simple discount badge
 import RatingPreview from '@/components/rating/RatingPreview';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button'; // Import Button
@@ -88,9 +88,11 @@ export default function ProductCard({
             onError={() => setImgSrc('/fallback/product-fallback.avif')}
           />
 
-          {/* Display promotion badge or sale badge */}
+          {/* Display sale badge */}
           {discountPercentage !== null && (
-            <PromotionBadge discountPercentage={discountPercentage} />
+            <Badge className="absolute top-2 right-2 bg-red-500 text-white">
+              -{discountPercentage}%
+            </Badge>
           )}
 
           {/* Stock badge */}

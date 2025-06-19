@@ -2,36 +2,47 @@
 import { cacheData } from '@/lib/cache';
 import db from '@/lib/prisma';
 
-// Helper function to fetch promotions
-async function fetchPromotions() {
+// Helper function to fetch active offers (replacing promotions)
+async function fetchOffers() {
   try {
-    const promotions = await db.promotion.findMany({});
+    const offers = await db.offer.findMany({
+      where: {
+        isActive: true,
+      },
+      include: {
+        productAssignments: {
+          include: {
+            product: true,
+          },
+        },
+      },
+    });
 
-    // Process promotions to ensure valid image URLs
-    return promotions.map((promotion) => {
+    // Process offers to ensure valid image URLs
+    return offers.map((offer) => {
       const fallbackImage = '/fallback/fallback.avif';
 
       // Check if the image URL exists and is valid
       const hasValidImageUrl =
-        promotion.imageUrl &&
-        typeof promotion.imageUrl === 'string' &&
-        (promotion.imageUrl.startsWith('/') || // Local images
-          promotion.imageUrl.startsWith('http')); // Remote images
+        offer.bannerImage &&
+        typeof offer.bannerImage === 'string' &&
+        (offer.bannerImage.startsWith('/') || // Local images
+          offer.bannerImage.startsWith('http')); // Remote images
 
       return {
-        ...promotion,
-        // Always return a string for imageUrl
-        imageUrl: hasValidImageUrl ? promotion.imageUrl : fallbackImage,
+        ...offer,
+        // Always return a string for imageUrl (map bannerImage to imageUrl for compatibility)
+        imageUrl: hasValidImageUrl ? offer.bannerImage : fallbackImage,
       };
     });
   } catch (error) {
-    console.error('Error fetching promotions:', error);
-    throw new Error('Failed to fetch promotions');
+    console.error('Error fetching offers:', error);
+    throw new Error('Failed to fetch offers');
   }
 }
 
 export const getPromotions = cacheData(
-  fetchPromotions,
-  ['getPromotions'], // Cache key
-  { revalidate: 3600 }, // Revalidate every 120 seconds
+  fetchOffers,
+  ['getOffers'], // Cache key
+  { revalidate: 3600 }, // Revalidate every hour
 );

@@ -14,6 +14,7 @@ const SUPPORTED_TABLES = {
   category: 'category',
   order: 'order',
   company: 'company',
+  offer: 'offer',
 } as const;
 
 type TableName = keyof typeof SUPPORTED_TABLES;

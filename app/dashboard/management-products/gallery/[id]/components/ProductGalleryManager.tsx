@@ -3,20 +3,20 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+// Removed unused import
 import {
     Upload,
     Images,
     Star,
     Trash2,
-    Download,
+
     Zap,
     AlertCircle,
     HardDrive,
     CheckCircle
 } from 'lucide-react';
 import Image from 'next/image';
-import ImageUpload from '@/components/image-upload';
+// Removed unused import
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 import { setAsMainImageFromGallery, removeImageFromGallery, updateProductGallery } from '../actions/updateProductImages';
@@ -37,7 +37,7 @@ export default function ProductGalleryManager({ product }: ProductGalleryManager
 
     // Preview state for new images before upload
     const [previewImages, setPreviewImages] = useState<{ file: File; url: string }[]>([]);
-    const [hasChanges, setHasChanges] = useState(false);
+    // Removed unused state
 
     // Find the main image index in the gallery
     const mainImageIndex = product.imageUrl ? images.indexOf(product.imageUrl) : -1;
@@ -89,7 +89,6 @@ export default function ProductGalleryManager({ product }: ProductGalleryManager
         }));
 
         setPreviewImages(prev => [...prev, ...newPreviewImages]);
-        setHasChanges(true);
         toast.success(`تم إضافة ${files.length} صورة للمعاينة`);
     };
 
@@ -111,7 +110,6 @@ export default function ProductGalleryManager({ product }: ProductGalleryManager
             if (result.success) {
                 setImages(updatedImages);
                 setPreviewImages([]); // Clear preview after successful upload
-                setHasChanges(false);
                 toast.success(`تم رفع ${newImageUrls.length} صورة بنجاح`);
                 toast.info('ملاحظة: لرفع الصور إلى Cloudinary، يرجى تكوين متغيرات البيئة');
             } else {
@@ -131,7 +129,6 @@ export default function ProductGalleryManager({ product }: ProductGalleryManager
         URL.revokeObjectURL(imageToRemove.url); // Clean up memory
 
         setPreviewImages(prev => prev.filter((_, i) => i !== index));
-        setHasChanges(previewImages.length > 1); // Check if there will still be changes
         toast.success('تم حذف الصورة من المعاينة');
     };
 
@@ -139,7 +136,6 @@ export default function ProductGalleryManager({ product }: ProductGalleryManager
         // Clean up all object URLs
         previewImages.forEach(preview => URL.revokeObjectURL(preview.url));
         setPreviewImages([]);
-        setHasChanges(false);
         toast.success('تم مسح جميع الصور المحددة');
     };
 

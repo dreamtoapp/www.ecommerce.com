@@ -142,20 +142,22 @@ export default async function HomePage({ searchParams }: PageProps<Record<string
     getCategories(),
   ]);
 
-  // Use promotions if available, otherwise use fallback data
+  // Use offers if available, otherwise use fallback data
   const displayPromotions =
     promotionsData.length > 0
       ? promotionsData
       : [
         {
           id: 'fallback-1',
-          title: 'Special Summer Collection',
+          name: 'Special Summer Collection',
           imageUrl: '/fallback/fallback.avif',
+          isActive: true,
         },
         {
           id: 'fallback-2',
-          title: 'New Arrivals - Spring 2025',
+          name: 'New Arrivals - Spring 2025',
           imageUrl: '/fallback/fallback.webp',
+          isActive: true,
         },
       ];
 

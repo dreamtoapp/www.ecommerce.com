@@ -9,10 +9,10 @@ import EnhancedProductCard from '@/components/product/EnhancedProductCard';
 import { useCartContext } from '@/providers/cart-provider';
 import { Product } from '@/types/databaseTypes';;
 
-import { DiscountedProduct } from '../../promotions/actions/promotionService';
+// Removed promotion imports - using standard Product type
 
 interface EnhancedProductCardAdapterProps {
-    product: Product | DiscountedProduct;
+    product: Product;
     className?: string;
     variant?: 'default' | 'category' | 'offer';
     showQuantityControls?: boolean;
@@ -66,8 +66,8 @@ export default function EnhancedProductCardAdapter({
     const adaptedProduct = isDiscountedProduct
         ? {
             ...product,
-            price: (product as DiscountedProduct).discountedPrice,
-            compareAtPrice: (product as DiscountedProduct).originalPrice
+            price: (product as any).discountedPrice,
+            compareAtPrice: (product as any).originalPrice
         }
         : product;
 

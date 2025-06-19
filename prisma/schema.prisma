@@ -95,6 +95,9 @@ model Product {
   // categories Category[]  // Old implicit relation removed
   categoryAssignments CategoryProduct[] // Explicit relation via join table
   
+  // Offer relationships via join table
+  offerAssignments  OfferProduct[] // Explicit relation via join table
+  
   // Organization & SEO
   tags              String[] @default([]) // tags for filtering and organization
   translations      ProductTranslation[]  // Relation to product translations
@@ -227,60 +230,7 @@ model LocationHistory {
   updatedAt DateTime @updatedAt
 }
 
-enum PromotionType {
-  PERCENTAGE_PRODUCT
-  FIXED_PRODUCT
-  PERCENTAGE_ORDER
-  FIXED_ORDER
-  FREE_SHIPPING
-}
 
-enum DiscountType { // Relevant for some PromotionTypes
-  PERCENTAGE
-  FIXED_AMOUNT
-}
-
-// Promotion Model
-model Promotion {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
-  title         String   // Made non-optional, title is usually required
-  slug          String   @unique @default("") // Add slug field for 
-  description   String?
-  imageUrl      String?
-
-  type          PromotionType @default(PERCENTAGE_PRODUCT)
-  discountValue Float?        // Value of discount (e.g., 10 for 10% or 10 SAR)
-  discountType  DiscountType? // PERCENTAGE or FIXED_AMOUNT
-
-  couponCode    String?  @unique 
-  
-  productIds    String[] @db.ObjectId // Products this promotion applies to  
-  minimumOrderValue Float? // Min order amount for promotion (esp. for ORDER types or FREE_SHIPPING)
-
-  startDate     DateTime?
-  endDate       DateTime?
-  
-  active        Boolean  @default(true)
-  
-
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt     // Corrected
-  translations  PromotionTranslation[]
-}
-
-// Model for Promotion Translations
-model PromotionTranslation {
-  id             String    @id @default(auto()) @map("_id") @db.ObjectId
-  promotionId    String    @db.ObjectId
-  promotion      Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
-  languageCode   String    // e.g., "en", "ar-SA"
-  title          String    // Translated promotion title
-  description    String?   // Translated promotion description
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-
-  @@unique([promotionId, languageCode])
-}
 
 model Counter {
   id      String @id @default(auto()) @map("_id") @db.ObjectId
@@ -405,7 +355,7 @@ enum EntityType {
   PAGE     // For general pages like homepage, about, contact
   PRODUCT
   CATEGORY
-  PROMOTION
+
   BLOG_POST
   BLOG_CATEGORY
 }
@@ -576,4 +526,33 @@ model WebVital {
   city       String?  // City from geolocation
   country    String?  // Country from geolocation
   additional Json?    // For future extensibility (e.g., connection, custom fields)
+}
+
+model Offer {
+  id                  String    @id @default(auto()) @map("_id") @db.ObjectId
+  name               String
+  slug               String    @unique
+  description        String?
+  bannerImage        String?   // Optional - can be added later
+  isActive           Boolean   @default(true)
+  displayOrder       Int       @default(0)
+  hasDiscount        Boolean   @default(false)
+  discountPercentage Float?    // Only if hasDiscount is true
+  
+  // Product relationships via join table
+  productAssignments OfferProduct[] // Explicit relation via join table
+  
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+}
+
+model OfferProduct {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  offerId     String   @db.ObjectId
+  productId   String   @db.ObjectId
+  offer       Offer    @relation(fields: [offerId], references: [id], onDelete: Cascade) // If an offer is deleted, remove assignments
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade) // If a product is deleted, remove assignments
+  assignedAt  DateTime @default(now())
+
+  @@unique([offerId, productId])
 }

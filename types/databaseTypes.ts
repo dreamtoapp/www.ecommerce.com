@@ -16,8 +16,7 @@ import {
   Prisma,
   Product as PrismaProduct,
   ProductTranslation as PrismaProductTranslation,
-  Promotion as PrismaPromotion,
-  PromotionTranslation as PrismaPromotionTranslation,
+
   Reply as PrismaReply,
   Request as PrismaRequest,
   Review as PrismaReview,
@@ -49,8 +48,7 @@ export type Notification = PrismaNotification;
 export type OrderItem = PrismaOrderItem;
 export type Product = PrismaProduct;
 export type ProductTranslation = PrismaProductTranslation;
-export type Promotion = PrismaPromotion;
-export type PromotionTranslation = PrismaPromotionTranslation;
+
 export type Reply = PrismaReply;
 export type Request = PrismaRequest;
 export type Review = PrismaReview;
