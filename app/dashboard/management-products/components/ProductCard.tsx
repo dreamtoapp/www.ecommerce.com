@@ -90,7 +90,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link
-                    href={`/dashboard/products/edit/${product.id}`}
+                    href={`/dashboard/management-products/edit/${product.id}`}
                     className={buttonVariants({ variant: 'ghost', size: 'icon' })}
                     title="تعديل"
                   >

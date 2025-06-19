@@ -1,12 +1,7 @@
-import { ArrowRight } from 'lucide-react';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { PageProps } from '@/types/commonTypes';
-
-import { Button } from '@/components/ui/button';
+import BackButton from '@/components/BackButton';
 import db from '@/lib/prisma';
-import { iconVariants } from '@/lib/utils';
-
 import ProductViewContent from './product-view-content';
 
 async function getFullProductDetails(id: string) {
@@ -58,17 +53,14 @@ export default async function ProductViewPage({ params }: PageProps<{ id: string
 
     return (
       <div className="container mx-auto py-8 px-4 md:px-6" dir="rtl">
-        <div className="mb-6 flex items-center justify-between">
+        <BackButton variant="default" />
+
+        <div className="mb-6 mt-6">
           <h1 className="text-2xl font-bold text-primary md:text-3xl">
             تفاصيل المنتج: {product.name}
           </h1>
-          <Button variant="outline" asChild>
-            <Link href="/dashboard/products-control" className="flex items-center gap-2">
-              <ArrowRight className={iconVariants({ size: 'sm' })} />
-              <span>العودة إلى قائمة المنتجات</span>
-            </Link>
-          </Button>
         </div>
+
         <ProductViewContent product={productWithStats} />
       </div>
     );
@@ -77,7 +69,9 @@ export default async function ProductViewPage({ params }: PageProps<{ id: string
 
     return (
       <div className="container mx-auto py-8 px-4 md:px-6" dir="rtl">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+        <BackButton variant="default" />
+
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center mt-6">
           <h3 className="text-xl font-semibold text-red-700 mb-2">
             حدث خطأ أثناء تحميل بيانات المنتج
           </h3>

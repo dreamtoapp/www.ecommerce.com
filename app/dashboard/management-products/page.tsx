@@ -1,11 +1,8 @@
-
 import { fetchFilteredProducts } from './actions/fetchFilteredProducts';
 import PaginationControls from './components/PaginationControls';
 import ProductCard from './components/ProductCard';
 import ProductFilterForm from './components/ProductFilterForm';
 import Link from '@/components/link';
-
-
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
@@ -16,6 +13,7 @@ function getStringParam(param: string | string[] | undefined): string {
 
 export default async function ProductsControlPage(props: { searchParams: SearchParams }) {
   const searchParams = await props.searchParams;
+
   // Parse filters and pagination from searchParams
   const name = getStringParam(searchParams.name);
   const supplierId = getStringParam(searchParams.supplierId);
