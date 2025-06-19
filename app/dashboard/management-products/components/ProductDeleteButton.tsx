@@ -23,12 +23,10 @@ export default function ProductDeleteButton({ productId }: { productId: string }
         <ConfirmDeleteDialog onConfirm={handleDeleteProduct}>
             <Button
                 variant="ghost"
-                size="icon"
-                title="حذف"
-                className="text-destructive hover:bg-destructive/10"
+                size="sm"
+                className="btn-delete p-2 h-8"
             >
-                <Trash2 className={iconVariants({ size: 'xs' })} />
-                <span className="sr-only">حذف</span>
+                <Trash2 className="h-4 w-4 icon-enhanced" />
             </Button>
         </ConfirmDeleteDialog>
     );
