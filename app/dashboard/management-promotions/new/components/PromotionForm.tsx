@@ -9,12 +9,10 @@ import {
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
-import {
-  getProductsByIds,
-} from '@/app/dashboard/products/actions'; // For fetching initial product details
+
 import type {
   SelectableProduct,
-} from '@/app/dashboard/products/actions/get-products-for-select';
+} from '@/app/dashboard/management-promotions/actions/get-products-for-select';
 import ImageUpload
   from '@/components/image-upload'; // Assuming for promotion image
 import InfoTooltip from '@/components/InfoTooltip';
@@ -42,6 +40,7 @@ import { createPromotion } from '../../actions/createPromotion';
 import { updatePromotion } from '../../actions/updatePromotion';
 import ProductSelectorModal
   from '../../components/ProductSelectorModal'; // Import the modal
+import { getProductById } from '@/app/dashboard/management-promotions/new/actions/get-product-by-id';
 
 interface PromotionFormProps {
   initialData?: Promotion; // For editing
@@ -83,7 +82,9 @@ export default function PromotionForm({ initialData }: PromotionFormProps) { // 
   useEffect(() => {
     if (isEditing && initialData?.productIds && initialData.productIds.length > 0 && selectedProducts.length === 0) {
       const fetchInitialProductDetails = async () => {
-        const products = await getProductsByIds(initialData.productIds);
+        const products = await Promise.all(
+          initialData.productIds.map(async (id: string) => await getProductById(id))
+        );
         setSelectedProducts(products);
       };
       fetchInitialProductDetails();

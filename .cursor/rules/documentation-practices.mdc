@@ -1,0 +1,76 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# 📚 Project Knowledge & Task Management
+
+This project uses Markdown files in the `/docs` directory to maintain a persistent memory and track tasks. You MUST adhere to this workflow to ensure context is never lost and development remains consistent.
+
+## 🔍 Pre-Task Analysis
+
+**ALWAYS consult these files before beginning any work:**
+
+1. **Read Project Plan**: MUST reference `@docs/project-plan.md` to understand:
+   - High-level project goals and current status
+   - Architecture decisions and constraints
+   - Completed features vs ongoing work
+   - Priority levels for different tasks
+
+2. **Check Technical Debt**: MUST review `@docs/tech-debt.md` to:
+   - Avoid introducing known anti-patterns
+   - Address related technical debt when working in affected areas
+   - Understand current issues and their priority levels
+
+## 📝 Active Documentation Requirements
+
+### During Development
+- **Update Progress**: As you complete steps of a task, update `@docs/project-plan.md` to reflect progress
+- **Document Decisions**: Add architectural decisions and reasoning to preserve context
+- **Track Issues**: If you discover new technical debt, add it to `@docs/tech-debt.md`
+
+### After Significant Changes
+- **Update Status**: Mark completed features as ✅ in project plan
+- **Document Learnings**: If you discover important patterns or anti-patterns, document them
+- **Update Priorities**: Adjust priority levels based on new information
+
+## 🎯 Rule Enforcement
+
+### Creating New Features
+1. Check if the feature is in the project plan
+2. Understand the current architecture from documentation
+3. Follow established patterns documented in other rules
+4. Update documentation as you progress
+
+### Bug Fixes
+1. Check if the bug is documented in tech-debt.md
+2. Fix the immediate issue
+3. Document any systemic issues discovered
+4. Update tech debt status
+
+### Refactoring
+1. Consult tech-debt.md for priority guidance
+2. Document the reasoning for refactoring decisions
+3. Update project plan with improved architecture notes
+4. Mark resolved technical debt as completed
+
+## 🚫 Prohibited Actions
+
+- **NEVER** start complex tasks without consulting the documentation
+- **NEVER** ignore existing documentation when making decisions
+- **NEVER** leave documentation outdated after making changes
+- **NEVER** duplicate effort by solving already-documented problems
+
+## 🔄 Documentation Maintenance
+
+### Weekly Reviews
+- Update project status in project-plan.md
+- Review and prioritize items in tech-debt.md
+- Ensure documentation accuracy
+
+### After Major Milestones
+- Comprehensive update of project-plan.md
+- Archive completed technical debt items
+- Document lessons learned
+
+This documentation system ensures that every AI interaction builds upon previous knowledge, creating a continuously improving development experience.

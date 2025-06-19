@@ -1,0 +1,42 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description:
+# Project Structure Rules
+
+## 📁 Folder Organization
+
+- Each route lives in its own folder: `app/[route]/`
+  - `components/` → route-specific components
+  - `actions/` → server actions
+  - `helpers/` → hooks, utils
+  - `loading.tsx` → always included, use shadcn skeleton
+  - `page.tsx` → always use server components unless needed otherwise
+
+## 🏗️ Feature-Based Structure
+
+- Feature-based folder structure for better organization
+- All reusable components/hooks go under `components/ui/` or `lib/hooks/`
+- Route-specific components stay in their respective route folders
+
+## 📂 Key Directories
+
+- `app/` - Next.js App Router pages and layouts
+- `components/ui/` - Reusable shadcn/ui components
+- `lib/` - Utilities, helpers, and shared logic
+- `messages/` - Internationalization files (`ar.json`, `en.json`)
+- `prisma/` - Database schema and migrations
+- `public/` - Static assets
+
+## 🔄 File Naming Conventions
+
+- Use PascalCase for components, pages, and files
+- Use camelCase for variables, functions, and folders
+- Always include `loading.tsx` for each route
+- Use descriptive, semantic names
+
+
+

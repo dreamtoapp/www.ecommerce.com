@@ -1,0 +1,154 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# 🚨 CRITICAL: Folder Naming Enforcement
+
+**IMMEDIATE ACTION REQUIRED**: This project has critical TypeScript errors due to inconsistent folder naming. You MUST fix these issues as the highest priority.
+
+## 🔥 CRITICAL ISSUES TO FIX NOW
+
+### Current Inconsistencies Found
+```
+❌ app/(e-comm)/cart/component/          → ✅ should be components/
+❌ app/(e-comm)/product/compnent/        → ✅ should be components/ (typo!)
+❌ app/(e-comm)/homepage/component/      → ✅ should be components/
+❌ app/(e-comm)/about/action/            → ✅ should be actions/
+❌ app/(e-comm)/contact/action/          → ✅ should be actions/
+```
+
+### TypeScript Module Resolution Error
+```
+ERROR: app/dashboard/products/actions/index.ts:5:34 
+Cannot find module '../../management-products/new/actions/get-products-by-ids'
+```
+
+## 🎯 MANDATORY NAMING STANDARDS
+
+### Required Folder Names (EXACT)
+- **components/** - React components (PLURAL, never "component")
+- **actions/** - Server actions (PLURAL, never "action") 
+- **helpers/** - Utilities and hooks (PLURAL)
+
+### Enforcement Rules
+1. **IMMEDIATELY rename** any folder that doesn't match these standards
+2. **UPDATE all import statements** after renaming
+3. **VERIFY TypeScript compilation** after changes
+4. **NEVER create** folders with incorrect names
+
+## 🔧 IMMEDIATE FIX PROCEDURE
+
+### Step 1: Rename Folders
+```bash
+# Fix these folders immediately:
+mv app/(e-comm)/cart/component app/(e-comm)/cart/components
+mv app/(e-comm)/product/compnent app/(e-comm)/product/components  # Note: fix typo!
+mv app/(e-comm)/homepage/component app/(e-comm)/homepage/components
+mv app/(e-comm)/about/action app/(e-comm)/about/actions
+mv app/(e-comm)/contact/action app/(e-comm)/contact/actions
+```
+
+### Step 2: Fix Import Statements
+After renaming, update ALL imports that reference these folders:
+
+```typescript
+// ❌ OLD (before fix)
+import { CartItem } from '../component/CartItem';
+import { ProductCard } from '../compnent/ProductCard';
+
+// ✅ NEW (after fix)  
+import { CartItem } from '../components/CartItem';
+import { ProductCard } from '../components/ProductCard';
+```
+
+### Step 3: Fix Missing Module Error
+The error `Cannot find module '../../management-products/new/actions/get-products-by-ids'` indicates either:
+1. The file doesn't exist at that path
+2. The import path is incorrect
+
+**INVESTIGATE AND FIX**:
+```typescript
+// Check if this file exists:
+app/dashboard/management-products/new/actions/get-products-by-ids.ts
+
+// If it doesn't exist, find the correct location or create it
+// If it exists elsewhere, fix the import path
+```
+
+## 🛡️ PREVENTION RULES
+
+### ESLint Rule (Add to .eslintrc.json)
+```json
+{
+  "rules": {
+    "import/no-unresolved": "error"
+  }
+}
+```
+
+### Pre-commit Hook (Recommended)
+Create a script to check folder naming before commits:
+
+```bash
+#!/bin/bash
+# Check for incorrect folder names
+if find app -type d -name "component" -o -name "action" -o -name "helper" | grep -q .; then
+  echo "❌ ERROR: Found incorrectly named folders!"
+  echo "Use: components/, actions/, helpers/ (plural forms)"
+  exit 1
+fi
+```
+
+## 🎯 ROUTE STRUCTURE ENFORCEMENT
+
+### Every Route MUST Have
+```
+app/[route]/
+├── page.tsx                 # ✅ Required
+├── loading.tsx              # ✅ Required  
+├── components/              # ✅ Required (PLURAL)
+│   └── [RouteComponents].tsx
+├── actions/                 # ✅ Required (PLURAL)
+│   └── [serverActions].ts
+└── helpers/                 # ✅ Required (PLURAL)
+    └── [utilities].ts
+```
+
+### File Creation Commands
+When creating new routes, use these exact commands:
+
+```bash
+# Create route structure with correct naming
+mkdir -p app/new-route/{components,actions,helpers}
+touch app/new-route/{page.tsx,loading.tsx}
+touch app/new-route/components/.gitkeep
+touch app/new-route/actions/.gitkeep  
+touch app/new-route/helpers/.gitkeep
+```
+
+## 🚨 ZERO TOLERANCE POLICY
+
+### Absolutely Forbidden
+- **NEVER** use `component/` (singular)
+- **NEVER** use `action/` (singular)  
+- **NEVER** use `helper/` (singular)
+- **NEVER** create typos like `compnent/`
+
+### Quality Gates
+- **MUST** pass TypeScript compilation
+- **MUST** have consistent folder naming
+- **MUST** update imports when refactoring
+- **MUST** verify all modules resolve correctly
+
+## 🔍 VERIFICATION CHECKLIST
+
+After making changes, verify:
+- [ ] `npx tsc --noEmit` runs without errors
+- [ ] All imports resolve correctly
+- [ ] No 404 errors in development server
+- [ ] All folder names follow plural convention
+- [ ] Git status shows renamed folders, not deleted/created
+
+**This is the highest priority issue. Fix folder naming inconsistencies before any other development work.**
+

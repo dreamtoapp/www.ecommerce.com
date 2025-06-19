@@ -1,0 +1,322 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# ⚡ Next.js App Router Standards
+
+This project uses **Next.js 15.2.1 with App Router**. You MUST follow these patterns for optimal performance, SEO, and user experience.
+
+## 🏗️ COMPONENT ARCHITECTURE
+
+### Server Components (Default)
+- **DEFAULT to Server Components** - Only use Client Components when necessary
+- **NO unnecessary `'use client'`** - Server Components are more performant
+- **FETCH data directly** in Server Components - No need for useEffect
+
+```typescript
+// ✅ GOOD - Server Component with direct data fetching
+import { prisma } from '@/lib/prisma';
+
+export default async function ProductPage({ params }: { params: { slug: string } }) {
+  const product = await prisma.product.findUnique({
+    where: { slug: params.slug },
+    include: { category: true, images: true }
+  });
+
+  if (!product) {
+    notFound();
+  }
+
+  return <ProductDisplay product={product} />;
+}
+```
+
+### Client Components (When Required)
+- **USE `'use client'`** only when you need:
+  - Event handlers (onClick, onChange, etc.)
+  - Browser APIs (localStorage, geolocation, etc.)
+  - React hooks (useState, useEffect, etc.)
+  - Third-party libraries that require browser environment
+
+```typescript
+// ✅ GOOD - Client Component for interactivity
+'use client';
+
+import { useState } from 'react';
+import { toast } from 'sonner';
+
+interface AddToCartButtonProps {
+  productId: string;
+  productName: string;
+}
+
+export default function AddToCartButton({ productId, productName }: AddToCartButtonProps) {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleAddToCart = async () => {
+    setIsLoading(true);
+    // Add to cart logic
+    toast.success(`${productName} added to cart`);
+    setIsLoading(false);
+  };
+
+  return (
+    <button onClick={handleAddToCart} disabled={isLoading}>
+      {isLoading ? 'Adding...' : 'Add to Cart'}
+    </button>
+  );
+}
+```
+
+## 📁 ROUTE ORGANIZATION
+
+### Required Route Structure
+Every route folder MUST contain:
+- `page.tsx` - The route page (Server Component by default)
+- `loading.tsx` - Loading UI with shadcn/ui skeletons
+- `components/` - Route-specific components
+- `actions/` - Server actions for this route
+- `helpers/` - Route-specific utilities
+
+```
+app/products/
+├── page.tsx              # ✅ Required
+├── loading.tsx           # ✅ Required
+├── components/           # ✅ Required
+│   ├── ProductGrid.tsx
+│   └── ProductFilter.tsx
+├── actions/              # ✅ Required
+│   ├── getProducts.ts
+│   └── searchProducts.ts
+└── helpers/              # ✅ Required
+    └── productUtils.ts
+```
+
+### Loading States
+- **ALWAYS include `loading.tsx`** in every route
+- **USE shadcn/ui Skeleton** components for loading states
+- **MATCH the layout** of the actual content
+
+```typescript
+// ✅ GOOD - loading.tsx with proper skeletons
+import { Skeleton } from '@/components/ui/skeleton';
+
+export default function Loading() {
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <Skeleton className="h-8 w-64 mb-6" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="space-y-4">
+            <Skeleton className="h-48 w-full rounded-lg" />
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+```
+
+## 🎯 SERVER ACTIONS
+
+### Server Action Standards
+- **PLACE server actions** in route-specific `actions/` folders
+- **USE `'use server'`** directive at the top
+- **RETURN structured responses** with success/error states
+- **VALIDATE input** with Zod schemas
+
+```typescript
+// ✅ GOOD - Structured server action
+'use server';
+
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+import { z } from 'zod';
+import { prisma } from '@/lib/prisma';
+
+const createProductSchema = z.object({
+  name: z.string().min(1),
+  price: z.number().min(0),
+  categoryId: z.string(),
+});
+
+export async function createProduct(formData: FormData) {
+  try {
+    const rawData = {
+      name: formData.get('name'),
+      price: Number(formData.get('price')),
+      categoryId: formData.get('categoryId'),
+    };
+
+    const validatedData = createProductSchema.parse(rawData);
+
+    const product = await prisma.product.create({
+      data: validatedData,
+    });
+
+    revalidatePath('/dashboard/products');
+    
+    return {
+      success: true,
+      message: 'Product created successfully',
+      product,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to create product',
+    };
+  }
+}
+```
+
+### Form Integration
+- **USE useActionState** hook for form handling
+- **HANDLE loading states** appropriately
+- **SHOW toast notifications** for user feedback
+
+```typescript
+// ✅ GOOD - Form with server action integration
+'use client';
+
+import { useActionState } from 'react';
+import { toast } from 'sonner';
+import { createProduct } from '../actions/createProduct';
+
+export default function ProductForm() {
+  const [state, formAction, isPending] = useActionState(createProduct, {
+    success: false,
+    message: '',
+  });
+
+  useEffect(() => {
+    if (state.success) {
+      toast.success(state.message);
+    } else if (state.message) {
+      toast.error(state.message);
+    }
+  }, [state]);
+
+  return (
+    <form action={formAction} className="space-y-4">
+      <input name="name" placeholder="Product name" required />
+      <input name="price" type="number" placeholder="Price" required />
+      <button type="submit" disabled={isPending}>
+        {isPending ? 'Creating...' : 'Create Product'}
+      </button>
+    </form>
+  );
+}
+```
+
+## 🖼️ IMAGE OPTIMIZATION
+
+### next/image Requirements
+- **ALWAYS use `next/image`** instead of `<img>`
+- **PROVIDE width and height** or use `fill` with relative container
+- **USE appropriate `sizes`** for responsive images
+- **SET `alt` attributes** for accessibility
+
+```typescript
+// ✅ GOOD - Optimized image usage
+import Image from 'next/image';
+
+export default function ProductCard({ product }: { product: Product }) {
+  return (
+    <div className="relative aspect-square">
+      <Image
+        src={product.imageUrl}
+        alt={product.name}
+        fill
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        className="object-cover rounded-lg"
+        priority={product.featured} // Only for above-fold images
+      />
+    </div>
+  );
+}
+```
+
+## 🌍 INTERNATIONALIZATION
+
+### next-intl Integration
+- **USE next-intl** for all text content
+- **DEFAULT to Arabic** as primary language
+- **SUPPORT RTL** layouts properly
+- **USE translation keys** instead of hardcoded strings
+
+```typescript
+// ✅ GOOD - Internationalized component
+import { useTranslations } from 'next-intl';
+
+export default function ProductCard({ product }: { product: Product }) {
+  const t = useTranslations('products');
+
+  return (
+    <div className="space-y-2">
+      <h3>{product.name}</h3>
+      <p className="text-muted-foreground">
+        {t('price')}: {product.price} {t('currency')}
+      </p>
+      <button>{t('addToCart')}</button>
+    </div>
+  );
+}
+```
+
+## 📱 RESPONSIVE DESIGN
+
+### Tailwind CSS Standards
+- **USE mobile-first** approach
+- **IMPLEMENT proper RTL** support
+- **USE semantic HTML** elements
+- **ENSURE accessibility** compliance
+
+```typescript
+// ✅ GOOD - Responsive and accessible design
+export default function ProductGrid({ products }: { products: Product[] }) {
+  return (
+    <section 
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"
+      aria-labelledby="products-heading"
+    >
+      <h2 id="products-heading" className="sr-only">
+        Products Grid
+      </h2>
+      {products.map(product => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </section>
+  );
+}
+```
+
+## 🔄 CACHING & REVALIDATION
+
+### Data Fetching Patterns
+- **USE unstable_cache** for expensive operations
+- **IMPLEMENT proper revalidation** with revalidatePath/revalidateTag
+- **AVOID over-fetching** data
+
+```typescript
+// ✅ GOOD - Cached data fetching
+import { unstable_cache } from 'next/cache';
+
+const getPopularProducts = unstable_cache(
+  async () => {
+    return await prisma.product.findMany({
+      where: { featured: true },
+      include: { category: true },
+      orderBy: { sales: 'desc' },
+      take: 8,
+    });
+  },
+  ['popular-products'],
+  { revalidate: 3600 } // 1 hour
+);
+```
+
+This rule ensures optimal Next.js App Router usage for maximum performance and maintainability.

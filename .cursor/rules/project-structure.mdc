@@ -1,0 +1,59 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description:
+# Project Structure Rules
+
+## 📁 Folder Organization
+
+- Every route lives in its own folder: `app/[route]/`
+  - `components/` → ✅ route-specific components (UI only for this route)
+  - `actions/` → ✅ server actions (e.g. fetch, mutate, handle)
+  - `helpers/` → ✅ route-specific utilities, custom hooks, or helpers
+  - `loading.tsx` → ✅ always included, use shadcn skeleton
+  - `page.tsx` → ✅ always use server components unless client needed
+
+> 🔁 **Mandatory Rule:**  
+> Each `app/[route]/` **must always include** its own `components/`, `actions/`, and `helpers/` folders — even if they are empty at first.  
+> - Create these folders **immediately when setting up a new route**
+> - If empty, include a placeholder file (e.g. `.keep` or `README.md`) so they are tracked in Git and visible in editors like Cursor
+> - This enforces a clean, self-contained, and scalable architecture
+
+---
+
+## 🏗️ Feature-Based Structure
+
+- Use a **feature-based** folder structure for modularity and clarity
+- Reusable/shared logic must go in shared folders:
+  - `components/ui/` → global shadcn/ui-based or custom UI components
+  - `lib/hooks/` → global custom hooks
+  - `lib/utils/` → global utility functions
+
+> 🧩 Route-specific logic must stay inside that route’s own folder  
+> Avoid mixing shared and route-specific code
+
+---
+
+## 📂 Key Top-Level Directories
+
+| Folder             | Purpose                                                  |
+|--------------------|-----------------------------------------------------------|
+| `app/`             | App Router pages and layouts                              |
+| `components/ui/`   | Global reusable components (e.g. shadcn/ui)               |
+| `lib/`             | Shared utilities, hooks, and logic                        |
+| `messages/`        | Internationalization files (`ar.json`, `en.json`, ...)    |
+| `prisma/`          | Prisma schema, migrations, seed                           |
+| `public/`          | Static assets (e.g. images, fonts, favicon)               |
+
+---
+
+## 🔡 File & Naming Conventions
+
+- 🧱 **Components, files, pages** → PascalCase (`UserCard.tsx`, `PageForm.tsx`)
+- 🧩 **Variables, functions, folders** → camelCase (`fetchData`, `useCheckout`, `productList`)
+- 🕓 Always include `loading.tsx` in every route folder
+- 🔍 Use clear, semantic, descriptive names — avoid vague names like `data.ts` or `utils.ts`
+

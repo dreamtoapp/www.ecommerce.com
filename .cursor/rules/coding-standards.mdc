@@ -1,0 +1,44 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Coding Standards & Conventions
+
+## 🎯 TypeScript Requirements
+
+- ✅ TypeScript only, 100% type-safe (no `any`, `unknown`)
+- ✅ Always use proper type annotations
+- ✅ Leverage TypeScript's type inference where appropriate
+- ✅ Use interfaces and types for complex data structures
+
+## 📝 Naming Conventions
+
+- ✅ camelCase for variables, functions, and properties
+- ✅ PascalCase for files, components, and classes
+- ✅ Short but meaningful names
+- ✅ Avoid abbreviations unless widely understood
+
+## 🧹 Code Quality
+
+- ✅ Use SOLID principles — readable, maintainable, scalable
+- ✅ Always prefer simple & clean over clever or complex
+- ✅ Short but meaningful comments
+- ✅ Write minimal, readable code (no bloat)
+- ✅ Name functions clearly and semantically
+
+## 🔧 Best Practices
+
+- ✅ Follow React and Next.js best practices
+- ✅ Use server components by default
+- ✅ Implement proper error boundaries
+- ✅ Write testable, modular code
+- ✅ Keep functions small and focused
+
+## 📚 Documentation
+
+- ✅ Comment complex business logic
+- ✅ Document API endpoints and data structures
+- ✅ Use JSDoc for public functions and components
+- ✅ Keep documentation up-to-date with code changes
+

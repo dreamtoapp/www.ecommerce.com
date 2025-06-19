@@ -1,11 +1,8 @@
-import { ArrowRight } from 'lucide-react'; // Import directly
 
-import Link from '@/components/link';
-import { iconVariants } from '@/lib/utils'; // Import CVA variants
-
-import ClientAnalyticsDashboard from './ClientAnalyticsDashboard';
-import { getProductAnalytics } from './getAnalytics';
-import ProductNotFound from './ProductNotFound';
+import ClientAnalyticsDashboard from './components/ClientAnalyticsDashboard';
+import { getProductAnalytics } from './actions/getAnalytics';
+import ProductNotFound from './components/ProductNotFound';
+import BackButton from '@/components/BackButton';
 
 // Removed Icon import: import { Icon } from '@/components/icons';
 
@@ -37,15 +34,7 @@ export default async function ProductAnalyticsPage({
 
   return (
     <div className='container mx-auto py-8' dir='rtl'>
-      <div className='mb-4'>
-        <Link
-          href='/dashboard/products-control'
-          className='inline-flex items-center gap-1 rounded-lg border border-border bg-card px-3 py-1 font-medium text-muted-foreground shadow-sm transition hover:text-primary hover:bg-muted' // Changed bg-white to bg-card, border-muted to border-border, added hover:bg-muted
-        >
-          <ArrowRight className={iconVariants({ size: 'xs' })} /> {/* Use direct import + CVA */}
-          <span>رجوع للمنتجات</span>
-        </Link>
-      </div>
+      <BackButton label='رجوع للمنتجات' />
       <ClientAnalyticsDashboard
         analytics={{ ...analytics, product: { ...analytics.product, size: analytics.product.size ?? null, details: analytics.product.details ?? null, productCode: analytics.product.productCode ?? null, gtin: analytics.product.gtin ?? null, material: analytics.product.material ?? null, brand: analytics.product.brand ?? null, color: analytics.product.color ?? null } }}
         id={id}

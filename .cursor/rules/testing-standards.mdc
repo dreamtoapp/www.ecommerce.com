@@ -1,0 +1,354 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# 🧪 Testing Standards & Best Practices
+
+This project requires **comprehensive testing** to ensure reliability and maintainability. You MUST write tests for all new features and critical functionality.
+
+## 🏗️ TESTING SETUP REQUIREMENTS
+
+### Required Testing Stack
+- **Jest** - Testing framework
+- **React Testing Library** - Component testing
+- **@testing-library/jest-dom** - Custom matchers
+- **MSW (Mock Service Worker)** - API mocking
+- **@testing-library/user-event** - User interaction simulation
+
+### Test File Organization
+```
+src/
+├── components/
+│   ├── UserCard.tsx
+│   └── __tests__/
+│       └── UserCard.test.tsx
+├── app/
+│   ├── products/
+│   │   ├── actions/
+│   │   │   ├── getProducts.ts
+│   │   │   └── __tests__/
+│   │   │       └── getProducts.test.ts
+│   │   └── components/
+│   │       ├── ProductGrid.tsx
+│   │       └── __tests__/
+│   │           └── ProductGrid.test.tsx
+└── lib/
+    ├── utils.ts
+    └── __tests__/
+        └── utils.test.ts
+```
+
+## 📝 COMPONENT TESTING
+
+### React Testing Library Standards
+- **RENDER components** using `render()` from RTL
+- **QUERY by accessible elements** (roles, labels, text)
+- **AVOID implementation details** (class names, state)
+- **TEST user interactions** with `user-event`
+
+```typescript
+// ✅ GOOD - Component test with RTL
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { AddToCartButton } from '../AddToCartButton';
+
+describe('AddToCartButton', () => {
+  it('should add product to cart when clicked', async () => {
+    const user = userEvent.setup();
+    const mockAddToCart = jest.fn();
+    
+    render(
+      <AddToCartButton 
+        productId="123" 
+        productName="Test Product"
+        onAddToCart={mockAddToCart}
+      />
+    );
+
+    const button = screen.getByRole('button', { name: /add to cart/i });
+    await user.click(button);
+
+    expect(mockAddToCart).toHaveBeenCalledWith('123');
+    expect(screen.getByText('Adding...')).toBeInTheDocument();
+  });
+
+  it('should be disabled when loading', () => {
+    render(
+      <AddToCartButton 
+        productId="123" 
+        productName="Test Product"
+        isLoading={true}
+      />
+    );
+
+    expect(screen.getByRole('button')).toBeDisabled();
+  });
+});
+```
+
+### Form Testing
+- **TEST form validation** with invalid inputs
+- **TEST form submission** with valid data
+- **TEST error states** and error messages
+- **USE React Hook Form testing utilities**
+
+```typescript
+// ✅ GOOD - Form testing
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { ProductForm } from '../ProductForm';
+
+describe('ProductForm', () => {
+  it('should show validation errors for empty required fields', async () => {
+    const user = userEvent.setup();
+    
+    render(<ProductForm onSubmit={jest.fn()} />);
+
+    const submitButton = screen.getByRole('button', { name: /create product/i });
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Product name is required')).toBeInTheDocument();
+      expect(screen.getByText('Price must be greater than 0')).toBeInTheDocument();
+    });
+  });
+
+  it('should submit form with valid data', async () => {
+    const user = userEvent.setup();
+    const mockSubmit = jest.fn();
+    
+    render(<ProductForm onSubmit={mockSubmit} />);
+
+    await user.type(screen.getByLabelText(/product name/i), 'Test Product');
+    await user.type(screen.getByLabelText(/price/i), '99.99');
+    await user.click(screen.getByRole('button', { name: /create product/i }));
+
+    await waitFor(() => {
+      expect(mockSubmit).toHaveBeenCalledWith({
+        name: 'Test Product',
+        price: 99.99,
+      });
+    });
+  });
+});
+```
+
+## 🎯 SERVER ACTION TESTING
+
+### Testing Server Actions
+- **MOCK database operations** with Jest
+- **TEST validation logic** with invalid inputs
+- **TEST success and error paths**
+- **VERIFY revalidation calls**
+
+```typescript
+// ✅ GOOD - Server action testing
+import { createProduct } from '../createProduct';
+import { prisma } from '@/lib/prisma';
+import { revalidatePath } from 'next/cache';
+
+// Mock dependencies
+jest.mock('@/lib/prisma', () => ({
+  prisma: {
+    product: {
+      create: jest.fn(),
+    },
+  },
+}));
+
+jest.mock('next/cache', () => ({
+  revalidatePath: jest.fn(),
+}));
+
+const mockPrisma = prisma as jest.Mocked<typeof prisma>;
+const mockRevalidatePath = revalidatePath as jest.MockedFunction<typeof revalidatePath>;
+
+describe('createProduct', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should create product successfully', async () => {
+    const mockProduct = { id: '1', name: 'Test Product', price: 99.99 };
+    mockPrisma.product.create.mockResolvedValue(mockProduct as any);
+
+    const formData = new FormData();
+    formData.append('name', 'Test Product');
+    formData.append('price', '99.99');
+
+    const result = await createProduct(formData);
+
+    expect(result).toEqual({
+      success: true,
+      message: 'Product created successfully',
+      product: mockProduct,
+    });
+    expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/products');
+  });
+
+  it('should handle validation errors', async () => {
+    const formData = new FormData();
+    formData.append('name', ''); // Invalid empty name
+
+    const result = await createProduct(formData);
+
+    expect(result.success).toBe(false);
+    expect(result.message).toContain('validation');
+    expect(mockPrisma.product.create).not.toHaveBeenCalled();
+  });
+});
+```
+
+## 🔧 UTILITY TESTING
+
+### Testing Utility Functions
+- **TEST pure functions** with various inputs
+- **TEST edge cases** and error conditions
+- **USE descriptive test names**
+- **GROUP related tests** with describe blocks
+
+```typescript
+// ✅ GOOD - Utility function testing
+import { formatPrice, calculateDiscount, validateEmail } from '../utils';
+
+describe('formatPrice', () => {
+  it('should format prices correctly for SAR currency', () => {
+    expect(formatPrice(99.99, 'SAR')).toBe('99.99 ر.س');
+    expect(formatPrice(0, 'SAR')).toBe('0.00 ر.س');
+    expect(formatPrice(1234.5, 'SAR')).toBe('1,234.50 ر.س');
+  });
+
+  it('should handle invalid inputs gracefully', () => {
+    expect(formatPrice(NaN, 'SAR')).toBe('0.00 ر.س');
+    expect(formatPrice(Infinity, 'SAR')).toBe('0.00 ر.س');
+  });
+});
+
+describe('calculateDiscount', () => {
+  it('should calculate percentage discounts correctly', () => {
+    expect(calculateDiscount(100, { type: 'percentage', value: 10 })).toBe(10);
+    expect(calculateDiscount(50, { type: 'percentage', value: 25 })).toBe(12.5);
+  });
+
+  it('should calculate fixed amount discounts correctly', () => {
+    expect(calculateDiscount(100, { type: 'fixed', value: 20 })).toBe(20);
+    expect(calculateDiscount(15, { type: 'fixed', value: 20 })).toBe(15); // Cannot exceed total
+  });
+});
+```
+
+## 🌐 API & INTEGRATION TESTING
+
+### Mock Service Worker (MSW) Setup
+- **MOCK external APIs** with MSW
+- **TEST API error scenarios**
+- **VERIFY request payloads**
+
+```typescript
+// ✅ GOOD - MSW setup for API testing
+import { rest } from 'msw';
+import { setupServer } from 'msw/node';
+
+const server = setupServer(
+  rest.get('/api/products', (req, res, ctx) => {
+    return res(
+      ctx.json([
+        { id: '1', name: 'Product 1', price: 99.99 },
+        { id: '2', name: 'Product 2', price: 149.99 },
+      ])
+    );
+  }),
+
+  rest.post('/api/products', (req, res, ctx) => {
+    return res(
+      ctx.json({ id: '3', name: 'New Product', price: 199.99 })
+    );
+  })
+);
+
+beforeAll(() => server.listen());
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+```
+
+## 📊 TESTING COVERAGE
+
+### Coverage Requirements
+- **Minimum 80% overall coverage**
+- **90% coverage for critical business logic**
+- **100% coverage for utility functions**
+- **TEST all error paths**
+
+### Coverage Configuration
+```javascript
+// jest.config.js
+module.exports = {
+  collectCoverageFrom: [
+    'app/**/*.{ts,tsx}',
+    'components/**/*.{ts,tsx}',
+    'lib/**/*.{ts,tsx}',
+    '!**/*.d.ts',
+    '!**/node_modules/**',
+  ],
+  coverageThreshold: {
+    global: {
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
+    },
+    './lib/': {
+      branches: 90,
+      functions: 90,
+      lines: 90,
+      statements: 90,
+    },
+  },
+};
+```
+
+## 🚀 PERFORMANCE TESTING
+
+### Testing Performance-Critical Components
+- **USE React Testing Library's performance utilities**
+- **TEST component render times**
+- **VERIFY memory leaks**
+
+```typescript
+// ✅ GOOD - Performance testing
+import { render, screen } from '@testing-library/react';
+import { ProductGrid } from '../ProductGrid';
+
+describe('ProductGrid Performance', () => {
+  it('should render large product lists efficiently', () => {
+    const products = Array.from({ length: 1000 }, (_, i) => ({
+      id: `product-${i}`,
+      name: `Product ${i}`,
+      price: 99.99,
+    }));
+
+    const start = performance.now();
+    render(<ProductGrid products={products} />);
+    const end = performance.now();
+
+    expect(end - start).toBeLessThan(100); // Should render in under 100ms
+  });
+});
+```
+
+## 🔄 TEST MAINTENANCE
+
+### Test Organization Rules
+- **ONE test file per source file**
+- **DESCRIPTIVE test names** that explain behavior
+- **GROUP related tests** with describe blocks
+- **CLEAN UP after each test** (mocks, DOM, etc.)
+
+### Continuous Testing
+- **RUN tests in CI/CD**
+- **REQUIRE passing tests** for PRs
+- **UPDATE tests** when refactoring
+- **REMOVE obsolete tests**
+
+This comprehensive testing approach ensures code reliability, maintainability, and developer confidence.

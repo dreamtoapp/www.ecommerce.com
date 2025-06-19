@@ -1,0 +1,451 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# 🚨 Error Handling Patterns & Standards
+
+This project requires **systematic error handling** to ensure robust application behavior and excellent user experience. You MUST implement comprehensive error handling for all scenarios.
+
+## 🏗️ ERROR BOUNDARY REQUIREMENTS
+
+### React Error Boundaries
+- **IMPLEMENT error boundaries** at route level and globally
+- **PROVIDE fallback UI** for graceful degradation  
+- **LOG errors** for debugging and monitoring
+- **RESET error state** when user navigates away
+
+```typescript
+// ✅ GOOD - Route-level error boundary
+'use client';
+
+import { ErrorBoundary } from 'react-error-boundary';
+import { Button } from '@/components/ui/button';
+import { AlertTriangle } from 'lucide-react';
+
+function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+      <AlertTriangle className="h-12 w-12 text-destructive" />
+      <div className="text-center space-y-2">
+        <h2 className="text-xl font-semibold">حدث خطأ غير متوقع</h2>
+        <p className="text-muted-foreground max-w-md">
+          نعتذر عن هذا الخطأ. يرجى المحاولة مرة أخرى أو الاتصال بالدعم الفني إذا استمر الخطأ.
+        </p>
+      </div>
+      <div className="flex gap-2">
+        <Button onClick={resetErrorBoundary}>
+          المحاولة مرة أخرى
+        </Button>
+        <Button variant="outline" onClick={() => window.location.href = '/'}>
+          العودة للرئيسية
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+export default function ProductsLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <ErrorBoundary
+      FallbackComponent={ErrorFallback}
+      onError={(error, errorInfo) => {
+        console.error('Products page error:', error, errorInfo);
+        // Send to error tracking service
+      }}
+      onReset={() => {
+        // Clear any cached data or state
+        window.location.reload();
+      }}
+    >
+      {children}
+    </ErrorBoundary>
+  );
+}
+```
+
+### Global Error Boundary
+- **PLACE in root layout** to catch all unhandled errors
+- **PROVIDE generic fallback** for critical failures
+- **INTEGRATE with error tracking** services
+
+```typescript
+// ✅ GOOD - Global error boundary in app/global-error.tsx
+'use client';
+
+import { useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+
+export default function GlobalError({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  useEffect(() => {
+    // Log error to monitoring service
+    console.error('Global error:', error);
+  }, [error]);
+
+  return (
+    <html>
+      <body>
+        <div className="flex flex-col items-center justify-center min-h-screen p-4">
+          <div className="text-center space-y-4 max-w-md">
+            <h1 className="text-2xl font-bold">تعذر تحميل التطبيق</h1>
+            <p className="text-muted-foreground">
+              حدث خطأ في النظام. يرجى إعادة تحميل الصفحة أو المحاولة لاحقاً.
+            </p>
+            <Button onClick={reset}>إعادة المحاولة</Button>
+          </div>
+        </div>
+      </body>
+    </html>
+  );
+}
+```
+
+## 🎯 SERVER ACTION ERROR HANDLING
+
+### Structured Error Responses
+- **RETURN consistent error format** from server actions
+- **VALIDATE input** and handle validation errors
+- **CATCH and transform** database errors
+- **LOG errors** for debugging
+
+```typescript
+// ✅ GOOD - Server action with comprehensive error handling
+'use server';
+
+import { z } from 'zod';
+import { prisma } from '@/lib/prisma';
+import { revalidatePath } from 'next/cache';
+
+const createProductSchema = z.object({
+  name: z.string().min(1, 'اسم المنتج مطلوب'),
+  price: z.number().min(0.01, 'السعر يجب أن يكون أكبر من 0'),
+  categoryId: z.string().min(1, 'تصنيف المنتج مطلوب'),
+});
+
+export async function createProduct(formData: FormData) {
+  try {
+    // Input validation
+    const rawData = {
+      name: formData.get('name') as string,
+      price: Number(formData.get('price')),
+      categoryId: formData.get('categoryId') as string,
+    };
+
+    const validatedData = createProductSchema.parse(rawData);
+
+    // Database operation
+    const product = await prisma.product.create({
+      data: validatedData,
+    });
+
+    revalidatePath('/dashboard/products');
+
+    return {
+      success: true,
+      message: 'تم إنشاء المنتج بنجاح',
+      data: product,
+    };
+  } catch (error) {
+    console.error('Error creating product:', error);
+
+    // Validation errors
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        message: 'بيانات غير صحيحة',
+        errors: error.errors.reduce((acc, err) => {
+          acc[err.path[0]] = err.message;
+          return acc;
+        }, {} as Record<string, string>),
+      };
+    }
+
+    // Database errors
+    if (error instanceof Error && error.message.includes('Unique constraint')) {
+      return {
+        success: false,
+        message: 'منتج بهذا الاسم موجود بالفعل',
+      };
+    }
+
+    // Generic error
+    return {
+      success: false,
+      message: 'حدث خطأ أثناء إنشاء المنتج. يرجى المحاولة مرة أخرى.',
+    };
+  }
+}
+```
+
+### Client-Side Error Handling
+- **HANDLE server action errors** in components
+- **SHOW user-friendly messages** with toast notifications
+- **DISPLAY field-specific errors** for forms
+- **MAINTAIN loading states** during error recovery
+
+```typescript
+// ✅ GOOD - Client component handling server action errors
+'use client';
+
+import { useActionState, useEffect } from 'react';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { createProduct } from '../actions/createProduct';
+
+export default function ProductForm() {
+  const [state, formAction, isPending] = useActionState(createProduct, {
+    success: false,
+    message: '',
+    errors: {},
+  });
+
+  useEffect(() => {
+    if (state.success && state.message) {
+      toast.success(state.message);
+    } else if (!state.success && state.message) {
+      toast.error(state.message);
+    }
+  }, [state]);
+
+  return (
+    <form action={formAction} className="space-y-4">
+      <div>
+        <Input 
+          name="name" 
+          placeholder="اسم المنتج" 
+          className={state.errors?.name ? 'border-destructive' : ''}
+        />
+        {state.errors?.name && (
+          <p className="text-sm text-destructive mt-1">{state.errors.name}</p>
+        )}
+      </div>
+
+      <div>
+        <Input 
+          name="price" 
+          type="number" 
+          placeholder="السعر" 
+          className={state.errors?.price ? 'border-destructive' : ''}
+        />
+        {state.errors?.price && (
+          <p className="text-sm text-destructive mt-1">{state.errors.price}</p>
+        )}
+      </div>
+
+      <Button type="submit" disabled={isPending}>
+        {isPending ? 'جاري الإنشاء...' : 'إنشاء المنتج'}
+      </Button>
+    </form>
+  );
+}
+```
+
+## 🌐 API ERROR HANDLING
+
+### API Route Error Handling
+- **CATCH all errors** in API routes
+- **RETURN appropriate HTTP status codes**
+- **PROVIDE consistent error format**
+- **LOG errors** for monitoring
+
+```typescript
+// ✅ GOOD - API route with comprehensive error handling
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+
+export async function POST(request: NextRequest) {
+  try {
+    const session = await getServerSession();
+    
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Unauthorized', message: 'يجب تسجيل الدخول أولاً' },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json();
+    
+    // Validate request body
+    if (!body.productId || !body.quantity) {
+      return NextResponse.json(
+        { error: 'Bad Request', message: 'بيانات الطلب غير مكتملة' },
+        { status: 400 }
+      );
+    }
+
+    const cartItem = await prisma.cartItem.create({
+      data: {
+        userId: session.user.id,
+        productId: body.productId,
+        quantity: body.quantity,
+      },
+    });
+
+    return NextResponse.json({ success: true, data: cartItem });
+  } catch (error) {
+    console.error('API Error:', error);
+
+    if (error instanceof Error && error.message.includes('Foreign key constraint')) {
+      return NextResponse.json(
+        { error: 'Not Found', message: 'المنتج غير موجود' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { error: 'Internal Server Error', message: 'حدث خطأ في الخادم' },
+      { status: 500 }
+    );
+  }
+}
+```
+
+## 🔄 ASYNC OPERATION ERROR HANDLING
+
+### Promise Error Handling
+- **USE try-catch** for async operations
+- **HANDLE specific error types**
+- **PROVIDE fallback values** when appropriate
+- **AVOID silent failures**
+
+```typescript
+// ✅ GOOD - Async function with error handling
+async function fetchProductDetails(productId: string) {
+  try {
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+      include: { category: true, images: true },
+    });
+
+    if (!product) {
+      throw new Error(`Product with ID ${productId} not found`);
+    }
+
+    return {
+      success: true,
+      data: product,
+    };
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
+      data: null,
+    };
+  }
+}
+
+// Usage with error handling
+async function ProductPage({ params }: { params: { id: string } }) {
+  const result = await fetchProductDetails(params.id);
+  
+  if (!result.success) {
+    notFound(); // Next.js 404 page
+  }
+
+  return <ProductDisplay product={result.data} />;
+}
+```
+
+## 📱 USER EXPERIENCE ERROR PATTERNS
+
+### Loading States
+- **SHOW loading indicators** during async operations
+- **DISABLE interactive elements** while loading
+- **PROVIDE progress feedback** for long operations
+
+```typescript
+// ✅ GOOD - Loading state management
+'use client';
+
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
+
+export default function DeleteProductButton({ productId }: { productId: string }) {
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/products/${productId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete product');
+      }
+
+      toast.success('تم حذف المنتج بنجاح');
+    } catch (error) {
+      toast.error('فشل في حذف المنتج');
+      console.error('Delete error:', error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  return (
+    <Button
+      variant="destructive"
+      onClick={handleDelete}
+      disabled={isDeleting}
+    >
+      {isDeleting ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          جاري الحذف...
+        </>
+      ) : (
+        'حذف'
+      )}
+    </Button>
+  );
+}
+```
+
+### Error Recovery
+- **PROVIDE retry mechanisms** for failed operations
+- **CLEAR error states** after successful retry
+- **GUIDE users** to alternative actions
+
+## 📊 ERROR MONITORING
+
+### Error Tracking Integration
+- **LOG all errors** to console and external service
+- **INCLUDE context** (user ID, action, timestamp)
+- **TRACK error frequency** and patterns
+- **SET UP alerts** for critical errors
+
+```typescript
+// ✅ GOOD - Error logging utility
+export function logError(error: Error, context: {
+  userId?: string;
+  action: string;
+  additionalInfo?: Record<string, any>;
+}) {
+  const errorInfo = {
+    message: error.message,
+    stack: error.stack,
+    timestamp: new Date().toISOString(),
+    ...context,
+  };
+
+  console.error('Application Error:', errorInfo);
+
+  // Send to error tracking service (e.g., Sentry)
+  // Sentry.captureException(error, { extra: errorInfo });
+}
+```
+
+This comprehensive error handling approach ensures application resilience and excellent user experience across all scenarios.

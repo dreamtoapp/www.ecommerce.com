@@ -1,0 +1,42 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Database & Data Management Rules
+
+## 🗄️ Database Setup
+
+- Use MongoDB + Prisma for data management
+- Follow Prisma best practices for schema design
+- Implement proper database relationships
+- Use type-safe database operations
+
+## 📊 Schema Design
+
+- Design normalized database schemas
+- Use proper indexing for performance
+- Implement soft deletes where appropriate
+- Handle data migrations carefully
+
+## 🔄 Data Operations
+
+- Use Prisma Client for all database operations
+- Implement proper error handling for database queries
+- Use transactions for complex operations
+- Optimize queries for performance
+
+## 🛡️ Data Security
+
+- Validate all data before database operations
+- Implement proper access controls
+- Use environment variables for database credentials
+- Regular database backups
+
+## 📈 Performance
+
+- Use database indexes strategically
+- Implement query optimization
+- Monitor database performance
+- Use connection pooling appropriately
+

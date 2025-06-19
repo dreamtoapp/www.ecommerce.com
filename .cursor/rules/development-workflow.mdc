@@ -1,0 +1,46 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Development Workflow Rules
+
+## 🧠 AI Helper Instructions
+
+AI should:
+- Write full components when asked
+- Suggest best practices (clean code, SOLID)
+- Refactor when code grows large or repetitive
+- Name functions clearly and semantically
+- Always write minimal, readable code (no bloat)
+
+## 📚 Official Documentation
+
+Follow the **latest official documentation** and **best practices** from:
+
+- 🔗 [Next.js Documentation](mdc:https:/nextjs.org/docs) — App Router, Server Components, Metadata, SEO, Performance
+- 🔗 [React Docs (Beta)](mdc:https:/react.dev) — Hooks, Server/Client components, Concurrent rendering
+- 🔗 [Prisma Docs](mdc:https:/www.prisma.io/docs) — MongoDB setup, relationships, and type-safety
+- 🔗 [Tailwind CSS Docs](mdc:https:/tailwindcss.com/docs) — Responsive-first styling, RTL support
+- 🔗 [shadcn/ui Docs](mdc:https:/ui.shadcn.com/docs) — Best practices for modern UI components
+- 🔗 [Zod Docs](mdc:https:/zod.dev) — Schema validation and type inference
+- 🔗 [React Hook Form Docs](mdc:https:/react-hook-form.com) — Form performance, validation, accessibility
+- 🔗 [NextAuth Docs](mdc:https:/next-auth.js.org) — Secure and scalable authentication
+- 🔗 [next-intl Docs](mdc:https:/next-intl-docs.vercel.app) — Multilingual support for App Router with RTL handling
+
+## 🔄 Development Process
+
+- Start with server components by default
+- Use client components only when necessary
+- Implement proper error handling from the start
+- Write clean, maintainable code
+- Follow the established project structure
+
+## 🎯 Code Quality
+
+- Use TypeScript strictly (no any/unknown)
+- Implement proper error boundaries
+- Write testable, modular code
+- Keep functions small and focused
+- Use meaningful variable and function names
+

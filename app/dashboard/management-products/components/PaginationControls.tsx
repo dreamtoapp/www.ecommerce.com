@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import {
   Pagination,
   PaginationContent,
@@ -10,14 +11,14 @@ interface PaginationControlsProps {
   page: number;
   pageSize: number;
   total: number;
-  onPageChange: (page: number) => void;
 }
+
+
 
 export default function PaginationControls({
   page,
   pageSize,
   total,
-  onPageChange,
 }: PaginationControlsProps) {
   const totalPages = Math.ceil(total / pageSize);
   if (totalPages <= 1) return null;
@@ -47,29 +48,31 @@ export default function PaginationControls({
     return pages;
   };
 
+  // Helper to build URL with correct page param
+  const getPageHref = (targetPage: number) => {
+    // On the server, we don't have window.location, so we use the current URL from process.env or fallback
+    // We'll use a relative URL with only the page param for simplicity
+    return `?page=${targetPage}`;
+  };
+
   return (
     <Pagination dir='rtl'>
       <PaginationContent>
         <PaginationItem>
-          <button
-            type='button'
-            onClick={() => page < totalPages && onPageChange(page + 1)}
-            disabled={page >= totalPages}
+          <Link
+            href={getPageHref(page < totalPages ? page + 1 : totalPages)}
+            aria-disabled={page >= totalPages}
             className={page >= totalPages ? 'pointer-events-none opacity-50' : ''}
           >
             التالي &larr;
-          </button>
+          </Link>
         </PaginationItem>
         {getPageNumbers().map((p, idx) =>
           typeof p === 'number' ? (
             <PaginationItem key={p}>
               <PaginationLink
-                href='#'
+                href={getPageHref(p)}
                 isActive={p === page}
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (p !== page) onPageChange(p);
-                }}
               >
                 {p}
               </PaginationLink>
@@ -81,14 +84,13 @@ export default function PaginationControls({
           ),
         )}
         <PaginationItem>
-          <button
-            type='button'
-            onClick={() => page > 1 && onPageChange(page - 1)}
-            disabled={page <= 1}
+          <Link
+            href={getPageHref(page > 1 ? page - 1 : 1)}
+            aria-disabled={page <= 1}
             className={page <= 1 ? 'pointer-events-none opacity-50' : ''}
           >
             &rarr; السابق
-          </button>
+          </Link>
         </PaginationItem>
       </PaginationContent>
     </Pagination>

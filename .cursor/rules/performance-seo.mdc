@@ -1,0 +1,44 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Performance & SEO Rules
+
+## ⚡ Performance Optimization
+
+- Always use semantic HTML elements
+- Optimize images with `next/image` and lazy loading
+- Implement responsive-first design with Tailwind CSS
+- Highest PageSpeed score is priority
+- Use server components for better performance
+
+## 🔍 SEO Best Practices
+
+- Add comprehensive meta tags in layout with dynamic metadata
+- Use proper heading hierarchy (h1, h2, h3, etc.)
+- Implement structured data (JSON-LD) where appropriate
+- Optimize for Core Web Vitals
+- Use descriptive alt text for images
+
+## 📱 Responsive Design
+
+- Mobile-first approach with Tailwind CSS
+- Test on multiple screen sizes
+- Ensure touch-friendly interfaces
+- Optimize for both portrait and landscape orientations
+
+## 🚀 Loading Performance
+
+- Always include `loading.tsx` for each route
+- Use shadcn skeleton components for loading states
+- Implement proper loading strategies
+- Minimize bundle size and optimize imports
+
+## 📊 Analytics & Monitoring
+
+- Implement proper error tracking
+- Monitor Core Web Vitals
+- Track user interactions and conversions
+- Use performance monitoring tools
+

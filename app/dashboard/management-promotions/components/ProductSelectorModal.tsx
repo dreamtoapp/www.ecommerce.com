@@ -7,11 +7,12 @@ import {
   useState,
 } from 'react';
 
-import { getProductsForSelect } from '@/app/dashboard/products/actions'; // Import the server action
-import type {
-  PaginatedProductsResponse,
-  SelectableProduct,
-} from '@/app/dashboard/products/actions/get-products-for-select';
+// import { getProductsForSelect } from '@/app/dashboard/management-products/new/actions'; // Import the server action
+import {
+  getProductsForSelect,
+  type PaginatedProductsResponse,
+  type SelectableProduct,
+} from '@/app/dashboard/management-promotions/actions/get-products-for-select';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {

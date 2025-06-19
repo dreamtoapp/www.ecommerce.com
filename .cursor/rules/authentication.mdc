@@ -1,0 +1,43 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Authentication & Security Rules
+
+## 🔐 Authentication Setup
+
+- Use `NextAuth.js` for authentication
+- Protect routes using server actions + middleware if needed
+- Get user session with helper: `getServerSessionUser()`
+- Implement proper session management
+
+## 🛡️ Security Best Practices
+
+- Validate all user inputs
+- Use HTTPS in production
+- Implement proper CORS policies
+- Sanitize data before database operations
+- Use environment variables for sensitive data
+
+## 🔒 Route Protection
+
+- Implement middleware for protected routes
+- Use server-side session validation
+- Redirect unauthenticated users appropriately
+- Handle authentication states properly
+
+## 👤 User Management
+
+- Implement proper user registration and login
+- Handle password reset functionality
+- Manage user roles and permissions
+- Implement account deletion and data export
+
+## 🚨 Error Handling
+
+- Implement proper error boundaries
+- Log security-related events
+- Handle authentication errors gracefully
+- Provide user-friendly error messages
+

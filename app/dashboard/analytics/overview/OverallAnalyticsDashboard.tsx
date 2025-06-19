@@ -36,12 +36,10 @@ import {
 import {
   formatCurrency,
 } from '@/lib/formatCurrency'; // Assuming you have this utility
-
-import DateRangePicker
-  from '../../management-products/analytics/[id]/DateRangePicker'; // Re-use existing
 import {
   OverallAnalyticsData as AnalyticsDataType,
 } from '../actions/getOverallAnalytics'; // Import type
+import DateRangePicker from '../../management-products/analytics/[id]/components/DateRangePicker';
 
 interface OverallAnalyticsDashboardProps {
   initialData: AnalyticsDataType;

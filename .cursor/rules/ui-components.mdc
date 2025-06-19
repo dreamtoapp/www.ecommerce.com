@@ -1,0 +1,43 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# UI Components & Forms Rules
+
+## 🎨 Component Library
+
+- Use `shadcn/ui` for all UI elements
+- Follow shadcn/ui design system and patterns
+- Customize components through CSS variables when needed
+- Maintain consistency across the application
+
+## 📝 Form Handling
+
+- Use `react-hook-form` with `zod` for validation
+- Prefer server components + server actions for forms
+- Implement proper form validation and error handling
+- Use accessible form patterns and ARIA labels
+
+## 🔧 Component Architecture
+
+- Create reusable components in `components/ui/`
+- Route-specific components in their respective folders
+- Use composition over inheritance
+- Keep components focused and single-purpose
+
+## 🎯 Form Validation
+
+- Use Zod schemas for type-safe validation
+- Implement client-side and server-side validation
+- Provide clear error messages
+- Handle form submission states properly
+
+## ♿ Accessibility
+
+- Follow WCAG guidelines
+- Use semantic HTML elements
+- Implement proper keyboard navigation
+- Ensure sufficient color contrast
+- Add proper ARIA labels and roles
+

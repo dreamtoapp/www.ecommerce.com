@@ -1,0 +1,213 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# 🔒 TypeScript Standards & Best Practices
+
+This project enforces **STRICT TypeScript standards** with zero tolerance for type safety violations. All code MUST be 100% type-safe.
+
+## 🚫 FORBIDDEN PRACTICES
+
+### Absolutely Prohibited
+- **NEVER use `any`** - Use proper typing or `unknown` with type guards
+- **NEVER use `@ts-ignore`** - Fix the underlying type issue instead
+- **NEVER use `as any`** - Use proper type assertions or type guards
+- **NEVER disable TypeScript rules** without explicit justification in code review
+
+### Type Assertion Rules
+- **AVOID `as`** assertions - Use type guards or proper typing instead
+- **IF using `as`** - Only use when you have verified type safety
+- **PREFER type guards** over type assertions for runtime safety
+
+```typescript
+// ❌ BAD - Dangerous type assertion
+const user = response.data as User;
+
+// ✅ GOOD - Type guard with validation
+function isUser(data: unknown): data is User {
+  return typeof data === 'object' && data !== null && 'id' in data;
+}
+const user = isUser(response.data) ? response.data : null;
+
+// ✅ ACCEPTABLE - When you know the type is correct
+const element = document.getElementById('my-id') as HTMLInputElement;
+```
+
+## ✅ REQUIRED PRACTICES
+
+### Interface and Type Definitions
+- **MUST define interfaces** for all complex objects
+- **USE PascalCase** for types and interfaces
+- **PREFER interfaces** over types for object shapes
+- **USE types** for unions, primitives, and computed types
+
+```typescript
+// ✅ GOOD - Clear interface definition
+interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  createdAt: Date;
+}
+
+// ✅ GOOD - Union type
+type UserRole = 'admin' | 'customer' | 'driver';
+
+// ✅ GOOD - Computed type
+type CreateUserData = Omit<UserProfile, 'id' | 'createdAt'>;
+```
+
+### Function Typing
+- **MUST type all function parameters**
+- **MUST type return values** for public functions
+- **USE generic types** for reusable functions
+- **PREFER function declarations** with explicit types over arrow functions for complex logic
+
+```typescript
+// ✅ GOOD - Explicit function typing
+function createUser(userData: CreateUserData): Promise<UserProfile> {
+  // Implementation
+}
+
+// ✅ GOOD - Generic function
+function apiRequest<T>(url: string, options?: RequestInit): Promise<T> {
+  // Implementation
+}
+```
+
+### Component Typing (React/Next.js)
+- **MUST type all props** with interfaces
+- **USE React.FC** sparingly, prefer explicit typing
+- **TYPE children** explicitly when used
+- **USE generic components** for reusable UI components
+
+```typescript
+// ✅ GOOD - Component with typed props
+interface UserCardProps {
+  user: UserProfile;
+  onEdit?: (user: UserProfile) => void;
+  className?: string;
+}
+
+export default function UserCard({ user, onEdit, className }: UserCardProps) {
+  // Implementation
+}
+
+// ✅ GOOD - Generic component
+interface DataTableProps<T> {
+  data: T[];
+  columns: ColumnDef<T>[];
+  onRowClick?: (item: T) => void;
+}
+
+export default function DataTable<T>({ data, columns, onRowClick }: DataTableProps<T>) {
+  // Implementation
+}
+```
+
+## 🎯 SPECIFIC PROJECT PATTERNS
+
+### Prisma Integration
+- **ALWAYS use Prisma types** for database models
+- **EXTEND Prisma types** when needed rather than recreating
+- **USE Prisma's generated types** for relations
+
+```typescript
+// ✅ GOOD - Using Prisma types
+import type { User, Product } from '@prisma/client';
+
+// ✅ GOOD - Extending Prisma types
+interface UserWithOrders extends User {
+  orders: Order[];
+}
+
+// ✅ GOOD - Prisma select types
+type UserBasic = Pick<User, 'id' | 'name' | 'email'>;
+```
+
+### Form Handling
+- **MUST use Zod schemas** for form validation
+- **DERIVE TypeScript types** from Zod schemas
+- **TYPE form handlers** explicitly
+
+```typescript
+// ✅ GOOD - Zod schema with TypeScript integration
+import { z } from 'zod';
+
+const userSchema = z.object({
+  name: z.string().min(1),
+  email: z.string().email(),
+  age: z.number().min(18),
+});
+
+type UserFormData = z.infer<typeof userSchema>;
+
+function handleUserSubmit(data: UserFormData): Promise<void> {
+  // Implementation
+}
+```
+
+### Server Actions
+- **MUST type server action parameters**
+- **MUST type return values**
+- **USE FormData typing** for form submissions
+
+```typescript
+// ✅ GOOD - Typed server action
+async function createProduct(formData: FormData): Promise<{ success: boolean; message: string; product?: Product }> {
+  // Implementation
+}
+```
+
+## 🔧 DEVELOPMENT TOOLS
+
+### Required TypeScript Config
+- **strict: true** - Non-negotiable
+- **noUncheckedIndexedAccess: true** - Prevent array/object access issues
+- **noImplicitReturns: true** - Ensure all code paths return values
+
+### IDE Integration
+- **MUST fix TypeScript errors** before committing
+- **USE TypeScript strict mode** in IDE
+- **ENABLE all TypeScript warnings**
+
+### Error Handling
+- **TYPE error objects** explicitly
+- **USE discriminated unions** for error states
+- **HANDLE all possible error cases**
+
+```typescript
+// ✅ GOOD - Typed error handling
+type ApiResult<T> = 
+  | { success: true; data: T }
+  | { success: false; error: string };
+
+function handleApiResult<T>(result: ApiResult<T>): T | null {
+  if (result.success) {
+    return result.data;
+  } else {
+    console.error(result.error);
+    return null;
+  }
+}
+```
+
+## 📊 PERFORMANCE CONSIDERATIONS
+
+### Type-Only Imports
+- **USE `import type`** for type-only imports
+- **SEPARATE runtime and type imports**
+
+```typescript
+// ✅ GOOD - Type-only imports
+import type { User } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
+```
+
+### Conditional Types
+- **USE conditional types** for complex type logic
+- **AVOID overly complex type computations** that slow compilation
+
+This rule ensures maximum type safety while maintaining developer productivity and code maintainability.

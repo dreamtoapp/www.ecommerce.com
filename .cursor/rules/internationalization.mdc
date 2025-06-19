@@ -1,0 +1,42 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Internationalization (i18n) Rules
+
+## 🌍 Localization Setup
+
+- Use `next-intl` for multilingual support (Arabic & English)
+- Default language = Arabic
+- File structure under `/messages/` with `ar.json` and `en.json`
+- Support RTL with Tailwind (`dir="rtl"` via `html` element)
+
+## 📁 File Structure
+
+- `messages/ar.json` - Arabic translations
+- `messages/en.json` - English translations
+- `i18n/config.ts` - Internationalization configuration
+- `i18n/routing.ts` - Route handling for different locales
+
+## 🔄 RTL Support
+
+- Use Tailwind CSS RTL utilities
+- Set `dir="rtl"` on HTML element for Arabic
+- Use `dir="ltr"` for English
+- Test layout in both directions
+
+## 📝 Translation Keys
+
+- Use descriptive, hierarchical keys
+- Keep translations organized by feature/page
+- Avoid hardcoded strings in components
+- Use translation functions: `useTranslations()` hook
+
+## 🎯 Implementation
+
+- Wrap components with translation providers
+- Use `useTranslations()` for client components
+- Use `getTranslations()` for server components
+- Handle dynamic content with interpolation
+
