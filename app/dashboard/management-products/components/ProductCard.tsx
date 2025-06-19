@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Eye, Edit3, BarChart2, Package, DollarSign, Info, CheckCircle, XCircle } from 'lucide-react';
+import { Eye, Edit3, BarChart2, Package, DollarSign, Info, CheckCircle, XCircle, Images } from 'lucide-react';
 import { iconVariants } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
-import AddImage from '@/components/AddImage';
+
 import ProductDeleteButton from './ProductDeleteButton';
 
 interface ProductCardProps {
@@ -19,6 +20,7 @@ interface ProductCardProps {
     size?: string | null;
     details?: string | null;
     imageUrl?: string | null;
+    images?: string[];
     published: boolean;
     outOfStock?: boolean;
   };
@@ -26,72 +28,91 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const [currentImageUrl, setCurrentImageUrl] = useState(product.imageUrl);
+  const hasGallery = product.images && product.images.length > 0;
 
   return (
     <Card className="group flex flex-col h-full min-h-[380px] w-full max-w-[360px] rounded-xl border shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 card-hover-effect card-border-glow bg-gradient-to-b from-card to-card/80">
       {/* Product Image Section with Upload */}
       <CardContent className="p-0">
         <div className="relative w-full h-44 overflow-hidden rounded-t-xl bg-gradient-to-br from-muted/50 to-muted">
-          <AddImage
-            recordId={product.id}
-            table="product"
-            tableField="imageUrl"
-            cloudinaryPreset="E-comm"
-            folder="products"
-            url={currentImageUrl || undefined}
+          <Image
+            src={currentImageUrl || '/fallback/product-fallback.avif'}
             alt={`صورة ${product.name}`}
-            className="h-full w-full"
-            autoUpload={true}
-            onUploadComplete={(imageUrl) => {
-              setCurrentImageUrl(imageUrl);
-              // Show success feedback without full page reload
-              console.log('تم تحديث صورة المنتج بنجاح:', imageUrl);
-            }}
+            fill
+            className="object-cover"
           />
 
+          {/* Gallery Management Button */}
+          <div className="absolute top-3 left-3">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  href={`/dashboard/management-products/gallery/${product.id}`}
+                  className="flex items-center gap-1.5 bg-black/80 backdrop-blur-sm text-white px-2 py-1.5 rounded-md hover:bg-black/90 transition-all duration-200 text-xs shadow-lg group"
+                >
+                  <Images className="h-3 w-3 group-hover:scale-110 transition-transform duration-200" />
+                  <span>{hasGallery ? 'المعرض' : 'معرض'}</span>
+                  {hasGallery && (
+                    <span className="bg-white text-feature-products text-[10px] px-1.5 py-0.5 rounded-full font-bold min-w-[18px] text-center leading-none shadow-sm">
+                      {product.images?.length}
+                    </span>
+                  )}
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>
+                {hasGallery
+                  ? `إدارة المعرض (${product.images?.length} صور)`
+                  : 'إنشاء معرض صور للمنتج'
+                }
+              </TooltipContent>
+            </Tooltip>
+          </div>
+
           {/* Status Overlay Badges */}
-          <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
+          <div className="absolute top-3 right-3 flex flex-col gap-1 z-10">
             <Badge
               variant={product.published ? 'default' : 'secondary'}
-              className={`shadow-md transition-all duration-200 ${product.published
+              className={`shadow-lg transition-all duration-200 text-xs px-2 py-1 ${product.published
                 ? 'bg-feature-analytics text-primary-foreground border-feature-analytics'
                 : 'bg-feature-settings-soft text-feature-settings border-feature-settings/30'
                 }`}
             >
               {product.published ? (
                 <>
-                  <CheckCircle className="h-3 w-3 mr-1" />
+                  <CheckCircle className="h-3 w-3 ml-1" />
                   منشور
                 </>
               ) : (
                 <>
-                  <XCircle className="h-3 w-3 mr-1" />
-                  غير منشور
+                  <XCircle className="h-3 w-3 ml-1" />
+                  مسودة
                 </>
               )}
             </Badge>
 
             {typeof product.outOfStock !== 'undefined' && (
               <Badge
-                className={`shadow-md transition-all duration-200 ${product.outOfStock
+                className={`shadow-lg transition-all duration-200 text-xs px-2 py-1 ${product.outOfStock
                   ? 'bg-destructive text-destructive-foreground border-destructive'
                   : 'bg-feature-products text-primary-foreground border-feature-products'
                   }`}
               >
                 {product.outOfStock ? (
                   <>
-                    <XCircle className="h-3 w-3 mr-1" />
-                    غير متوفر
+                    <XCircle className="h-3 w-3 ml-1" />
+                    نفد
                   </>
                 ) : (
                   <>
-                    <CheckCircle className="h-3 w-3 mr-1" />
+                    <CheckCircle className="h-3 w-3 ml-1" />
                     متوفر
                   </>
                 )}
               </Badge>
             )}
           </div>
+
+
         </div>
 
         {/* Product Information Section */}
