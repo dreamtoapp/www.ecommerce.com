@@ -29,18 +29,10 @@ export async function POST(req: NextRequest) {
     const cloudinaryPreset = formData.get('cloudinaryPreset') as string | null;
     const folder = formData.get('folder') as string | null;
 
-    // Log incoming form values
-    console.log('[UPLOAD REQUEST]', {
-      file: file?.name ?? null,
-      recordId,
-      table,
-      tableField,
-      cloudinaryPreset,
-      folder,
-    });
 
-    // Validate required fields
-    if (!file || !recordId || !table || !cloudinaryPreset || !tableField) {
+
+    // Validate required fields (cloudinaryPreset can be empty string)
+    if (!file || !recordId || !table || cloudinaryPreset === null || cloudinaryPreset === undefined || !tableField) {
       return NextResponse.json(
         {
           error: 'Missing required fields',
@@ -49,7 +41,7 @@ export async function POST(req: NextRequest) {
             recordId,
             table,
             tableField,
-            cloudinaryPreset,
+            cloudinaryPreset: cloudinaryPreset === null ? 'null' : cloudinaryPreset === undefined ? 'undefined' : cloudinaryPreset,
           },
         },
         { status: 400 }
@@ -71,8 +63,17 @@ export async function POST(req: NextRequest) {
     const dataUri = `data:${file.type};base64,${buffer.toString('base64')}`;
 
     // Upload to Cloudinary
-    const imageUrl = await uploadImageToCloudinary(dataUri, cloudinaryPreset, folder ?? '');
-    console.log('[CLOUDINARY UPLOAD SUCCESS]', imageUrl);
+    let imageUrl;
+    try {
+      imageUrl = await uploadImageToCloudinary(dataUri, cloudinaryPreset, folder ?? '');
+      console.log('[CLOUDINARY UPLOAD SUCCESS]', imageUrl);
+    } catch (cloudinaryError) {
+      console.error('[CLOUDINARY UPLOAD ERROR]', cloudinaryError);
+      return NextResponse.json({ 
+        error: 'Failed to upload image to Cloudinary',
+        details: cloudinaryError instanceof Error ? cloudinaryError.message : 'Unknown Cloudinary error'
+      }, { status: 500 });
+    }
 
     // Dynamically build data object
     const updateData = {

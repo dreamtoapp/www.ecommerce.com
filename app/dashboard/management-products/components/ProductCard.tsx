@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -5,7 +8,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Eye, Edit3, BarChart2, Package, DollarSign, Info, CheckCircle, XCircle } from 'lucide-react';
 import { iconVariants } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
-import CardImage from '../../../../components/CardImage';
+import AddImage from '@/components/AddImage';
 import ProductDeleteButton from './ProductDeleteButton';
 
 interface ProductCardProps {
@@ -22,27 +25,37 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
+  const [currentImageUrl, setCurrentImageUrl] = useState(product.imageUrl);
+
   return (
     <Card className="group flex flex-col h-full min-h-[380px] w-full max-w-[360px] rounded-xl border shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 card-hover-effect card-border-glow bg-gradient-to-b from-card to-card/80">
-      {/* Product Image Section */}
+      {/* Product Image Section with Upload */}
       <CardContent className="p-0">
         <div className="relative w-full h-44 overflow-hidden rounded-t-xl bg-gradient-to-br from-muted/50 to-muted">
-          <CardImage
-            imageUrl={product.imageUrl || undefined}
-            altText={`${product.name} image`}
-            aspectRatio="square"
-            fallbackSrc="/fallback/product-fallback.avif"
-            placeholderText="لا توجد صورة متاحة"
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          <AddImage
+            recordId={product.id}
+            table="product"
+            tableField="imageUrl"
+            cloudinaryPreset="E-comm"
+            folder="products"
+            url={currentImageUrl || undefined}
+            alt={`صورة ${product.name}`}
+            className="h-full w-full"
+            autoUpload={true}
+            onUploadComplete={(imageUrl) => {
+              setCurrentImageUrl(imageUrl);
+              // Show success feedback without full page reload
+              console.log('تم تحديث صورة المنتج بنجاح:', imageUrl);
+            }}
           />
 
           {/* Status Overlay Badges */}
-          <div className="absolute top-3 right-3 flex flex-col gap-2">
+          <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
             <Badge
               variant={product.published ? 'default' : 'secondary'}
               className={`shadow-md transition-all duration-200 ${product.published
-                ? 'bg-feature-products text-white border-feature-products'
-                : 'bg-muted text-muted-foreground border-muted-foreground/20'
+                ? 'bg-feature-analytics text-primary-foreground border-feature-analytics'
+                : 'bg-feature-settings-soft text-feature-settings border-feature-settings/30'
                 }`}
             >
               {product.published ? (
@@ -62,7 +75,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               <Badge
                 className={`shadow-md transition-all duration-200 ${product.outOfStock
                   ? 'bg-destructive text-destructive-foreground border-destructive'
-                  : 'bg-emerald-600 text-white border-emerald-600'
+                  : 'bg-feature-products text-primary-foreground border-feature-products'
                   }`}
               >
                 {product.outOfStock ? (
@@ -127,7 +140,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 <TooltipTrigger asChild>
                   <Link
                     href={`/dashboard/management-products/view/${product.id}`}
-                    className={buttonVariants({ variant: 'ghost', size: 'sm' }) + ' btn-view-outline p-2 h-8'}
+                    className="btn-view-outline p-2 h-8 rounded-md border border-feature-analytics/20 text-feature-analytics hover:bg-feature-analytics/10 hover:border-feature-analytics/40 transition-all duration-200"
                   >
                     <Eye className="h-4 w-4 icon-enhanced" />
                   </Link>
@@ -139,7 +152,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 <TooltipTrigger asChild>
                   <Link
                     href={`/dashboard/management-products/analytics/${product.id}`}
-                    className={buttonVariants({ variant: 'ghost', size: 'sm' }) + ' text-feature-analytics hover:bg-feature-analytics/10 border-feature-analytics/20 hover:border-feature-analytics/40 p-2 h-8'}
+                    className="p-2 h-8 rounded-md border border-feature-analytics/20 text-feature-analytics hover:bg-feature-analytics/10 hover:border-feature-analytics/40 transition-all duration-200"
                   >
                     <BarChart2 className="h-4 w-4 icon-enhanced" />
                   </Link>
@@ -154,7 +167,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 <TooltipTrigger asChild>
                   <Link
                     href={`/dashboard/management-products/edit/${product.id}`}
-                    className={buttonVariants({ variant: 'ghost', size: 'sm' }) + ' btn-edit p-2 h-8'}
+                    className="btn-edit p-2 h-8 rounded-md border border-feature-settings/20 text-feature-settings hover:bg-feature-settings/10 hover:border-feature-settings/40 transition-all duration-200"
                   >
                     <Edit3 className="h-4 w-4 icon-enhanced" />
                   </Link>

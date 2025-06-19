@@ -14,10 +14,40 @@ cloudinary.v2.config({
  * @returns Optimized secure URL string
  */
 export async function uploadImageToCloudinary(filePath: string, preset: string, folder: string): Promise<string> {
-  const result = await cloudinary.v2.uploader.upload(filePath, {
-    upload_preset: preset,
-    folder: folder,
-  });
+  // Validate Cloudinary configuration
+  if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+    throw new Error('Missing Cloudinary configuration. Please check environment variables.');
+  }
+
+  // Upload options - try with preset first, fallback without preset
+  const uploadOptions: any = {
+    folder: folder || 'products',
+    resource_type: 'image',
+    // Basic transformations during upload
+    transformation: [
+      { quality: 'auto' },
+      { fetch_format: 'auto' }
+    ]
+  };
+
+  // Add preset if provided, otherwise rely on default settings
+  if (preset && preset.trim()) {
+    uploadOptions.upload_preset = preset;
+  }
+
+  let result;
+  try {
+    result = await cloudinary.v2.uploader.upload(filePath, uploadOptions);
+  } catch (error) {
+    // If preset fails, try without preset
+    if (preset && error instanceof Error && error.message.includes('preset')) {
+      console.warn('[CLOUDINARY] Preset failed, trying without preset:', preset);
+      delete uploadOptions.upload_preset;
+      result = await cloudinary.v2.uploader.upload(filePath, uploadOptions);
+    } else {
+      throw error;
+    }
+  }
 
   // Generate an optimized URL with auto format, quality, and responsive width
   return cloudinary.v2.url(result.public_id, {
