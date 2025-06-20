@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 
 import AppSidebar
-  from '@/app/dashboard/management-dashboard/components/AppSidebar'; // Reverted to Old sidebar
+  from '@/app/dashboard/management-dashboard/components/AppSidebar'; // Enhanced sidebar
 import { auth } from '@/auth';
 import {
   SidebarProvider,
@@ -9,7 +9,8 @@ import {
 } from '@/components/ui/sidebar';
 import { UserRole } from '@prisma/client';
 
-import CurrentLinkTitle from './orders/component/CurrentLinkTitle';
+import EnhancedBreadcrumb from './management-dashboard/components/EnhancedBreadcrumb';
+import QuickActions from './management-dashboard/components/QuickActions';
 import PusherNotify from './orders/component/pusherNotifaction/PusherNotify';
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
@@ -29,13 +30,16 @@ export default async function Layout({ children }: { children: React.ReactNode }
       <div className='flex min-h-screen w-full bg-background ' dir='rtl'>
         <AppSidebar /> {/* Reverted to use the old sidebar */}
         <div className='flex min-h-screen flex-1 flex-col'>
-          {/* Sticky header */}
-          <header className='sticky top-0 z-40 flex items-center justify-between border-b bg-secondary px-6 py-1'>
-            <div className='flex items-center gap-2'>
-              <SidebarTrigger />
-              <CurrentLinkTitle />
+          {/* Enhanced Sticky header */}
+          <header className='sticky top-0 z-40 flex items-center justify-between border-b bg-background/80 backdrop-blur-sm px-6 py-3 shadow-sm'>
+            <div className='flex items-center gap-4 flex-1'>
+              <SidebarTrigger className="hover:bg-feature-analytics-soft" />
+              <EnhancedBreadcrumb />
             </div>
-            <PusherNotify />
+            <div className='flex items-center gap-3'>
+              <QuickActions />
+              <PusherNotify />
+            </div>
           </header>
           {/* Main content */}
           <main className='w-full flex-1 overflow-auto bg-background p-6'>{children}</main>
