@@ -32,7 +32,7 @@ import {
 } from '@/components/ui/select';
 
 import { fetchOrdersAction } from '../../management-dashboard/action/fetchOrders';
-import OrderCard from '../../orders/component/OrderCard';
+import OrderCard from './OrderCard';
 import { Order } from '@/types/databaseTypes';
 
 interface OrdersListProps {

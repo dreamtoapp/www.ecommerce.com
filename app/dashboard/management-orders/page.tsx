@@ -1,16 +1,34 @@
 
 import { getOrderAnalytics } from './actions/get-order-analytics';
-import OrderAnalyticsDashboard from './components/OrderAnalyticsDashboard';
+import { fetchOrdersAction } from '../management-dashboard/action/fetchOrders';
+import OrderManagementView from './components/OrderManagementView';
 
-export default async function OrdersManagementPage() {
-  // Fetch the analytics data from the server
-  const analyticsData = await getOrderAnalytics();
+export default async function OrdersManagementPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
+  const resolvedSearchParams = await searchParams;
+  const statusFilter = resolvedSearchParams.status || undefined;
+
+  // Fetch data in parallel
+  const [analyticsResult, filteredOrders] = await Promise.all([
+    getOrderAnalytics(),
+    fetchOrdersAction({
+      status: statusFilter,
+      page: 1,
+      pageSize: 10,
+    }),
+  ]);
+
+
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6">تحليل الطلبات</h1>
-      <OrderAnalyticsDashboard analyticsData={analyticsData} />
-    </div>
+    <OrderManagementView
+      analyticsResult={analyticsResult}
+      initialOrders={filteredOrders ?? []}
+      statusFilter={statusFilter}
+    />
   );
-};
+}
 

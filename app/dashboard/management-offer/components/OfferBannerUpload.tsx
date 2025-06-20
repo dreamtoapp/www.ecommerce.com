@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+
 import { ImageIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AddImage from '@/components/AddImage';

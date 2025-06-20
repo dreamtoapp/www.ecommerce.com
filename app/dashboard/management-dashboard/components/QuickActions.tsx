@@ -1,7 +1,6 @@
 'use client';
 
-import React from 'react';
-import { Plus, FileText, Users, Package, BarChart3, Settings, Zap } from 'lucide-react';
+import { Plus, Users, Package, BarChart3, Zap } from 'lucide-react';
 import Link from '@/components/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 // Removed unused import
@@ -20,7 +20,6 @@ import Image from 'next/image';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 import { setAsMainImageFromGallery, removeImageFromGallery, updateProductGallery } from '../actions/updateProductImages';
-import { useRouter } from 'next/navigation';
 
 interface ProductGalleryManagerProps {
     product: {
@@ -32,7 +31,6 @@ interface ProductGalleryManagerProps {
 }
 
 export default function ProductGalleryManager({ product }: ProductGalleryManagerProps) {
-    const router = useRouter();
 
     // Initialize with merged images array (imageUrl + images combined)
     const [allImages, setAllImages] = useState<string[]>(() => {

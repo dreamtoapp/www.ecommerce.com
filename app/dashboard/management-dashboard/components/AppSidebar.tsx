@@ -32,7 +32,7 @@ interface MenuItem { // Renamed BaseMenuItem to MenuItem
 }
 
 // Enhanced menu item with color mapping
-const getMenuItemColors = (groupIndex: number, itemTitle: string) => {
+const getMenuItemColors = (groupIndex: number) => {
   const colorMap: Record<number, { border: string; text: string; bg: string }> = {
     0: { border: 'border-l-feature-analytics', text: 'text-feature-analytics', bg: 'bg-feature-analytics-soft' }, // Dashboard
     1: { border: 'border-l-feature-commerce', text: 'text-feature-commerce', bg: 'bg-feature-commerce-soft' }, // Orders
@@ -109,7 +109,7 @@ export default function AppSidebar() {
       <SidebarContent className='flex-1 overflow-y-auto p-2'>
         {menuGroups.map((group, i) => {
           const isCollapsed = collapsedGroups.includes(i);
-          const colors = getMenuItemColors(i, group.label);
+          const colors = getMenuItemColors(i);
 
           return (
             <SidebarGroup key={i} className='mb-4'>

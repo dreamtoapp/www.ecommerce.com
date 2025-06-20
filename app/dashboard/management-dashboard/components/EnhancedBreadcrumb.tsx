@@ -36,33 +36,12 @@ export default function EnhancedBreadcrumb() {
 
         // Find the current item in menu groups
         let currentItem = null;
-        let parentGroup = null;
 
         for (const group of menuGroups) {
             for (const item of group.items) {
                 if (normalizePath(item.url) === normalizePath(pathname)) {
                     currentItem = item;
-                    parentGroup = group;
                     break;
-                }
-
-                // Check children
-                if (item.children) {
-                    for (const child of item.children) {
-                        if (normalizePath(child.url) === normalizePath(pathname)) {
-                            currentItem = child;
-                            parentGroup = group;
-                            // Add parent item to breadcrumb
-                            if (item.url !== '/dashboard') {
-                                breadcrumbs.push({
-                                    label: item.title,
-                                    href: item.url,
-                                    icon: item.icon,
-                                });
-                            }
-                            break;
-                        }
-                    }
                 }
             }
             if (currentItem) break;
@@ -82,7 +61,6 @@ export default function EnhancedBreadcrumb() {
     };
 
     const breadcrumbs = buildBreadcrumb();
-    const currentPage = breadcrumbs[breadcrumbs.length - 1];
 
     return (
         <div className="flex items-center justify-between w-full">
@@ -155,8 +133,8 @@ export default function EnhancedBreadcrumb() {
                         <Badge
                             variant="outline"
                             className={`text-xs ${breadcrumbs.length === 1 ? 'border-feature-analytics text-feature-analytics' :
-                                    breadcrumbs.length === 2 ? 'border-feature-users text-feature-users' :
-                                        'border-feature-products text-feature-products'
+                                breadcrumbs.length === 2 ? 'border-feature-users text-feature-users' :
+                                    'border-feature-products text-feature-products'
                                 }`}
                         >
                             {breadcrumbs.length === 1 ? 'رئيسي' :

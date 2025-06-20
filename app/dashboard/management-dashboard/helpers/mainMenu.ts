@@ -131,11 +131,12 @@ export const menuGroups = [
   {
     label: 'الطلبات',
     items: [
-      { title: 'جميع الطلبات', url: '/dashboard/orders-management', icon: ClipboardList },
-      { title: 'قيد المراجعة', url: '/dashboard/orders-management/status/pending', icon: Clock },
-      { title: 'قيد التوصيل', url: '/dashboard/orders-management/status/in-way', icon: Truck },
-      { title: 'مكتملة', url: '/dashboard/orders-management/status/delivered', icon: CheckCircle },
-      { title: 'ملغاة', url: '/dashboard/orders-management/status/canceled', icon: XCircle },
+      { title: 'جميع الطلبات', url: '/dashboard/management-orders', icon: ClipboardList },
+      { title: 'قيد المراجعة', url: '/dashboard/management-orders/status/pending', icon: Clock },
+      { title: 'قيد التوصيل', url: '/dashboard/management-orders/status/in-way', icon: Truck },
+      { title: 'مكتملة', url: '/dashboard/management-orders/status/delivered', icon: CheckCircle },
+      { title: 'ملغاة', url: '/dashboard/management-orders/status/canceled', icon: XCircle },
+      { title: 'تحليلات الطلبات', url: '/dashboard/management-orders/analytics', icon: Activity },
     ],
   },
   {

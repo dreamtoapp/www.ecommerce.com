@@ -11,7 +11,7 @@ import { UserRole } from '@prisma/client';
 
 import EnhancedBreadcrumb from './management-dashboard/components/EnhancedBreadcrumb';
 import QuickActions from './management-dashboard/components/QuickActions';
-import PusherNotify from './orders/component/pusherNotifaction/PusherNotify';
+import PusherNotify from '@/components/notifications/PusherNotify';
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
   // This layout is used for the dashboard pages
