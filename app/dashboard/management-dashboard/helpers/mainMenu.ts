@@ -122,86 +122,86 @@ import {
 // ];
 export const menuGroups = [
   {
-    label: 'اللوحة الرئيسية',
+    label: 'الرئيسية',
     items: [
-      { title: 'ملخص الأداء', url: '/dashboard', icon: LayoutDashboard }, // Changed to "Performance Summary"
-      { title: 'معاينة المتجر', url: '/', icon: Store }, // Changed to "Store Preview"
+      { title: 'لوحة التحكم', url: '/dashboard', icon: LayoutDashboard },
+      { title: 'المتجر', url: '/', icon: Store },
     ],
   },
   {
-    label: 'إدارة الطلبات',
+    label: 'الطلبات',
     items: [
-      { title: 'سجل الطلبات', url: '/dashboard/orders-management', icon: ClipboardList }, // Changed icon
-      { title: 'طلبات قيد المراجعة', url: '/dashboard/orders-management/status/pending', icon: Clock },
-      { title: 'طلبات قيد التوصيل', url: '/dashboard/orders-management/status/in-way', icon: Truck },
-      { title: 'طلبات مكتملة', url: '/dashboard/orders-management/status/delivered', icon: CheckCircle },
-      { title: 'طلبات ملغاة', url: '/dashboard/orders-management/status/canceled', icon: XCircle },
+      { title: 'جميع الطلبات', url: '/dashboard/orders-management', icon: ClipboardList },
+      { title: 'قيد المراجعة', url: '/dashboard/orders-management/status/pending', icon: Clock },
+      { title: 'قيد التوصيل', url: '/dashboard/orders-management/status/in-way', icon: Truck },
+      { title: 'مكتملة', url: '/dashboard/orders-management/status/delivered', icon: CheckCircle },
+      { title: 'ملغاة', url: '/dashboard/orders-management/status/canceled', icon: XCircle },
     ],
   },
   {
-    label: 'إدارة المنتجات',
+    label: 'المنتجات',
     items: [
-      { title: 'المخزون', url: '/dashboard/management-products', icon: Package }, // Changed to "Inventory"
-      { title: 'التصنيفات', url: '/dashboard/management-categories', icon: Tags }, // Changed icon
-      { title: 'إدارة الموردين', url: '/dashboard/management-suppliers', icon: Warehouse },
+      { title: 'المنتجات', url: '/dashboard/management-products', icon: Package },
+      { title: 'التصنيفات', url: '/dashboard/management-categories', icon: Tags },
+      { title: 'الموردين', url: '/dashboard/management-suppliers', icon: Warehouse },
     ],
   },
   {
-    label: 'إدارة العملاء',
+    label: 'العملاء',
     items: [
-      { title: 'سجل العملاء', url: '/dashboard/management-users/customer', icon: Users },
-      { title: 'طلبات الدعم', url: '/dashboard/clientsubmission', icon: Headset }, // Changed icon
+      { title: 'العملاء', url: '/dashboard/management-users/customer', icon: Users },
+      { title: 'الدعم', url: '/dashboard/clientsubmission', icon: Headset },
     ],
   },
   {
-    label: 'إدارة الفريق',
+    label: 'الفريق',
     items: [
-      { title: 'المشرفون', url: '/dashboard/management-users/admin', icon: ShieldCheck }, // Changed icon
-      { title: 'فرق التسويق', url: '/dashboard/management-users/marketer', icon: Megaphone },
-      { title: 'إدارة السائقين', url: '/dashboard/management-users/drivers', icon: Truck },
-      { title: 'جدولة المناوبات', url: '/dashboard/shifts', icon: CalendarClock },
+      { title: 'المشرفون', url: '/dashboard/management-users/admin', icon: ShieldCheck },
+      { title: 'التسويق', url: '/dashboard/management-users/marketer', icon: Megaphone },
+      { title: 'السائقون', url: '/dashboard/management-users/drivers', icon: Truck },
+      { title: 'المناوبات', url: '/dashboard/shifts', icon: CalendarClock },
     ],
   },
   {
-    label: 'التسويق الرقمي',
+    label: 'التسويق',
     items: [
-      { title: 'العروض المميزة', url: '/dashboard/management-offer', icon: Tag },
-      { title: 'حملات البريد الإلكتروني', url: '/dashboard/clientnews', icon: Mailbox },
+      { title: 'العروض', url: '/dashboard/management-offer', icon: Tag },
+      { title: 'البريد الإلكتروني', url: '/dashboard/clientnews', icon: Mailbox },
     ],
   },
   {
-    label: 'التحليلات المتقدمة',
+    label: 'التقارير',
     items: [
-      { title: 'تقارير الأداء', url: '/dashboard/management-reports', icon: Activity },
+      { title: 'التقارير', url: '/dashboard/management-reports', icon: Activity },
     ],
   },
   {
-    label: 'المالية والمحاسبة',
+    label: 'المالية',
     items: [
-      { title: 'حركات المصروفات', url: '/dashboard/management-expenses', icon: CreditCard }, // Changed to "Expense Transactions"
+      { title: 'المصروفات', url: '/dashboard/management-expenses', icon: CreditCard },
     ],
   },
   {
-    label: 'الإعدادات النظامية',
+    label: 'الإعدادات',
     items: [
-      { title: 'الإعدادات العامة', url: '/dashboard/settings', icon: Settings },
-      { title: 'إدارة التنبيهات', url: '/dashboard/management-notification', icon: Bell },
-      { title: 'الدعم الفني', url: '/dashboard/management-maintinance', icon: LifeBuoy },
-      { title: 'المرجع التشغيلي', url: '/dashboard/guidelines', icon: BookOpen },
-      { title: 'إدارة البيانات', url: '/dashboard/dataSeed', icon: Database }, // Changed to "Data Management"
+      { title: 'الإعدادات', url: '/dashboard/settings', icon: Settings },
+      { title: 'التنبيهات', url: '/dashboard/management-notification', icon: Bell },
+      { title: 'الصيانة', url: '/dashboard/management-maintinance', icon: LifeBuoy },
+      { title: 'الدليل', url: '/dashboard/guidelines', icon: BookOpen },
+      { title: 'البيانات', url: '/dashboard/dataSeed', icon: Database },
     ],
   },
   {
-    label: 'تحسين محركات البحث',
+    label: 'تحسين المحركات',
     items: [
-      { title: 'تحليل SEO الشامل', url: '/dashboard/seo', icon: SearchCheck }, // Changed icon
-      { title: 'تحسين الصفحة الرئيسية', url: '/dashboard/seo/home', icon: Home },
-      { title: 'صفحة من نحن', url: '/dashboard/seo/about', icon: Info },
-      { title: 'إدارة المدونة', url: '/dashboard/seo/blog', icon: Newspaper },
-      { title: 'تحسين صفحات المنتجات', url: '/dashboard/seo/product', icon: Package },
-      { title: 'صفحات الترويج', url: '/dashboard/seo/promotion', icon: Tag },
-      { title: 'تحسين التصنيفات', url: '/dashboard/seo/category', icon: LayoutGrid },
-      { title: 'مقاييس الأداء', url: '/dashboard/seo/performance', icon: Gauge }, // Changed icon
+      { title: 'تحليل SEO', url: '/dashboard/seo', icon: SearchCheck },
+      { title: 'الصفحة الرئيسية', url: '/dashboard/seo/home', icon: Home },
+      { title: 'من نحن', url: '/dashboard/seo/about', icon: Info },
+      { title: 'المدونة', url: '/dashboard/seo/blog', icon: Newspaper },
+      { title: 'صفحات المنتجات', url: '/dashboard/seo/product', icon: Package },
+      { title: 'الترويج', url: '/dashboard/seo/promotion', icon: Tag },
+      { title: 'التصنيفات', url: '/dashboard/seo/category', icon: LayoutGrid },
+      { title: 'الأداء', url: '/dashboard/seo/performance', icon: Gauge },
     ],
   },
 ];
