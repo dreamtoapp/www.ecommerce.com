@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 // Removed unused import
@@ -20,6 +20,7 @@ import Image from 'next/image';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 import { setAsMainImageFromGallery, removeImageFromGallery, updateProductGallery } from '../actions/updateProductImages';
+import { useRouter } from 'next/navigation';
 
 interface ProductGalleryManagerProps {
     product: {
@@ -31,17 +32,32 @@ interface ProductGalleryManagerProps {
 }
 
 export default function ProductGalleryManager({ product }: ProductGalleryManagerProps) {
-    const [images, setImages] = useState<string[]>(product.images || []);
+    const router = useRouter();
+
+    // Initialize with merged images array (imageUrl + images combined)
+    const [allImages, setAllImages] = useState<string[]>(() => {
+        const mergedImages = [...(product.images || [])];
+
+        // Add imageUrl to the beginning if it exists and isn't already in the array
+        if (product.imageUrl && !mergedImages.includes(product.imageUrl)) {
+            mergedImages.unshift(product.imageUrl);
+        }
+
+        return mergedImages;
+    });
+
+    const [mainImageUrl, setMainImageUrl] = useState<string | null>(product.imageUrl || null);
     const [isUploading, setIsUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
     const [isUpdating, setIsUpdating] = useState(false);
+    const [uploadComplete, setUploadComplete] = useState(false);
 
     // Preview state for new images before upload
     const [previewImages, setPreviewImages] = useState<{ file: File; url: string }[]>([]);
-    // Removed unused state
 
     // Find the main image index in the gallery
-    const mainImageIndex = product.imageUrl ? images.indexOf(product.imageUrl) : -1;
-    const hasGallery = images.length > 0;
+    const mainImageIndex = mainImageUrl ? allImages.indexOf(mainImageUrl) : -1;
+    const hasGallery = allImages.length > 0;
     const hasPreview = previewImages.length > 0;
 
     // Cleanup object URLs on unmount to prevent memory leaks
@@ -51,6 +67,13 @@ export default function ProductGalleryManager({ product }: ProductGalleryManager
         };
     }, []);
 
+    // Sync effect: Ensure imageUrl is always in the gallery when component mounts or data changes
+    useEffect(() => {
+        if (product.imageUrl && !allImages.includes(product.imageUrl)) {
+            setAllImages(prev => [product.imageUrl!, ...prev]);
+        }
+    }, [product.imageUrl]);
+
     const handleImageSelection = async (files: File[] | null) => {
         if (!files || files.length === 0) return;
 
@@ -59,9 +82,9 @@ export default function ProductGalleryManager({ product }: ProductGalleryManager
         const maxSizeBytes = maxSizeMB * 1024 * 1024;
 
         // Check total images limit (existing + preview + new)
-        const totalImages = images.length + previewImages.length + files.length;
+        const totalImages = allImages.length + previewImages.length + files.length;
         if (totalImages > maxFiles) {
-            toast.error(`لا يمكن إضافة أكثر من ${maxFiles} صور. لديك حالياً ${images.length + previewImages.length} صورة`);
+            toast.error(`لا يمكن إضافة أكثر من ${maxFiles} صور. لديك حالياً ${allImages.length + previewImages.length} صورة`);
             return;
         }
 
@@ -96,31 +119,76 @@ export default function ProductGalleryManager({ product }: ProductGalleryManager
         if (previewImages.length === 0) return;
 
         setIsUploading(true);
+        setUploadProgress({ current: 0, total: previewImages.length });
+        const uploadedUrls: string[] = [];
+
         try {
-            console.log('Uploading preview images:', previewImages);
+            console.log('Uploading preview images to Cloudinary:', previewImages);
 
-            // For now, convert preview images to URLs
-            // This allows the gallery to work without Cloudinary configuration
-            const newImageUrls = previewImages.map(preview => preview.url);
+            // Upload each image to Cloudinary only (without updating database)
+            for (let i = 0; i < previewImages.length; i++) {
+                const preview = previewImages[i];
+                setUploadProgress({ current: i + 1, total: previewImages.length });
 
-            // Update gallery with new images
-            const updatedImages = [...images, ...newImageUrls];
+                // Create a special FormData for gallery uploads (no database update)
+                const formData = new FormData();
+                formData.append('file', preview.file);
+                formData.append('table', 'product');
+                formData.append('uploadOnly', 'true');  // Special flag for upload-only mode
+
+                const response = await fetch('/api/images', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(`Upload failed for ${preview.file.name}: ${errorData.error || response.statusText}`);
+                }
+
+                const data = await response.json();
+                if (data.imageUrl) {
+                    uploadedUrls.push(data.imageUrl);
+                    toast.success(`تم رفع ${preview.file.name} (${i + 1}/${previewImages.length})`);
+                } else {
+                    throw new Error(data.error || `Failed to upload ${preview.file.name}`);
+                }
+            }
+
+            // Update gallery with new uploaded images
+            const updatedImages = [...allImages, ...uploadedUrls];
             const result = await updateProductGallery(product.id, updatedImages);
 
             if (result.success) {
-                setImages(updatedImages);
+                setAllImages(updatedImages);
                 setPreviewImages([]); // Clear preview after successful upload
-                toast.success(`تم رفع ${newImageUrls.length} صورة بنجاح`);
-                toast.info('ملاحظة: لرفع الصور إلى Cloudinary، يرجى تكوين متغيرات البيئة');
+                setUploadComplete(true);
+
+                // Show completion animation for 2 seconds
+                setTimeout(() => setUploadComplete(false), 2000);
+
+                toast.success(`تم رفع جميع الصور (${uploadedUrls.length}) إلى Cloudinary بنجاح`, {
+                    duration: 4000,
+                    description: 'جميع الصور محفوظة ومحسنة للويب'
+                });
             } else {
                 toast.error(result.message);
             }
 
         } catch (error) {
             console.error('Upload error:', error);
-            toast.error('حدث خطأ أثناء رفع الصور');
+            toast.error(`حدث خطأ أثناء رفع الصور: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`);
+
+            // If some images were uploaded but database update failed, show partial success
+            if (uploadedUrls.length > 0) {
+                toast.info(`تم رفع ${uploadedUrls.length} من ${previewImages.length} صور بنجاح`);
+            }
         } finally {
             setIsUploading(false);
+            // Don't reset progress immediately to show completion state
+            setTimeout(() => {
+                setUploadProgress({ current: 0, total: 0 });
+            }, 2000);
         }
     };
 
@@ -144,19 +212,27 @@ export default function ProductGalleryManager({ product }: ProductGalleryManager
 
         setIsUpdating(true);
         try {
-            const imageUrl = images[index];
-            const result = await setAsMainImageFromGallery(product.id, imageUrl, images);
+            const imageUrl = allImages[index];
+
+            // Optimistically update the UI first
+            setMainImageUrl(imageUrl);
+
+            // Use the current allImages array for the server call
+            const result = await setAsMainImageFromGallery(product.id, imageUrl, allImages);
 
             if (result.success) {
                 toast.success(result.message);
-                // Update local state to reflect the change
-                product.imageUrl = imageUrl;
+                // State is already updated optimistically
             } else {
                 toast.error(result.message);
+                // Revert optimistic update on failure
+                setMainImageUrl(product.imageUrl ?? null);
             }
         } catch (error) {
             console.error('Error setting main image:', error);
             toast.error('حدث خطأ أثناء تعيين الصورة الرئيسية');
+            // Revert optimistic update on error
+            setMainImageUrl(product.imageUrl ?? null);
         } finally {
             setIsUpdating(false);
         }
@@ -167,18 +243,19 @@ export default function ProductGalleryManager({ product }: ProductGalleryManager
 
         setIsUpdating(true);
         try {
-            const imageUrl = images[index];
-            const result = await removeImageFromGallery(product.id, imageUrl, images);
+            const imageUrl = allImages[index];
+            const result = await removeImageFromGallery(product.id, imageUrl, allImages);
 
             if (result.success) {
                 toast.success(result.message);
-                // Update local state
-                const newImages = images.filter((_, i) => i !== index);
-                setImages(newImages);
 
-                // If we deleted the main image, update product.imageUrl
-                if (product.imageUrl === imageUrl) {
-                    product.imageUrl = newImages.length > 0 ? newImages[0] : null;
+                // Remove from local state
+                const newImages = allImages.filter(img => img !== imageUrl);
+                setAllImages(newImages);
+
+                // If we deleted the main image, clear it or set new main
+                if (mainImageUrl === imageUrl) {
+                    setMainImageUrl(newImages.length > 0 ? newImages[0] : null);
                 }
             } else {
                 toast.error(result.message);
@@ -202,7 +279,7 @@ export default function ProductGalleryManager({ product }: ProductGalleryManager
                                 <Images className="h-5 w-5 text-feature-analytics icon-enhanced" />
                                 <div>
                                     <p className="text-sm text-muted-foreground">إجمالي الصور</p>
-                                    <p className="text-2xl font-bold">{images.length}</p>
+                                    <p className="text-2xl font-bold">{allImages.length}</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -215,7 +292,7 @@ export default function ProductGalleryManager({ product }: ProductGalleryManager
                                 <div>
                                     <p className="text-sm text-muted-foreground">الصورة الرئيسية</p>
                                     <p className="text-sm font-medium">
-                                        {product.imageUrl && images.includes(product.imageUrl) ? 'محددة ✓' : 'غير محددة'}
+                                        {mainImageUrl ? 'محددة ✓' : 'غير محددة'}
                                     </p>
                                 </div>
                             </div>
@@ -270,37 +347,121 @@ export default function ProductGalleryManager({ product }: ProductGalleryManager
                                 }}
                                 className="hidden"
                                 id="gallery-file-input"
-                                disabled={isUploading || (images.length + previewImages.length) >= 10}
+                                disabled={isUploading || (allImages.length + previewImages.length) >= 10}
                             />
 
                             <label
                                 htmlFor="gallery-file-input"
-                                className={`inline-flex items-center gap-3 px-8 py-4 rounded-lg transition-all duration-200 shadow-lg font-medium text-lg ${isUploading || (images.length + previewImages.length) >= 10
+                                className={`inline-flex items-center gap-3 px-8 py-4 rounded-lg transition-all duration-200 shadow-lg font-medium text-lg ${isUploading || (allImages.length + previewImages.length) >= 10
                                     ? 'bg-gray-400 cursor-not-allowed text-gray-200'
                                     : 'bg-feature-products hover:bg-feature-products/90 text-white cursor-pointer hover:shadow-xl'
                                     }`}
                             >
                                 <Upload className="h-6 w-6" />
-                                {(images.length + previewImages.length) >= 10
+                                {(allImages.length + previewImages.length) >= 10
                                     ? 'تم الوصول للحد الأقصى (10 صور)'
                                     : 'اختيار صور للمعرض'
                                 }
                             </label>
 
                             <p className="text-sm text-muted-foreground mt-4">
-                                يمكن اختيار حتى {10 - images.length - previewImages.length} صور إضافية • الحد الأقصى: 5 ميجا لكل صورة
+                                يمكن اختيار حتى {10 - allImages.length - previewImages.length} صور إضافية • الحد الأقصى: 5 ميجا لكل صورة
                             </p>
                             <p className="text-xs text-muted-foreground mt-1">
                                 الصيغ المدعومة: JPEG, PNG, WebP, AVIF
                             </p>
                         </div>
 
-                        {isUploading && (
-                            <div className="mt-4 p-4 bg-feature-products-soft/20 border border-feature-products/30 rounded-lg">
-                                <div className="flex items-center gap-2 text-feature-products">
-                                    <Upload className="h-4 w-4 animate-pulse" />
-                                    <span className="text-sm font-medium">جاري رفع الصور...</span>
+                        {(isUploading || uploadComplete) && (
+                            <div className="mt-4 p-6 bg-gradient-to-r from-feature-products-soft/30 to-blue-50/30 dark:from-feature-products-soft/20 dark:to-blue-950/20 border-2 border-feature-products/40 rounded-xl shadow-lg">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="relative">
+                                            {uploadComplete ? (
+                                                <div className="h-6 w-6 bg-green-500 rounded-full flex items-center justify-center animate-bounce">
+                                                    <CheckCircle className="h-4 w-4 text-white" />
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <Upload className="h-6 w-6 text-feature-products animate-pulse" />
+                                                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-ping"></div>
+                                                </>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <h4 className={`text-lg font-semibold ${uploadComplete ? 'text-green-600' : 'text-feature-products'}`}>
+                                                {uploadComplete ? 'تم رفع جميع الصور بنجاح! ✓' : 'جاري رفع الصور إلى Cloudinary'}
+                                            </h4>
+                                            <p className="text-sm text-muted-foreground">
+                                                {uploadComplete ? 'جميع الصور محفوظة ومحسنة للويب' : 'يتم رفع الصور بجودة عالية ومحسنة للويب'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-2xl font-bold text-feature-products">
+                                            {uploadProgress.current}/{uploadProgress.total}
+                                        </div>
+                                        <div className="text-sm text-muted-foreground">
+                                            {uploadProgress.total > 0 ? Math.round((uploadProgress.current / uploadProgress.total) * 100) : 0}%
+                                        </div>
+                                    </div>
                                 </div>
+
+                                {/* Enhanced Progress Bar */}
+                                {uploadProgress.total > 0 && (
+                                    <div className="space-y-3">
+                                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden shadow-inner">
+                                            <div
+                                                className={`h-3 rounded-full transition-all duration-500 ease-out shadow-sm relative overflow-hidden ${uploadComplete
+                                                    ? 'bg-gradient-to-r from-green-500 to-emerald-500'
+                                                    : 'bg-gradient-to-r from-feature-products to-blue-500'
+                                                    }`}
+                                                style={{ width: `${uploadComplete ? 100 : (uploadProgress.current / uploadProgress.total) * 100}%` }}
+                                            >
+                                                {/* Animated shine effect */}
+                                                <div className={`absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent ${uploadComplete ? 'animate-ping' : 'animate-pulse'
+                                                    }`}></div>
+                                            </div>
+                                        </div>
+
+                                        {/* Individual file progress indicators */}
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            {Array.from({ length: uploadProgress.total }, (_, index) => (
+                                                <div
+                                                    key={index}
+                                                    className={`w-3 h-3 rounded-full transition-all duration-300 ${index < uploadProgress.current
+                                                        ? 'bg-green-500 shadow-lg shadow-green-200 dark:shadow-green-900'
+                                                        : index === uploadProgress.current
+                                                            ? 'bg-feature-products animate-pulse shadow-lg shadow-blue-200 dark:shadow-blue-900'
+                                                            : 'bg-gray-300 dark:bg-gray-600'
+                                                        }`}
+                                                    title={`صورة ${index + 1} ${index < uploadProgress.current
+                                                        ? '- تم الرفع ✓'
+                                                        : index === uploadProgress.current
+                                                            ? '- جاري الرفع...'
+                                                            : '- في الانتظار'
+                                                        }`}
+                                                />
+                                            ))}
+                                        </div>
+
+                                        {/* Status text */}
+                                        <div className="flex items-center justify-between text-sm">
+                                            <div className="flex items-center gap-2 text-feature-products">
+                                                <div className="w-2 h-2 bg-feature-products rounded-full animate-pulse"></div>
+                                                <span className="font-medium">
+                                                    {uploadProgress.current < uploadProgress.total
+                                                        ? `رفع الصورة ${uploadProgress.current + 1}...`
+                                                        : 'تم رفع جميع الصور بنجاح! ✓'
+                                                    }
+                                                </span>
+                                            </div>
+                                            <div className="text-muted-foreground">
+                                                متبقي: {uploadProgress.total - uploadProgress.current}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </CardContent>
@@ -391,17 +552,30 @@ export default function ProductGalleryManager({ product }: ProductGalleryManager
                                     <Button
                                         onClick={handleUploadAll}
                                         disabled={isUploading || previewImages.length === 0}
-                                        className="bg-amber-600 hover:bg-amber-700 text-white flex-1 h-10 font-medium shadow-md"
+                                        className={`flex-1 h-12 font-medium shadow-md transition-all duration-300 ${isUploading
+                                            ? 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white'
+                                            : 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white'
+                                            }`}
                                     >
                                         {isUploading ? (
-                                            <>
-                                                <Upload className="h-4 w-4 mr-2 animate-pulse" />
-                                                جاري الرفع... ({previewImages.length})
-                                            </>
+                                            <div className="flex items-center gap-3">
+                                                <div className="relative">
+                                                    <Upload className="h-5 w-5 animate-pulse" />
+                                                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full animate-ping"></div>
+                                                </div>
+                                                <div className="flex flex-col items-start">
+                                                    <span className="text-sm font-semibold">
+                                                        جاري الرفع... ({uploadProgress.current}/{uploadProgress.total})
+                                                    </span>
+                                                    <div className="text-xs opacity-90">
+                                                        {uploadProgress.total > 0 ? Math.round((uploadProgress.current / uploadProgress.total) * 100) : 0}% مكتمل
+                                                    </div>
+                                                </div>
+                                            </div>
                                         ) : (
                                             <>
-                                                <Upload className="h-4 w-4 mr-2" />
-                                                رفع جميع الصور ({previewImages.length})
+                                                <Upload className="h-5 w-5 mr-2" />
+                                                <span>رفع إلى Cloudinary ({previewImages.length})</span>
                                             </>
                                         )}
                                     </Button>
@@ -434,7 +608,7 @@ export default function ProductGalleryManager({ product }: ProductGalleryManager
                                 <div className="flex items-center gap-2">
                                     <Images className="h-5 w-5 text-feature-analytics icon-enhanced" />
                                     <span className="text-feature-analytics">
-                                        معرض المنتج الحالي ({images.length})
+                                        معرض المنتج الحالي ({allImages.length})
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -448,7 +622,7 @@ export default function ProductGalleryManager({ product }: ProductGalleryManager
                         </CardHeader>
                         <CardContent>
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                                {images.map((image, index) => (
+                                {allImages.map((image, index) => (
                                     <div key={index} className="relative group">
                                         {/* إطار الصورة مع تحسينات */}
                                         <div className="aspect-square bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg overflow-hidden border-2 border-transparent hover:border-feature-analytics/30 transition-all duration-300 shadow-sm hover:shadow-md">

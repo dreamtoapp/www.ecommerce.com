@@ -46,12 +46,12 @@ export async function updateProductGallery(productId: string, galleryImages: str
   }
 }
 
-export async function setAsMainImageFromGallery(productId: string, imageUrl: string, galleryImages: string[]) {
+export async function setAsMainImageFromGallery(productId: string, imageUrl: string, allImages: string[]) {
   try {
-    // Update both main image and ensure it's in the gallery
-    const updatedGallery = galleryImages.includes(imageUrl) 
-      ? galleryImages 
-      : [imageUrl, ...galleryImages];
+    // Ensure the main image is in the gallery array
+    const updatedGallery = allImages.includes(imageUrl) 
+      ? allImages 
+      : [imageUrl, ...allImages];
 
     await db.product.update({
       where: { id: productId },
@@ -73,9 +73,9 @@ export async function setAsMainImageFromGallery(productId: string, imageUrl: str
   }
 }
 
-export async function removeImageFromGallery(productId: string, imageUrl: string, galleryImages: string[]) {
+export async function removeImageFromGallery(productId: string, imageUrl: string, allImages: string[]) {
   try {
-    const updatedGallery = galleryImages.filter(img => img !== imageUrl);
+    const updatedGallery = allImages.filter(img => img !== imageUrl);
     
     // Get current product to check if we're deleting the main image
     const product = await db.product.findUnique({

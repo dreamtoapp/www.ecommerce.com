@@ -16,10 +16,10 @@ interface AddImageProps {
   recordId: string;
   table: string;
   tableField: string;
-  cloudinaryPreset: string;
+  cloudinaryPreset?: string; // Made optional - will use env var if not provided
   onUploadComplete?: (url: string) => void;
   autoUpload?: boolean;
-  folder?: string; // Optional folder for Cloudinary
+  folder?: string; // Optional folder for Cloudinary - if not provided, uses CLOUDINARY_UPLOAD_PRESET/CLOUDINARY_CLIENT_FOLDER/table
 }
 
 const AddImage: React.FC<AddImageProps> = ({
@@ -28,11 +28,11 @@ const AddImage: React.FC<AddImageProps> = ({
   className = '',
   recordId,
   table,
-  cloudinaryPreset,
+  cloudinaryPreset, // Optional - API will use env var if not provided
   onUploadComplete,
   tableField = 'image', // Default to 'image' if not provided
   autoUpload = false,
-  folder = '', // Default to empty string if not provided
+  folder, // Optional - API will auto-generate using env vars if not provided
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | undefined>(url);
@@ -79,9 +79,13 @@ const AddImage: React.FC<AddImageProps> = ({
     formData.append('recordId', recordId);
     formData.append('table', table);
     formData.append('tableField', tableField);
-    formData.append('cloudinaryPreset', cloudinaryPreset || '');
+    // Only append cloudinaryPreset if provided, otherwise API will use env var
+    if (cloudinaryPreset) {
+      formData.append('cloudinaryPreset', cloudinaryPreset);
+    }
+    // Only append folder if provided, otherwise API will auto-generate using env vars
     if (folder) {
-      formData.append('folder', folder); // Append folder if provided
+      formData.append('folder', folder);
     }
 
 

@@ -5,6 +5,7 @@ import BackButton from '@/components/BackButton';
 import { getOfferById, getAllProducts } from '../../actions';
 import { AssignedProducts } from '../../components/AssignedProducts';
 import { ProductSelector } from '../../components/ProductSelector';
+import { OfferBannerUpload } from '../../components/OfferBannerUpload';
 
 interface ManageOfferPageProps {
     params: Promise<{
@@ -50,6 +51,13 @@ export default async function ManageOfferPage({ params }: ManageOfferPageProps) 
             {/* Main Content */}
             <main className="flex-1 p-4 md:p-6 space-y-8">
                 <div className="mx-auto max-w-7xl space-y-8">
+                    {/* Banner Upload Section */}
+                    <OfferBannerUpload
+                        offerId={offer.id}
+                        offerName={offer.name}
+                        currentBannerUrl={offer.bannerImage}
+                    />
+
                     {/* Offer Info Card */}
                     <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
                         <div className="flex items-center justify-between">

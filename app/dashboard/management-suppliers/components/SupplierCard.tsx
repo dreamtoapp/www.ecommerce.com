@@ -57,9 +57,7 @@ export default function SupplierCard({
           recordId={supplier.id}
           table="supplier"
           tableField='logo'
-          cloudinaryPreset={"E-comm"}
-          folder={`E-comm/supplier`}
-          onUploadComplete={() => toast.success("تم رفع الصورة بنجاح")} // 
+          onUploadComplete={() => toast.success("تم رفع الصورة بنجاح")}
         />
 
 

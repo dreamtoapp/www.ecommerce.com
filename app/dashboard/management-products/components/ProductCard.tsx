@@ -1,14 +1,13 @@
 'use client';
 
-// Removed unused useState import
 import Link from 'next/link';
-import Image from 'next/image';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Eye, Edit3, BarChart2, Package, DollarSign, Info, CheckCircle, XCircle, Images } from 'lucide-react';
-// Removed unused imports
+import { toast } from 'sonner';
 
+import AddImage from '@/components/AddImage';
 import ProductDeleteButton from './ProductDeleteButton';
 
 interface ProductCardProps {
@@ -25,6 +24,7 @@ interface ProductCardProps {
   };
 }
 
+// Enhanced ProductCard with AddImage integration
 export default function ProductCard({ product }: ProductCardProps) {
   const currentImageUrl = product.imageUrl;
   const hasGallery = product.images && product.images.length > 0;
@@ -34,11 +34,19 @@ export default function ProductCard({ product }: ProductCardProps) {
       {/* Product Image Section with Upload */}
       <CardContent className="p-0">
         <div className="relative w-full h-44 overflow-hidden rounded-t-xl bg-gradient-to-br from-muted/50 to-muted">
-          <Image
-            src={currentImageUrl || '/fallback/product-fallback.avif'}
+          <AddImage
+            url={currentImageUrl || undefined}
             alt={`صورة ${product.name}`}
-            fill
             className="object-cover"
+            recordId={product.id}
+            table="product"
+            tableField="imageUrl"
+            onUploadComplete={() => {
+              toast.success('تم تحديث صورة المنتج بنجاح');
+              // Refresh the page to show the new image
+              setTimeout(() => window.location.reload(), 1000);
+            }}
+            autoUpload={true}
           />
 
           {/* Gallery Management Button */}

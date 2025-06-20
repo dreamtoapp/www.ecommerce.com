@@ -42,8 +42,6 @@ export default async function SettingsPage() {
             recordId={companyData?.id || ''}
             table="company"
             tableField="logo"
-            folder="E-comm/Company/Profile"
-            cloudinaryPreset="E-comm"
           />
 
         </div>

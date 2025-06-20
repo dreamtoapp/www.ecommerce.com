@@ -42,8 +42,6 @@ export default function CategoryCard({ category }: CategoryCardProps) {
           recordId={id}
           table="category"
           tableField="imageUrl"
-          cloudinaryPreset="E-comm"
-          folder="E-comm/category"
           onUploadComplete={() => toast.success('تم رفع صورة التصنيف بنجاح')}
         />
       </div>

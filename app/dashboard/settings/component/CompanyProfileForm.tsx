@@ -207,8 +207,6 @@ export default function CompanyProfileForm({ company }: CompanyProfileFormProps)
                       recordId={company?.id || ''}
                       table="company"
                       tableField="taxQrImage"
-                      folder="E-comm/Company/Profile"
-                      cloudinaryPreset="E-comm"
                     />
                   </div>
                 )}

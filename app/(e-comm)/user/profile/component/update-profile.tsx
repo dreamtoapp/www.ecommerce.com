@@ -105,10 +105,7 @@ export default function UserProfileForm({ userData }: { userData: UserFormData }
             recordId={userData.id}
             table="user"
             tableField='image'
-            folder={`E-comm/Users/ProfileImage/${userData.id}`}
-            cloudinaryPreset={"E-comm"}
-
-            onUploadComplete={() => toast.success("تم رفع الصورة بنجاح")} // show notification on upload
+            onUploadComplete={() => toast.success("تم رفع الصورة بنجاح")}
           />
         </div>
       </div>

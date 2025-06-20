@@ -60,9 +60,7 @@ export default function UserCard({ driver }: DriverCardProps) {
             recordId={safeDriver.id}
             table="user"
             tableField='image'
-            cloudinaryPreset={"E-comm"}
-            folder={`E-comm/users/${safeDriver.role}`}
-            onUploadComplete={() => toast.success("تم رفع الصورة بنجاح")} // 
+            onUploadComplete={() => toast.success("تم رفع الصورة بنجاح")}
           />
         </div>
 
