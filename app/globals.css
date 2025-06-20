@@ -83,6 +83,16 @@
     --feature-suppliers-soft: 188 95% 95%;  /* Light Teal BG */
     --feature-commerce: 231 48% 48%;        /* Rich Indigo for Commerce */
     --feature-commerce-soft: 231 48% 95%;   /* Light Indigo BG */
+
+    /* Order Status Colors - Light Mode */
+    --status-pending: 45 95% 40%;           /* Strong Amber for Pending */
+    --status-pending-soft: 45 100% 92%;    /* Light Amber BG */
+    --status-urgent: 0 85% 45%;             /* Strong Red for Urgent */
+    --status-urgent-soft: 0 100% 94%;      /* Light Red BG */
+    --status-high-value: 160 85% 35%;      /* Strong Emerald for High Value */
+    --status-high-value-soft: 160 100% 92%; /* Light Emerald BG */
+    --status-priority: 217 90% 45%;        /* Strong Blue for Priority */
+    --status-priority-soft: 217 100% 93%;  /* Light Blue BG */
   }
 
   .dark {
@@ -157,6 +167,16 @@
     --feature-suppliers-soft: 188 50% 12%;  /* Dark Teal BG */
     --feature-commerce: 231 60% 65%;        /* Lighter Indigo for Commerce */
     --feature-commerce-soft: 231 40% 12%;   /* Dark Indigo BG */
+
+    /* Order Status Colors - Dark Mode */
+    --status-pending: 45 95% 70%;           /* Bright Amber for Pending */
+    --status-pending-soft: 45 60% 15%;     /* Strong Dark Amber BG */
+    --status-urgent: 0 85% 75%;             /* Bright Red for Urgent */
+    --status-urgent-soft: 0 60% 18%;       /* Strong Dark Red BG */
+    --status-high-value: 160 80% 65%;      /* Bright Emerald for High Value */
+    --status-high-value-soft: 160 60% 15%; /* Strong Dark Emerald BG */
+    --status-priority: 217 85% 80%;        /* Bright Blue for Priority */
+    --status-priority-soft: 217 60% 15%;   /* Strong Dark Blue BG */
   }
 }
 
@@ -329,6 +349,40 @@
   .icon-enhanced:hover {
     @apply scale-110 drop-shadow-sm;
   }
+
+  /* Order Status Colors */
+  .border-status-pending { border-color: hsl(var(--status-pending)); }
+  .border-l-status-pending { border-left-color: hsl(var(--status-pending)); }
+  .text-status-pending { color: hsl(var(--status-pending)); }
+  .bg-status-pending { background-color: hsl(var(--status-pending)); }
+  .bg-status-pending-soft { background-color: hsl(var(--status-pending-soft)); }
+  
+  .border-status-urgent { border-color: hsl(var(--status-urgent)); }
+  .border-l-status-urgent { border-left-color: hsl(var(--status-urgent)); }
+  .text-status-urgent { color: hsl(var(--status-urgent)); }
+  .bg-status-urgent { background-color: hsl(var(--status-urgent)); }
+  .bg-status-urgent-soft { background-color: hsl(var(--status-urgent-soft)); }
+  
+  .border-status-high-value { border-color: hsl(var(--status-high-value)); }
+  .border-l-status-high-value { border-left-color: hsl(var(--status-high-value)); }
+  .text-status-high-value { color: hsl(var(--status-high-value)); }
+  .bg-status-high-value { background-color: hsl(var(--status-high-value)); }
+  .bg-status-high-value-soft { background-color: hsl(var(--status-high-value-soft)); }
+  
+  .border-status-priority { border-color: hsl(var(--status-priority)); }
+  .border-l-status-priority { border-left-color: hsl(var(--status-priority)); }
+  .text-status-priority { color: hsl(var(--status-priority)); }
+  .bg-status-priority { background-color: hsl(var(--status-priority)); }
+  .bg-status-priority-soft { background-color: hsl(var(--status-priority-soft)); }
+
+  /* Enhanced Text Contrast */
+  .text-strong { color: hsl(var(--foreground)); font-weight: 600; }
+  .text-strong-muted { color: hsl(var(--muted-foreground)); font-weight: 600; }
+  .border-strong { border-color: hsl(var(--border)); border-width: 2px; }
+  .shadow-strong { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
+
+  /* Semantic Color Utilities */
+  .border-l-destructive { border-left-color: hsl(var(--destructive)); }
 }
 
 .relative.w-full.h-0 {

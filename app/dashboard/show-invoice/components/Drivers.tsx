@@ -1,8 +1,6 @@
 // SelectDriver.tsx
 'use client';
-import { PersonStanding } from 'lucide-react'; // Import directly
-import { iconVariants } from '@/lib/utils'; // Import CVA variants
-// Removed Icon import: import { Icon } from '@/components/icons';
+import { User, CheckCircle2 } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -12,11 +10,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 
 interface Driver {
   id: string;
   name: string;
 }
+
 interface SelectDriverProps {
   drivers: Driver[];
   selectedDriverId?: string;
@@ -25,26 +25,53 @@ interface SelectDriverProps {
 
 export function Drivers({ drivers, selectedDriverId, setSelectedDriverId }: SelectDriverProps) {
   return (
-    <div className='flex w-full flex-col'>
-      <div className='flex items-center gap-2'>
-        <PersonStanding className={iconVariants({ size: 'sm' })} /> {/* Use direct import + CVA (adjust size if needed) */}
-        <p>اختار السائق</p>
-      </div>
+    <div className="w-full space-y-3">
+      <Label className="flex items-center gap-2 text-sm font-medium text-foreground">
+        <User className="h-4 w-4 text-feature-users" />
+        اختيار السائق
+      </Label>
+
       <Select value={selectedDriverId} onValueChange={(value) => setSelectedDriverId(value)}>
-        <SelectTrigger className='text-foreground'>
-          <SelectValue placeholder='اختر السائق' />
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="اختر السائق المناسب..." />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            <SelectLabel>السائقون المتاحون</SelectLabel>
-            {drivers.map((driver) => (
-              <SelectItem key={driver.id} value={driver.id}>
-                {driver.name}
+            <SelectLabel className="flex items-center gap-2">
+              <User className="h-4 w-4 text-feature-users" />
+              السائقون المتاحون
+            </SelectLabel>
+            {drivers.length > 0 ? (
+              drivers.map((driver) => (
+                <SelectItem
+                  key={driver.id}
+                  value={driver.id}
+                  className="cursor-pointer hover:bg-muted/50"
+                >
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-feature-users" />
+                    <span>{driver.name}</span>
+                    {selectedDriverId === driver.id && (
+                      <CheckCircle2 className="h-4 w-4 text-green-600 mr-auto" />
+                    )}
+                  </div>
+                </SelectItem>
+              ))
+            ) : (
+              <SelectItem value="no-drivers" disabled>
+                لا يوجد سائقين متاحين
               </SelectItem>
-            ))}
+            )}
           </SelectGroup>
         </SelectContent>
       </Select>
+
+      {selectedDriverId && (
+        <div className="flex items-center gap-2 text-xs text-green-700 bg-green-50 px-2 py-1 rounded">
+          <CheckCircle2 className="h-3 w-3" />
+          تم اختيار: {drivers.find(d => d.id === selectedDriverId)?.name}
+        </div>
+      )}
     </div>
   );
 }

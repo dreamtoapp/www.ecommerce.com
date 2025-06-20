@@ -2,7 +2,7 @@
 // app/dashboard/orders-management/status/pending/components/PendingOrdersView.tsx
 import React, { useState } from 'react';
 
-import { Search } from 'lucide-react';
+import { Search, Filter, SortAsc, SortDesc, FileText, X } from 'lucide-react';
 import {
   usePathname,
   useRouter,
@@ -11,6 +11,9 @@ import {
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 
 import OrderTable from './OrderTable';
 import { Order } from '@/types/databaseTypes';
@@ -68,43 +71,176 @@ export default function PendingOrdersView({
     updateQuery({ sortBy: field, sortOrder: newOrder, page: 1, search: searchTerm });
   };
 
+  // Handle clear filters
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setSortBy('createdAt');
+    setSortOrder('desc');
+    updateQuery({ search: '', sortBy: 'createdAt', sortOrder: 'desc', page: 1 });
+  };
+
+  // Check if filters are active
+  const hasActiveFilters = search || sortBy !== 'createdAt' || sortOrder !== 'desc';
+
+  // Get sort icon
+  const getSortIcon = (field: 'createdAt' | 'amount' | 'orderNumber') => {
+    if (sortBy === field) {
+      return sortOrder === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />;
+    }
+    return null;
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="space-y-4">
+      {/* Enhanced Search & Filter Section */}
+      <Card className="shadow-lg border-l-4 border-l-status-pending card-hover-effect">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Search className="h-5 w-5 text-status-pending icon-enhanced" />
+            البحث والتصفية
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Search Bar Section */}
+          <div className="space-y-3">
+            <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3">
+              <Input
+                type="search"
+                placeholder="بحث عن طلب (رقم الطلب، اسم العميل، رقم الهاتف)..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="flex-1"
+              />
+              <Button type="submit" className="gap-2 sm:w-auto w-full">
+                <Search className="h-4 w-4" />
+                بحث
+              </Button>
+            </form>
 
-      {/* Filters and Actions */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <form onSubmit={handleSearch} className="flex w-full max-w-sm items-center space-x-2 rtl:space-x-reverse">
-          <Input
-            type="search"
-            placeholder="بحث عن طلب (رقم الطلب أو اسم العميل)..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full"
+            {/* Search Results Info */}
+            <div className="flex justify-between items-center">
+              {search ? (
+                <Badge variant="outline" className="bg-status-pending-soft text-status-pending border-status-pending">
+                  نتائج البحث: {orders.length}
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="bg-muted text-muted-foreground">
+                  إجمالي الطلبات: {pendingCount}
+                </Badge>
+              )}
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Sort Controls */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4 text-feature-analytics" />
+                <span className="text-sm font-semibold text-foreground">ترتيب حسب:</span>
+              </div>
+
+              {/* Clear Filters Button */}
+              {hasActiveFilters && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleClearFilters}
+                  className="gap-2 text-muted-foreground hover:text-destructive border-dashed"
+                >
+                  <X className="h-3 w-3" />
+                  مسح الفلاتر
+                </Button>
+              )}
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant={sortBy === 'createdAt' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handleSort('createdAt')}
+                className="gap-1 flex-1 sm:flex-initial min-w-[90px]"
+              >
+                الأحدث
+                {getSortIcon('createdAt')}
+              </Button>
+
+              <Button
+                variant={sortBy === 'amount' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handleSort('amount')}
+                className="gap-1 flex-1 sm:flex-initial min-w-[90px]"
+              >
+                المبلغ
+                {getSortIcon('amount')}
+              </Button>
+
+              <Button
+                variant={sortBy === 'orderNumber' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handleSort('orderNumber')}
+                className="gap-1 flex-1 sm:flex-initial min-w-[90px]"
+              >
+                رقم الطلب
+                {getSortIcon('orderNumber')}
+              </Button>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Status Info */}
+          <div className="bg-muted/50 border rounded-lg p-3">
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="outline" className="bg-card">
+                الصفحة: {currentPage}
+              </Badge>
+
+              <Badge variant="outline" className="bg-card">
+                المعروض: {orders.length} من {pendingCount}
+              </Badge>
+
+              {sortBy && (
+                <Badge variant="outline" className="bg-feature-analytics-soft text-feature-analytics border-feature-analytics gap-1">
+                  الترتيب: {sortBy === 'createdAt' ? 'التاريخ' : sortBy === 'amount' ? 'المبلغ' : 'رقم الطلب'}
+                  {getSortIcon(sortBy)}
+                </Badge>
+              )}
+
+              {search && (
+                <Badge variant="outline" className="bg-status-priority-soft text-status-priority border-status-priority">
+                  البحث: "{search}"
+                </Badge>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Orders Results Section */}
+      <Card className="shadow-lg border-l-4 border-l-feature-commerce card-hover-effect">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <FileText className="h-5 w-5 text-feature-commerce icon-enhanced" />
+            الطلبات قيد الانتظار
+            <Badge className="bg-status-pending text-white px-2 py-1 ml-2 text-sm">
+              {orders.length}
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <OrderTable
+            orders={orders}
+            currentPage={currentPage}
+            pageSize={pageSize}
+            totalPages={Math.ceil(pendingCount / pageSize) || 1}
+            updatePage={(page) => updateQuery({ page, sortBy, sortOrder, search: searchTerm })}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
           />
-          <Button type="submit" size="sm">
-            <Search className="h-4 w-4 ml-2 rtl:mr-2" />
-            بحث
-          </Button>
-        </form>
-        <div className="flex gap-2">
-
-          <Button variant={sortBy === 'createdAt' ? 'default' : 'outline'} size="sm" onClick={() => handleSort('createdAt')}>الأحدث</Button>
-          <Button variant={sortBy === 'amount' ? 'default' : 'outline'} size="sm" onClick={() => handleSort('amount')}>المبلغ</Button>
-          <Button variant={sortBy === 'orderNumber' ? 'default' : 'outline'} size="sm" onClick={() => handleSort('orderNumber')}>رقم الطلب</Button>
-        </div>
-      </div>
-
-      {/* Orders Table */}
-      <OrderTable
-        orders={orders}
-        currentPage={currentPage}
-        pageSize={pageSize}
-        totalPages={Math.ceil(pendingCount / pageSize) || 1}
-        updatePage={(page) => updateQuery({ page, sortBy, sortOrder, search: searchTerm })}
-        sortBy={sortBy}
-        sortOrder={sortOrder}
-      />
+        </CardContent>
+      </Card>
     </div>
   );
 }

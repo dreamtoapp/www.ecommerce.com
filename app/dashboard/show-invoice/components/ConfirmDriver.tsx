@@ -9,7 +9,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Truck } from 'lucide-react';
+import { Truck, UserCheck, AlertTriangle } from 'lucide-react';
 import { Drivers } from './Drivers';
 import { approveDriverToOrder } from '../actions/approveOrder-toDtiver';
 import { useRouter } from 'next/navigation';
@@ -29,20 +29,35 @@ function ConfirmDriver({ orderNo, driverList }: driverProp) {
   const router = useRouter();
 
   const handleDriverApproval = useCallback(async () => {
-    if (!selectedDriverId) return;
+    if (!selectedDriverId) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'تنبيه',
+        text: 'يرجى اختيار سائق أولاً',
+        confirmButtonText: 'موافق'
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const isDone = await approveDriverToOrder(orderNo, selectedDriverId);
       Swal.fire({
         icon: isDone.success ? 'success' : 'error',
-        title: 'اسناد طلبية للسائق',
+        title: 'إسناد طلبية للسائق',
         text: isDone.message,
+        confirmButtonText: 'موافق'
       });
       if (isDone.success) router.push('/dashboard');
     } catch (error) {
       console.error('Failed to assign driver:', error);
-      // Add error toast/notification here
+      Swal.fire({
+        icon: 'error',
+        title: 'خطأ',
+        text: 'حدث خطأ أثناء إسناد الطلبية للسائق',
+        confirmButtonText: 'موافق'
+      });
     } finally {
       setIsLoading(false);
     }
@@ -62,29 +77,79 @@ function ConfirmDriver({ orderNo, driverList }: driverProp) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button
-          variant='destructive'
-          className='flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-white shadow-md transition-all duration-200 hover:bg-red-700'
-        >
-          <div className='flex h-6 w-6 animate-bounce items-center justify-center rounded-full bg-green-500 text-xs font-semibold text-white shadow-md'>
-            <Truck className='h-4 w-4' />
-          </div>
-          <span className='text-sm font-medium'>تحديد السائق</span>
+        <Button className="btn-edit w-full sm:w-auto flex items-center gap-2 shadow-md">
+          <Truck className="h-4 w-4" />
+          تحديد السائق
         </Button>
       </DialogTrigger>
-      <DialogContent className='rounded-xl sm:max-w-md' dir='rtl'>
-        <DialogHeader>
-          <DialogTitle className='text-center text-xl font-bold'>شحن الطلبية للعميل</DialogTitle>
-          <DialogDescription className='text-center text-gray-600 dark:text-gray-300'>
-            طلبية رقم : {orderNo}
+      <DialogContent className="sm:max-w-md" dir="rtl">
+        <DialogHeader className="space-y-3">
+          <DialogTitle className="flex items-center gap-2 text-xl">
+            <Truck className="h-5 w-5 text-feature-commerce icon-enhanced" />
+            إسناد الطلبية للسائق
+          </DialogTitle>
+          <DialogDescription className="text-muted-foreground">
+            طلبية رقم: <span className="font-medium text-foreground">{orderNo}</span>
           </DialogDescription>
         </DialogHeader>
 
-        <div className='flex w-full items-center justify-between'>{memoizedDrivers}</div>
+        <div className="space-y-4">
+          {/* Driver Selection */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <UserCheck className="h-4 w-4 text-feature-users" />
+              <span className="text-sm font-medium text-foreground">اختر السائق المناسب:</span>
+            </div>
 
-        <Button variant='outline' disabled={isLoading} onClick={handleDriverApproval}>
-          {isLoading ? 'جارٍ التاكيد...' : 'تاكيد العملية'}
-        </Button>
+            {driverList && driverList.length > 0 ? (
+              <div className="max-h-60 overflow-y-auto">
+                {memoizedDrivers}
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 p-4 rounded-lg bg-amber-50 border border-amber-200">
+                <AlertTriangle className="h-4 w-4 text-amber-600" />
+                <span className="text-sm text-amber-700">لا يوجد سائقين متاحين حالياً</span>
+              </div>
+            )}
+          </div>
+
+          {/* Selected Driver Preview */}
+          {selectedDriverId && (
+            <div className="p-3 rounded-lg bg-green-50 border border-green-200">
+              <div className="flex items-center gap-2">
+                <UserCheck className="h-4 w-4 text-green-600" />
+                <span className="text-sm font-medium text-green-700">
+                  السائق المختار: {driverList?.find(d => d.id === selectedDriverId)?.name}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex gap-3 pt-4">
+          <DialogTrigger asChild>
+            <Button variant="outline" className="btn-cancel-outline flex-1">
+              إلغاء
+            </Button>
+          </DialogTrigger>
+          <Button
+            disabled={isLoading || !selectedDriverId}
+            onClick={handleDriverApproval}
+            className="btn-add flex-1"
+          >
+            {isLoading ? (
+              <>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                جارٍ التأكيد...
+              </>
+            ) : (
+              <>
+                <UserCheck className="h-4 w-4" />
+                تأكيد العملية
+              </>
+            )}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );

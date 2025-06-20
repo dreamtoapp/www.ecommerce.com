@@ -214,28 +214,26 @@ export default function CanceledOrdersView({
       {/* Header */}
       <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
         <div className="space-y-1">
-          <h2 className="text-2xl font-bold tracking-tight">الطلبات الملغاة</h2>
+          <h2 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-foreground">
+            <XCircle className="h-6 w-6 text-red-600 icon-enhanced" />
+            الطلبات الملغاة
+          </h2>
           <p className="text-muted-foreground">
             تحليل وإدارة الطلبات التي تم إلغاؤها
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <Card className="border-red-200 bg-red-50">
-            <CardContent className="flex items-center gap-2 p-3">
-              <XCircle className="h-5 w-5 text-red-500" />
-              <div>
-                <span className="text-sm font-medium text-red-700">ملغاة:</span>
-                <span className="mr-1 font-bold text-red-900">{canceledCount}</span>
-              </div>
-            </CardContent>
-          </Card>
+          <XCircle className="h-5 w-5 text-red-600" />
+          <span className="rounded-lg bg-red-50 border border-red-200 px-4 py-2 text-red-700 font-semibold text-sm shadow-sm">
+            ملغاة: <span className="font-bold">{canceledCount}</span>
+          </span>
         </div>
       </div>
 
       {/* Filters */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <form onSubmit={handleSearch} className="flex w-full max-w-sm items-center space-x-2 rtl:space-x-reverse">
+        <form onSubmit={handleSearch} className="flex w-full max-w-sm items-center gap-2">
           <Input
             type="search"
             placeholder="بحث عن طلب..."
@@ -249,9 +247,9 @@ export default function CanceledOrdersView({
           </Button>
         </form>
 
-        <div className="flex items-center space-x-2 rtl:space-x-reverse">
-          <AlertTriangle className="h-4 w-4 text-gray-500" />
-          <span className="text-sm">سبب الإلغاء:</span>
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm text-foreground">سبب الإلغاء:</span>
           <Select value={selectedReason} onValueChange={handleReasonChange}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="جميع الأسباب" />
@@ -318,7 +316,7 @@ export default function CanceledOrdersView({
                           href={`/dashboard/show-invoice/${order.id}`}
                           className={cn(
                             "inline-flex h-8 w-8 items-center justify-center rounded-md p-0 text-sm font-medium transition-colors",
-                            "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                            "text-muted-foreground hover:bg-muted hover:text-foreground"
                           )}
                           title="عرض التفاصيل"
                         >
@@ -338,9 +336,9 @@ export default function CanceledOrdersView({
       ) : (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-10">
-            <XCircle className="h-16 w-16 text-red-400" />
-            <h3 className="mt-4 text-lg font-medium">لا توجد طلبات ملغاة</h3>
-            <p className="text-sm text-gray-500">
+            <XCircle className="h-16 w-16 text-red-600" />
+            <h3 className="mt-4 text-lg font-medium text-foreground">لا توجد طلبات ملغاة</h3>
+            <p className="text-sm text-muted-foreground">
               {reasonFilter
                 ? 'لا توجد طلبات ملغاة بهذا السبب'
                 : 'لا توجد طلبات ملغاة حالياً'}

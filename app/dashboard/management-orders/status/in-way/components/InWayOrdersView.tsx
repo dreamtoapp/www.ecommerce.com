@@ -119,17 +119,16 @@ export default function InWayOrdersView({
                         <TableCell className="align-middle">{order.customer.name || 'غير معروف'}</TableCell>
                         <TableCell className="align-middle">
                           <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-full flex items-center justify-center"
-                              style={{ backgroundColor: order.isTripStart ? 'var(--indigo-100)' : 'var(--yellow-100)' }}>
+                            <div className="h-8 w-8 rounded-full flex items-center justify-center bg-feature-commerce-soft border border-feature-commerce">
                               {order.isTripStart ? (
-                                <Truck className="h-4 w-4 text-indigo-600" />
+                                <Truck className="h-4 w-4 text-feature-commerce" />
                               ) : (
-                                <MapPin className="h-4 w-4 text-yellow-500 animate-pulse" />
+                                <MapPin className="h-4 w-4 text-amber-600 animate-pulse" />
                               )}
                             </div>
                             <span>{order.driver?.name || 'لم يتم تعيين'}</span>
                             {!order.isTripStart && (
-                              <span className="text-xs text-yellow-600 font-semibold ml-2">لم يبدأ الرحلة</span>
+                              <span className="text-xs text-amber-700 font-semibold ml-2">لم يبدأ الرحلة</span>
                             )}
                           </div>
                         </TableCell>
@@ -138,10 +137,9 @@ export default function InWayOrdersView({
                           <div className="flex items-center gap-2">
 
                             {order.driverId ? (
-
                               <a
                                 href={`tel:${order.driverId}`}
-                                className="inline-flex h-8 w-8 items-center justify-center rounded-md p-0 text-blue-600 hover:bg-blue-100 hover:text-blue-700"
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-md p-0 text-blue-600 hover:bg-blue-100 hover:text-blue-700 transition-colors"
                                 title={order.driverId}
                                 style={{ direction: 'ltr' }}
                               >
@@ -152,7 +150,7 @@ export default function InWayOrdersView({
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-8 w-8 p-0 text-blue-600"
+                                className="h-8 w-8 p-0 text-muted-foreground"
                                 title="لا يوجد رقم سائق"
                                 disabled
                               >
@@ -163,24 +161,22 @@ export default function InWayOrdersView({
                               href={`/dashboard/track/${order.id}`}
                               className={cn(
                                 "inline-flex h-8 w-8 items-center justify-center rounded-md p-0 text-sm font-medium transition-colors",
-                                "text-indigo-600 hover:bg-indigo-100 hover:text-indigo-700"
+                                "text-feature-commerce hover:bg-feature-commerce-soft hover:text-feature-commerce"
                               )}
                               title="تتبع الطلب"
                             >
                               <MapPin className="h-4 w-4" />
                             </Link>
-                            <div className="flex items-center gap-2">
-                              <Link
-                                href={`/dashboard/show-invoice/${order.id}`}
-                                className={cn(
-                                  "inline-flex h-8 w-8 items-center justify-center rounded-md p-0 text-sm font-medium transition-colors",
-                                  "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                                )}
-                                title="عرض التفاصيل"
-                              >
-                                <Search className="h-4 w-4" />
-                              </Link>
-                            </div>
+                            <Link
+                              href={`/dashboard/show-invoice/${order.id}`}
+                              className={cn(
+                                "inline-flex h-8 w-8 items-center justify-center rounded-md p-0 text-sm font-medium transition-colors",
+                                "text-muted-foreground hover:bg-muted hover:text-foreground"
+                              )}
+                              title="عرض التفاصيل"
+                            >
+                              <Search className="h-4 w-4" />
+                            </Link>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -193,11 +189,11 @@ export default function InWayOrdersView({
         ) : (
           <Card className="h-[500px]">
             <CardContent className="p-4 h-full">
-              <div className="flex h-full items-center justify-center bg-gray-100 rounded-lg">
+              <div className="flex h-full items-center justify-center bg-muted/30 rounded-lg">
                 <div className="text-center">
-                  <Map className="h-12 w-12 mx-auto text-indigo-400" />
-                  <h3 className="mt-2 text-lg font-medium">خريطة تتبع الطلبات</h3>
-                  <p className="text-sm text-gray-500 max-w-md mx-auto mt-2">
+                  <Map className="h-12 w-12 mx-auto text-feature-commerce" />
+                  <h3 className="mt-2 text-lg font-medium text-foreground">خريطة تتبع الطلبات</h3>
+                  <p className="text-sm text-muted-foreground max-w-md mx-auto mt-2">
                     هنا ستظهر خريطة تفاعلية تعرض مواقع جميع الطلبات قيد التوصيل في الوقت الفعلي.
                   </p>
                 </div>
@@ -208,9 +204,9 @@ export default function InWayOrdersView({
       ) : (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-10">
-            <Truck className="h-16 w-16 text-indigo-400" />
-            <h3 className="mt-4 text-lg font-medium">لا توجد طلبات في الطريق</h3>
-            <p className="text-sm text-gray-500">
+            <Truck className="h-16 w-16 text-feature-commerce" />
+            <h3 className="mt-4 text-lg font-medium text-foreground">لا توجد طلبات في الطريق</h3>
+            <p className="text-sm text-muted-foreground">
               لا توجد طلبات قيد التوصيل حالياً
             </p>
           </CardContent>

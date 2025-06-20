@@ -3,6 +3,7 @@
 import { Truck } from 'lucide-react';
 import { Metadata } from 'next';
 
+import BackButton from '@/components/BackButton';
 import { ORDER_STATUS } from '@/constant/order-status';
 
 import {
@@ -36,26 +37,32 @@ export default async function InWayOrdersPage({
         driverId: driverId !== 'all' ? driverId : undefined,
       }),
       fetchAnalytics(),
-
     ]);
 
-
     return (
-      <div className="font-cairo relative flex flex-col space-y-6 p-4 bg-background min-h-screen" dir="rtl">
+      <div className="font-cairo relative flex flex-col space-y-4 p-4 bg-background min-h-screen" dir="rtl">
+        <BackButton variant="default" />
+
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-2">
           <div className="space-y-1">
-            <h2 className="text-2xl font-bold tracking-tight text-primary">الطلبات في الطريق</h2>
+            <h2 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-foreground">
+              <Truck className="h-6 w-6 text-feature-commerce icon-enhanced" />
+              الطلبات في الطريق
+            </h2>
             <p className="text-muted-foreground">إدارة الطلبات التي في طريقها للتسليم</p>
           </div>
-          <SyncOrderInWayButton />
-          <div className="flex items-center gap-2">
-            <Truck className="h-5 w-5 " />
-            <span className="rounded-lg bg-[hsl(var(--chart-2)/0.15)] border border-[hsl(var(--chart-2)/0.25)] px-4 py-2 text-[hsl(var(--chart-2))] font-semibold text-sm shadow-sm">
 
-              في الطريق: <span className="font-bold text-[hsl(var(--chart-2))]">{analytics}</span>
-            </span>
+          <div className="flex items-center gap-3">
+            <SyncOrderInWayButton />
+            <div className="flex items-center gap-2">
+              <Truck className="h-5 w-5 text-feature-commerce" />
+              <span className="rounded-lg bg-feature-commerce-soft border border-feature-commerce px-4 py-2 text-feature-commerce font-semibold text-sm shadow-sm">
+                في الطريق: <span className="font-bold">{analytics}</span>
+              </span>
+            </div>
           </div>
         </div>
+
         <InWayOrdersView
           orders={orders.orders}
           inWayCount={analytics}
@@ -69,11 +76,13 @@ export default async function InWayOrdersPage({
     console.error('Error loading in-way orders:', error);
 
     return (
-      <div className="font-cairo relative flex flex-col space-y-6 p-4" dir="rtl">
+      <div className="font-cairo relative flex flex-col space-y-4 p-4" dir="rtl">
+        <BackButton variant="default" />
+
         {/* Error Message */}
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-          <h3 className="text-xl font-semibold text-red-700 mb-2">حدث خطأ أثناء تحميل الطلبات</h3>
-          <p className="text-red-600">يرجى المحاولة مرة أخرى لاحقاً أو الاتصال بالدعم الفني.</p>
+        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-6 text-center">
+          <h3 className="text-xl font-semibold text-destructive mb-2">حدث خطأ أثناء تحميل الطلبات</h3>
+          <p className="text-destructive/80">يرجى المحاولة مرة أخرى لاحقاً أو الاتصال بالدعم الفني.</p>
         </div>
       </div>
     );

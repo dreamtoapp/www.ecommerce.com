@@ -160,22 +160,20 @@ export default function DeliveredOrdersView({
       {/* Header */}
       <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
         <div className="space-y-1">
-          <h2 className="text-2xl font-bold tracking-tight">الطلبات المسلمة</h2>
+          <h2 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-foreground">
+            <CheckCircle className="h-6 w-6 text-green-600 icon-enhanced" />
+            الطلبات المسلمة
+          </h2>
           <p className="text-muted-foreground">
             عرض وتحليل الطلبات التي تم تسليمها بنجاح
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <Card className="border-green-200 bg-green-50">
-            <CardContent className="flex items-center gap-2 p-3">
-              <CheckCircle className="h-5 w-5 text-green-500" />
-              <div>
-                <span className="text-sm font-medium text-green-700">تم التسليم:</span>
-                <span className="mr-1 font-bold text-green-900">{deliveredCount}</span>
-              </div>
-            </CardContent>
-          </Card>
+          <CheckCircle className="h-5 w-5 text-green-600" />
+          <span className="rounded-lg bg-green-50 border border-green-200 px-4 py-2 text-green-700 font-semibold text-sm shadow-sm">
+            تم التسليم: <span className="font-bold">{deliveredCount}</span>
+          </span>
 
           <div className="flex rounded-md border border-input">
             {/* Removed the view mode toggle buttons (list/stats) as requested */}
