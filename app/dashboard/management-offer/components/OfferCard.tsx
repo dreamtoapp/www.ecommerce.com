@@ -1,12 +1,12 @@
 import React from 'react';
 import { Package, Percent, Eye, EyeOff, Edit3 } from 'lucide-react';
-import Image from 'next/image';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import Link from '@/components/link';
+import AddImage from '@/components/AddImage';
 
 import type { Offer } from '../actions/get-offers';
 import { ToggleOfferStatus } from './ToggleOfferStatus';
@@ -53,24 +53,15 @@ const DiscountBadge = ({ offer }: { offer: Offer }) => {
 
 const OfferBanner = ({ offer }: { offer: Offer }) => (
     <div className="relative h-48 w-full overflow-hidden rounded-xl border border-feature-commerce/30 shadow-lg">
-        {offer.bannerImage ? (
-            <Image
-                src={offer.bannerImage}
-                alt={offer.name}
-                fill
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 50vw"
-                priority
-            />
-        ) : (
-            <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-feature-commerce/5 via-feature-commerce/8 to-feature-commerce/10">
-                <div className="text-center text-feature-commerce/60">
-                    <Package className="h-16 w-16 mx-auto mb-3 icon-enhanced" />
-                    <p className="text-lg font-medium">لا توجد صورة بانر</p>
-                    <p className="text-sm">يمكن إضافة الصورة لاحقاً</p>
-                </div>
-            </div>
-        )}
+        <AddImage
+            url={offer.bannerImage || undefined}
+            recordId={offer.id}
+            table="offer"
+            tableField="bannerImage"
+            autoUpload={true}
+            className="w-full h-full"
+            alt={`صورة بانر العرض - ${offer.name}`}
+        />
         <OfferStatusBadge offer={offer} />
         <DiscountBadge offer={offer} />
     </div>

@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Package, Edit3 } from 'lucide-react';
 import BackButton from '@/components/BackButton';
 import { OfferForm } from '../../components/OfferForm';
-import { OfferBannerUpload } from '../../components/OfferBannerUpload';
 import { getOfferById } from '../../actions';
 
 interface EditOfferPageProps {
@@ -45,13 +44,6 @@ export default async function EditOfferPage({ params }: EditOfferPageProps) {
             {/* Main Content */}
             <main className="flex-1 p-4 md:p-6">
                 <div className="mx-auto max-w-6xl space-y-8">
-                    {/* Banner Upload Section */}
-                    <OfferBannerUpload
-                        offerId={offer.id}
-                        offerName={offer.name}
-                        currentBannerUrl={offer.bannerImage}
-                    />
-
                     {/* Offer Details Form */}
                     <Card className="shadow-lg border-l-4 border-l-feature-commerce card-hover-effect">
                         <CardHeader className="pb-4">
@@ -60,7 +52,7 @@ export default async function EditOfferPage({ params }: EditOfferPageProps) {
                                 تعديل تفاصيل المجموعة: {offer.name}
                             </CardTitle>
                             <p className="text-sm text-muted-foreground">
-                                عدّل تفاصيل المجموعة المميزة والمنتجات المرتبطة بها
+                                عدّل تفاصيل المجموعة المميزة والمنتجات المرتبطة بها. لتغيير صورة البانر، استخدم بطاقة العرض في الصفحة الرئيسية.
                             </p>
                         </CardHeader>
                         <CardContent>

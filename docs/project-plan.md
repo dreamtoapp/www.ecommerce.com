@@ -95,6 +95,35 @@ This is a comprehensive e-commerce platform built with Next.js 15.2.1, supportin
 - All forms use react-hook-form + zod for validation
 - Images optimized through Cloudinary and next/image
 
+## 📋 Current TODO Items
+
+### 🔄 Image Upload UX Improvements
+- [ ] **Disable card interactions during image upload**
+  - **Problem**: Users can click multiple times during upload causing potential conflicts
+  - **Solution Options**:
+    1. **Disable entire card** with loading overlay during upload
+    2. **Show loading state** with pointer-events: none
+    3. **Add upload queue** to handle multiple clicks gracefully
+    4. **Debounce clicks** with minimum delay between uploads
+  - **Priority**: Medium-High (UX improvement)
+  - **Files to modify**: 
+    - `components/AddImage.tsx` - Add loading state prop
+    - `app/dashboard/management-offer/components/OfferCard.tsx` - Handle loading state
+    - `app/dashboard/management-products/components/ProductCard.tsx` - Handle loading state
+  - **Implementation**: Add loading state management and disable interactions during upload
+
+### 🎨 Enhanced Progress Feedback
+- [ ] **Improve upload progress visualization**
+  - Show upload progress percentage on card
+  - Add cancel upload option
+  - Better error handling with retry functionality
+
+### 🔧 Technical Improvements
+- [ ] **Optimize image upload performance**
+  - Add image compression before upload
+  - Implement retry mechanism for failed uploads
+  - Add upload queue for multiple images
+
 ---
 *Last updated: [Current Date]*
 *Next review: [Weekly]* 
