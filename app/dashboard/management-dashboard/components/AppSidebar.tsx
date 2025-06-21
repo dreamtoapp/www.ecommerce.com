@@ -5,13 +5,12 @@ import React, {
   useState,
 } from 'react'; // Import ElementType
 
-import { ChevronsUpDown, Star, Clock, Bookmark } from 'lucide-react';
+import { Star, ChevronDown } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
 import Link from '@/components/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import {
   Sidebar,
   SidebarContent,
@@ -20,6 +19,7 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from '@/components/ui/sidebar';
+import { formatDistanceToNow } from 'date-fns';
 
 import { menuGroups } from '../helpers/mainMenu';
 
@@ -81,7 +81,6 @@ export default function AppSidebar() {
             <p className='text-xs text-muted-foreground'>إدارة متطورة</p>
           </div>
         </div>
-
         {/* Quick Access Favorites */}
         {favorites.length > 0 && (
           <div className='mt-3'>
@@ -94,8 +93,8 @@ export default function AppSidebar() {
                 const favItem = menuGroups.flatMap(g => g.items).find(item => item.url === fav);
                 return favItem ? (
                   <Link key={fav} href={fav}>
-                    <Badge variant="secondary" className='text-xs hover:bg-feature-analytics-soft transition-colors'>
-                      <favItem.icon className='h-3 w-3 mr-1' />
+                    <Badge variant="secondary" className='text-xs'>
+                      <favItem.icon className='h-3 w-3 mr-1 icon-enhanced' />
                       {favItem.title.slice(0, 8)}...
                     </Badge>
                   </Link>
@@ -117,7 +116,7 @@ export default function AppSidebar() {
               <button
                 className={`
                   flex w-full items-center justify-between px-3 py-3 text-sm font-semibold 
-                  rounded-lg transition-all duration-200 hover:shadow-md card-hover-effect
+                  rounded-lg transition-colors duration-200 hover:shadow-md
                   ${colors.bg} ${colors.text} border ${colors.border.replace('border-l-', 'border-')}
                 `}
                 onClick={() => toggleGroup(i)}
@@ -130,7 +129,7 @@ export default function AppSidebar() {
                     {group.items.length}
                   </Badge>
                   <span className={`transition-transform duration-200 ${isCollapsed ? 'rotate-180' : ''}`}>
-                    <ChevronsUpDown size={16} />
+                    <ChevronDown className="h-4 w-4 icon-enhanced" />
                   </span>
                 </div>
               </button>
@@ -139,8 +138,8 @@ export default function AppSidebar() {
               <ul
                 id={`sidebar-group-${i}`}
                 className={`
-                  space-y-1 overflow-hidden transition-all duration-300 mt-2
-                  ${isCollapsed ? 'max-h-0 opacity-0' : 'max-h-96 opacity-100'}
+                  space-y-1 mt-2
+                  ${isCollapsed ? 'hidden' : 'block'}
                 `}
                 style={{ direction: 'rtl' }}
               >
@@ -156,10 +155,10 @@ export default function AppSidebar() {
                             href={item.url}
                             className={`
                               flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium 
-                              transition-all duration-200 hover:shadow-md card-hover-effect
+                              transition-colors duration-200 hover:bg-muted/50
                               ${isActive
                                 ? `${colors.bg} ${colors.text} ${colors.border} border-r-4 font-bold shadow-md`
-                                : 'hover:bg-muted/50 hover:shadow-sm'
+                                : 'hover:bg-muted/50'
                               }
                             `}
                           >
@@ -174,14 +173,14 @@ export default function AppSidebar() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className='absolute left-1 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0'
+                            className='absolute left-1 top-1/2 h-6 w-6 p-0 hover:bg-feature-commerce-soft transition-colors duration-200'
                             onClick={(e) => {
                               e.preventDefault();
                               toggleFavorite(item.url);
                             }}
                           >
                             <Star
-                              className={`h-3 w-3 ${isFavorite ? 'fill-feature-commerce text-feature-commerce' : 'text-muted-foreground'}`}
+                              className={`h-3 w-3 icon-enhanced ${isFavorite ? 'fill-feature-commerce text-feature-commerce' : 'text-muted-foreground'}`}
                             />
                           </Button>
                         </div>
@@ -198,15 +197,14 @@ export default function AppSidebar() {
                                   href={child.url}
                                   className={`
                                     flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium 
-                                    transition-all duration-200 hover:shadow-sm
                                     ${isChildActive
-                                      ? `${colors.bg} ${colors.text} font-bold`
-                                      : 'hover:bg-muted/30'
+                                      ? `${colors.bg} ${colors.text} ${colors.border} border-r-4 font-bold shadow`
+                                      : ''
                                     }
                                   `}
                                 >
-                                  <child.icon className={`h-4 w-4 ${isChildActive ? colors.text : 'text-muted-foreground'}`} />
-                                  <span>{child.title}</span>
+                                  <child.icon className={`h-4 w-4 icon-enhanced ${isChildActive ? colors.text : 'text-muted-foreground'}`} />
+                                  <span className='flex-1'>{child.title}</span>
                                 </Link>
                               </li>
                             );
@@ -224,20 +222,13 @@ export default function AppSidebar() {
       </SidebarContent>
 
       {/* Enhanced Footer */}
-      <SidebarFooter className='border-t p-4 bg-muted/30'>
-        <div className='flex items-center gap-3 text-xs text-muted-foreground'>
-          <div className='flex items-center gap-1'>
-            <Clock className='h-3 w-3' />
-            <span>آخر تحديث: الآن</span>
-          </div>
-          <Separator orientation="vertical" className="h-4" />
-          <div className='flex items-center gap-1'>
-            <Bookmark className='h-3 w-3' />
-            <span>{favorites.length} مفضلة</span>
-          </div>
+      <SidebarFooter className='border-t p-4 bg-muted/30 flex flex-col gap-2'>
+        <div className='flex items-center justify-between text-xs text-muted-foreground'>
+          <span>آخر تحديث: {formatDistanceToNow(new Date(), { addSuffix: true, locale: undefined })}</span>
+          <span>المفضلة: {favorites.length}</span>
         </div>
-        <div className='text-center text-xs text-muted-foreground mt-2'>
-          © {new Date().getFullYear()} إدارة أمواج
+        <div className='text-xs text-muted-foreground text-center'>
+          <span>© {new Date().getFullYear()} متجرك</span>
         </div>
       </SidebarFooter>
 

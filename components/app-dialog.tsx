@@ -62,9 +62,11 @@ const AppDialog: React.FC<AppDialogProps> = memo(({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent className={className}>
+      <DialogContent className={`max-w-2xl max-h-[90vh] overflow-y-auto ${className}`}>
         {header}
-        {children}
+        <div className="flex-1 overflow-y-auto px-1">
+          {children}
+        </div>
         {dialogFooter}
       </DialogContent>
     </Dialog>

@@ -470,4 +470,212 @@ export default function StaticProductList({ products }: { products: Product[] })
 }
 ```
 
+## 🎨 UI Components & Forms Rules
+
+### 🃏 Card Design System
+
+#### 🎨 Standard Card Structure
+**ALL cards MUST follow this consistent pattern:**
+
+```tsx
+<Card className="shadow-lg border-l-4 border-l-[COLOR]">
+  <CardHeader className="pb-4">
+    <CardTitle className="flex items-center gap-2 text-xl">
+      <Icon className="h-5 w-5 text-[COLOR]" />
+      Card Title
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    {/* Card content */}
+  </CardContent>
+</Card>
+```
+
+### 📋 **STANDARDIZED HEADER LAYOUT PATTERN**
+
+**ALL dashboard pages MUST use this clean header layout:**
+
+```tsx
+{/* Clean Header Card */}
+<div className="bg-muted/30 rounded-lg shadow-sm border-0 p-6">
+  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    {/* Left side - Title with BackButton */}
+    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+      <div className="flex items-center gap-3">
+        <BackButton variant="default" />
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold text-foreground">
+            Page Title
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Page description
+          </p>
+        </div>
+      </div>
+      
+      {/* Status Badge (if applicable) */}
+      <Badge className="flex items-center gap-2 px-3 py-1.5 rounded-lg font-medium bg-[COLOR]-50 text-[COLOR]-800 border border-[COLOR]-200">
+        <Icon className="w-4 h-4" />
+        Status Text
+      </Badge>
+    </div>
+
+    {/* Right side - Action Buttons (if applicable) */}
+    <div className="flex flex-col sm:flex-row gap-3">
+      {/* Action buttons here */}
+    </div>
+  </div>
+</div>
+```
+
+#### 🎯 **Header Layout Rules:**
+
+1. **BackButton Position**: ALWAYS beside the title, never on separate line
+2. **Container**: Use `bg-muted/30 rounded-lg shadow-sm border-0 p-6`
+3. **Responsive**: Stacks vertically on mobile, horizontal on desktop
+4. **Spacing**: Use `gap-3` between BackButton and title content
+5. **Title Structure**: 
+   - Main title: `text-2xl font-bold text-foreground`
+   - Subtitle: `text-sm text-muted-foreground`
+6. **Status Badges**: Use appropriate color scheme matching page context
+7. **Action Buttons**: Right-aligned, responsive stacking
+
+#### 🌈 **Status Badge Colors by Page Type:**
+
+- **Pending Orders**: `bg-amber-50 text-amber-800 border-amber-200`
+- **Delivered Orders**: `bg-green-50 text-green-800 border-green-200`
+- **Cancelled Orders**: `bg-red-50 text-red-800 border-red-200`
+- **In Transit Orders**: `bg-blue-50 text-blue-800 border-blue-200`
+- **Products**: `bg-emerald-50 text-emerald-800 border-emerald-200`
+- **Users**: `bg-indigo-50 text-indigo-800 border-indigo-200`
+- **Analytics**: `bg-purple-50 text-purple-800 border-purple-200`
+
+#### ✅ **Implementation Checklist:**
+- [ ] BackButton positioned beside title (not separate line)
+- [ ] Clean container with `bg-muted/30` background
+- [ ] Responsive layout (mobile stack, desktop horizontal)
+- [ ] Proper spacing with `gap-3` and `gap-4`
+- [ ] Status badge with appropriate colors
+- [ ] Action buttons right-aligned
+- [ ] Consistent typography hierarchy
+- [ ] RTL support maintained
+
+### 🌈 Color System for Cards
+
+#### Primary Colors (Main Features)
+- **Blue (`blue-500`)** - User management, profiles, authentication
+- **Green (`green-500`)** - Products, categories, success states
+- **Purple (`purple-500`)** - Analytics, reports, dashboards
+- **Orange (`orange-500`)** - Settings, configuration, system
+- **Red (`red-500`)** - Alerts, errors, critical actions
+- **Indigo (`indigo-500`)** - Orders, transactions, commerce
+- **Teal (`teal-500`)** - Communications, notifications, messages
+
+#### Secondary Colors (Supporting Features)
+- **Pink (`pink-500`)** - Promotions, marketing, special offers
+- **Yellow (`yellow-500`)** - Warnings, pending states
+- **Cyan (`cyan-500`)** - Data import/export, integrations
+- **Slate (`slate-500`)** - General information, documentation
+
+### 🎯 Card Examples by Feature
+
+#### User Management
+```tsx
+<Card className="shadow-lg border-l-4 border-l-blue-500">
+  <CardHeader className="pb-4">
+    <CardTitle className="flex items-center gap-2 text-xl">
+      <Users className="h-5 w-5 text-blue-500" />
+      إدارة المستخدمين
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    {/* User management content */}
+  </CardContent>
+</Card>
+```
+
+#### Product Management
+```tsx
+<Card className="shadow-lg border-l-4 border-l-green-500">
+  <CardHeader className="pb-4">
+    <CardTitle className="flex items-center gap-2 text-xl">
+      <Package className="h-5 w-5 text-green-500" />
+      إدارة المنتجات
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    {/* Product management content */}
+  </CardContent>
+</Card>
+```
+
+### 📐 Spacing & Layout Standards
+
+- **ALWAYS use `gap` for flex layouts** instead of `space-x` or `space-x-reverse`
+- Use `gap-3` (12px) for radio buttons and checkboxes with their labels
+- Use `gap-2` (8px) for small components and icons
+- Use `gap-4` (16px) for medium spacing between components
+- Use `gap-6` (24px) for larger section spacing
+- **Avoid `space-x-reverse`** - it causes RTL layout issues
+- Use CSS Grid `gap` for grid layouts instead of margins
+
+### ✅ Correct Examples:
+```tsx
+// Radio buttons with labels
+<div className="flex items-center gap-3">
+  <RadioGroupItem value="option1" id="option1" />
+  <Label htmlFor="option1">Option Text</Label>
+</div>
+
+// Checkbox with label
+<div className="flex items-center gap-3">
+  <Checkbox id="checkbox1" />
+  <Label htmlFor="checkbox1">Checkbox Text</Label>
+</div>
+
+// Icon with text
+<div className="flex items-center gap-2">
+  <Icon className="h-4 w-4" />
+  <span>Text</span>
+</div>
+```
+
+### ❌ Avoid:
+```tsx
+// Don't use space-x-reverse (RTL issues)
+<div className="flex items-center space-x-2 space-x-reverse">
+  <Checkbox />
+  <Label>Text</Label>
+</div>
+```
+
+## 📝 Form Handling
+
+- Use `react-hook-form` with `zod` for validation
+- Prefer server components + server actions for forms
+- Implement proper form validation and error handling
+- Use accessible form patterns and ARIA labels
+
+## 🔧 Component Architecture
+
+- Create reusable components in `components/ui/`
+- Route-specific components in their respective folders
+- Use composition over inheritance
+- Keep components focused and single-purpose
+
+## 🎯 Form Validation
+
+- Use Zod schemas for type-safe validation
+- Implement client-side and server-side validation
+- Provide clear error messages
+- Handle form submission states properly
+
+## ♿ Accessibility
+
+- Follow WCAG guidelines
+- Use semantic HTML elements
+- Implement proper keyboard navigation
+- Ensure sufficient color contrast
+- Add proper ARIA labels and roles
+
 This guide ensures consistent, high-quality component creation across the entire project. 

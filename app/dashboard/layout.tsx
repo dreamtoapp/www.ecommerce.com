@@ -33,7 +33,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
           {/* Enhanced Sticky header */}
           <header className='sticky top-0 z-40 flex items-center justify-between border-b bg-background/80 backdrop-blur-sm px-6 py-3 shadow-sm'>
             <div className='flex items-center gap-4 flex-1'>
-              <SidebarTrigger className="hover:bg-feature-analytics-soft" />
+              <SidebarTrigger />
               <EnhancedBreadcrumb />
             </div>
             <div className='flex items-center gap-3'>
@@ -42,7 +42,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
             </div>
           </header>
           {/* Main content */}
-          <main className='w-full flex-1 overflow-auto bg-background p-6'>{children}</main>
+          <main className='w-full flex-1 bg-background p-6'>{children}</main>
         </div>
       </div>
     </SidebarProvider>

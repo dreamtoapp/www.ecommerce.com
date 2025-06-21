@@ -1,6 +1,7 @@
 "use server";
 
 import db from '@/lib/prisma';
+import { OrderStatus } from '@prisma/client';
 
 // Types for analytics data
 export interface OrderAnalyticsData {
@@ -65,11 +66,10 @@ async function getOrderTimeline() {
 }
 
 async function getFulfillmentMetrics() {
-  const [unfulfilledOrders, returnsCount] = await Promise.all([
-    db.order.count({ where: { status: { notIn: ['Delivered', 'CANCELED'] } } }),
-    db.order.count({ where: { status: { in: ['RETURNED', 'REFUNDED'] } } })
+  const [unfulfilledOrders] = await Promise.all([
+    db.order.count({ where: { status: { notIn: [OrderStatus.DELIVERED, OrderStatus.CANCELED] } } })
   ]);
-  return { unfulfilledOrders, returnsCount };
+  return { unfulfilledOrders };
 }
 
 async function getSalesTrendAnalysis() {
@@ -140,10 +140,11 @@ export async function getOrderAnalytics(): Promise<GetOrderAnalyticsResult> {
       ...statusAnalytics,
       firstOrder: timeline.firstOrder || undefined,
       lastOrder: timeline.lastOrder || undefined,
+      returnsCount: 0,
       ...fulfillmentMetrics,
       salesTrends,
       topProducts,
-      topCustomers
+      topCustomers,
     };
     return { success: true, data: analyticsData };
   } catch (error) {

@@ -18,6 +18,8 @@ import {
 } from 'recharts';
 
 import Link from '@/components/link';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Package, Star } from 'lucide-react';
 
 interface DashboardHomePageProps {
   summary: {
@@ -29,7 +31,7 @@ interface DashboardHomePageProps {
     salesByMonth: { name: string; sales: number }[];
     topProducts: { name: string; sales: number; quantity: number }[];
     orderStatus: { name: string; value: number }[];
-    recentOrders: { id: string; customer: string; amount: number; status: string; date: string }[];
+    recentOrders: { id: string; orderNumber: string; customer: string; amount: number; status: string; date: string }[];
   };
 }
 
@@ -46,6 +48,14 @@ function getResolvedColor(variableName: string): string {
 function formatNumberEn(num: number) {
   return num.toLocaleString('en-US');
 }
+
+// Add this map at the top of the file (or import from a constants file)
+const statusLabels: Record<string, string> = {
+  DELIVERED: 'تم التوصيل',
+  IN_TRANSIT: 'قيد التوصيل',
+  CANCELED: 'ملغي',
+  PENDING: 'قيد الانتظار',
+};
 
 export default function DashboardHomePage({ summary }: DashboardHomePageProps) {
   const [pieChartColors, setPieChartColors] = useState<string[]>([]);
@@ -146,18 +156,42 @@ export default function DashboardHomePage({ summary }: DashboardHomePageProps) {
       </div>
 
       {/* Top Products */}
-      <div className='mb-8 rounded-xl bg-card p-6 shadow'>
-        <h2 className='mb-4 text-xl font-bold text-card-foreground'>المنتجات الأكثر مبيعًا</h2>
-        <ul className='divide-y'>
-          {summary.topProducts.map((p, i) => (
-            <li key={i} className='flex items-center justify-between py-3 text-card-foreground'>
-              <span className='font-medium'>{p.name}</span>
-              <span className='font-bold text-info-fg'>{formatNumberEn(p.sales)}</span>
-              <span className='text-muted-foreground'>({formatNumberEn(p.quantity)} قطعة)</span>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <Card className="mb-8 shadow-lg border-l-4 border-feature-products card-hover-effect card-border-glow">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <Package className="h-5 w-5 text-feature-products icon-enhanced" />
+            المنتجات الأكثر مبيعًا
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <table className="min-w-full text-right">
+            <thead>
+              <tr className="bg-muted">
+                <th className="px-4 py-2 text-muted-foreground">المنتج</th>
+                <th className="px-4 py-2 text-muted-foreground">المبيعات</th>
+                <th className="px-4 py-2 text-muted-foreground">الكمية</th>
+              </tr>
+            </thead>
+            <tbody>
+              {summary.topProducts.map((p, i) => (
+                <tr key={i} className="border-b hover:bg-feature-products-soft transition">
+                  <td className="flex items-center gap-2 font-bold text-lg">
+                    {i === 0 && <Star className="h-4 w-4 text-yellow-400" />}
+                    <Package className="h-4 w-4 text-feature-products" />
+                    {p.name}
+                  </td>
+                  <td className="font-mono font-semibold">{formatNumberEn(p.sales)}</td>
+                  <td>
+                    <span className="inline-block rounded-full bg-feature-products-soft px-3 py-1 text-xs font-bold text-feature-products">
+                      {formatNumberEn(p.quantity)} قطعة
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </CardContent>
+      </Card>
 
       {/* Order Status Pie Chart */}
       <div className='mb-8 rounded-xl bg-card p-6 shadow'>
@@ -201,10 +235,10 @@ export default function DashboardHomePage({ summary }: DashboardHomePageProps) {
           <tbody className='text-card-foreground'>
             {summary.recentOrders.map((o) => (
               <tr key={o.id} className='border-b'>
-                <td className='px-4 py-2'>{o.id.slice(-6)}</td>
-                <td className='px-4 py-2'>{o.customer}</td>
+                <td className='px-4 py-2'>{o.orderNumber || '—'}</td>
+                <td className='px-4 py-2'>{o.customer || '—'}</td>
                 <td className='px-4 py-2'>{formatNumberEn(o.amount)}</td>
-                <td className='px-4 py-2'>{o.status}</td>
+                <td className='px-4 py-2'>{statusLabels[o.status] || o.status}</td>
                 <td className='px-4 py-2'>{new Date(o.date).toLocaleDateString('en-US')}</td>
               </tr>
             ))}

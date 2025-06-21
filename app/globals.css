@@ -234,7 +234,7 @@
   
   /* Add/Create Buttons - Success Green */
   .btn-add {
-    @apply bg-green-600 text-white hover:bg-green-700 border-green-600 transition-colors duration-200;
+    @apply bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold transition-all duration-200 shadow-lg hover:shadow-xl;
   }
   .btn-add-outline {
     @apply border border-green-600 text-green-600 bg-transparent hover:bg-green-600 hover:text-white transition-colors duration-200;
@@ -242,7 +242,7 @@
   
   /* Edit/Update Buttons - Warning Orange */
   .btn-edit {
-    @apply bg-orange-600 text-white hover:bg-orange-700 border-orange-600 transition-colors duration-200;
+    @apply bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold transition-all duration-200 shadow-lg hover:shadow-xl;
   }
   .btn-edit-outline {
     @apply border border-orange-600 text-orange-600 bg-transparent hover:bg-orange-600 hover:text-white transition-colors duration-200;
@@ -250,7 +250,7 @@
   
   /* Delete/Remove Buttons - Destructive Red */
   .btn-delete {
-    @apply bg-red-600 text-white hover:bg-red-700 border-red-600 transition-colors duration-200;
+    @apply bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white font-semibold transition-all duration-200 shadow-lg hover:shadow-xl;
   }
   .btn-delete-outline {
     @apply border border-red-600 text-red-600 bg-transparent hover:bg-red-600 hover:text-white transition-colors duration-200;
@@ -261,12 +261,12 @@
     @apply bg-gray-600 text-white hover:bg-gray-700 border-gray-600 transition-colors duration-200;
   }
   .btn-cancel-outline {
-    @apply border border-gray-600 text-gray-600 bg-transparent hover:bg-gray-600 hover:text-white transition-colors duration-200;
+    @apply border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 font-semibold transition-all duration-200;
   }
   
   /* Save/Submit Buttons - Primary Blue */
   .btn-save {
-    @apply bg-blue-600 text-white hover:bg-blue-700 border-blue-600 transition-colors duration-200;
+    @apply bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-semibold transition-all duration-200 shadow-lg hover:shadow-xl;
   }
   .btn-save-outline {
     @apply border border-blue-600 text-blue-600 bg-transparent hover:bg-blue-600 hover:text-white transition-colors duration-200;
@@ -277,7 +277,7 @@
     @apply bg-purple-600 text-white hover:bg-purple-700 border-purple-600 transition-colors duration-200;
   }
   .btn-view-outline {
-    @apply border border-purple-600 text-purple-600 bg-transparent hover:bg-purple-600 hover:text-white transition-colors duration-200;
+    @apply border-2 border-purple-300 text-purple-700 hover:bg-purple-50 hover:border-purple-400 font-semibold transition-all duration-200;
   }
   
   /* Export/Download Buttons - Commerce Indigo */
@@ -298,32 +298,16 @@
 
   /* Enhanced Card Animations */
   .card-hover-effect {
-    @apply transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-1;
+    @apply transition-all duration-200 ease-in-out;
   }
   
-  .card-border-glow {
-    @apply relative overflow-hidden;
-  }
-  
-  .card-border-glow::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, transparent, currentColor, transparent);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-  
-  .card-border-glow:hover::before {
-    opacity: 0.6;
+  .card-hover-effect:hover {
+    @apply shadow-lg border-opacity-80;
   }
 
-  /* Professional Button Styles */
+  /* Professional Button Styles - Reduced scaling effect */
   .btn-professional {
-    @apply relative overflow-hidden transition-all duration-300 ease-in-out;
+    @apply bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-semibold transition-all duration-150 shadow-lg hover:shadow-xl;
   }
   
   .btn-professional::before {
@@ -343,11 +327,34 @@
 
   /* Icon Enhancement */
   .icon-enhanced {
-    @apply transition-all duration-200 ease-in-out;
+    @apply transition-all duration-150 ease-in-out;
   }
   
   .icon-enhanced:hover {
-    @apply scale-110 drop-shadow-sm;
+    @apply scale-105;
+  }
+
+  /* Enhanced Card Border Glow */
+  .card-border-glow {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-border-glow::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: inherit;
+    padding: 2px;
+    background: linear-gradient(45deg, hsl(var(--feature-commerce)), hsl(var(--feature-commerce-soft)));
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask-composite: xor;
+    pointer-events: none;
+    opacity: 0.3;
   }
 
   /* Order Status Colors */
@@ -374,6 +381,19 @@
   .text-status-priority { color: hsl(var(--status-priority)); }
   .bg-status-priority { background-color: hsl(var(--status-priority)); }
   .bg-status-priority-soft { background-color: hsl(var(--status-priority-soft)); }
+
+  /* Additional Status Colors */
+  .border-status-delivered { border-color: hsl(var(--status-high-value)); }
+  .border-l-status-delivered { border-left-color: hsl(var(--status-high-value)); }
+  .text-status-delivered { color: hsl(var(--status-high-value)); }
+  .bg-status-delivered { background-color: hsl(var(--status-high-value)); }
+  .bg-status-delivered-soft { background-color: hsl(var(--status-high-value-soft)); }
+
+  .border-status-canceled { border-color: hsl(var(--status-urgent)); }
+  .border-l-status-canceled { border-left-color: hsl(var(--status-urgent)); }
+  .text-status-canceled { color: hsl(var(--status-urgent)); }
+  .bg-status-canceled { background-color: hsl(var(--status-urgent)); }
+  .bg-status-canceled-soft { background-color: hsl(var(--status-urgent-soft)); }
 
   /* Enhanced Text Contrast */
   .text-strong { color: hsl(var(--foreground)); font-weight: 600; }
@@ -550,3 +570,136 @@
   width: 10px;
   height: 10px;
 }
+
+/* Animation Classes */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-up {
+  animation: slideInUp 0.3s ease-out;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Enhanced Scrollbar */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Enhanced Focus States */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500;
+}
+
+/* Enhanced Grid Animations - Reduced for smoothness */
+.grid-item {
+  @apply transition-all duration-200 ease-in-out;
+}
+
+.grid-item:hover {
+  @apply shadow-lg z-10;
+}
+
+/* Background Patterns */
+.bg-pattern-dots {
+  background-image: radial-gradient(circle, #e5e7eb 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.bg-pattern-grid {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Mobile-Specific Enhancements */
+@media (max-width: 768px) {
+  .card-hover-effect:hover {
+    @apply shadow-md;
+  }
+  
+  .grid-item:hover {
+    @apply transform-none shadow-md;
+  }
+}
+
+/* Enhanced Mobile Touch Interactions */
+@media (hover: none) and (pointer: coarse) {
+  .btn-professional:active,
+  .btn-add:active,
+  .btn-edit:active,
+  .btn-delete:active,
+  .btn-save:active {
+    @apply scale-95;
+  }
+}
+
+/* Smooth transitions for interactive elements - removed global selector to prevent scroll issues */
+
+/* CSS Containment utilities to prevent layout interference */
+.isolate {
+  isolation: isolate;
+}
+
+.contain-layout {
+  contain: layout;
+}
+
+.will-change-auto {
+  will-change: auto;
+}
+
+/* Enhanced loading states */
+.loading-shimmer {
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0) 0%, 
+    rgba(255, 255, 255, 0.2) 50%, 
+    rgba(255, 255, 255, 0) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Enhanced stagger animations for lists */
+.stagger-item {
+  animation: slideInUp 0.3s ease-out;
+}
+
+.stagger-item:nth-child(1) { animation-delay: 0ms; }
+.stagger-item:nth-child(2) { animation-delay: 50ms; }
+.stagger-item:nth-child(3) { animation-delay: 100ms; }
+.stagger-item:nth-child(4) { animation-delay: 150ms; }
+.stagger-item:nth-child(5) { animation-delay: 200ms; }
+.stagger-item:nth-child(6) { animation-delay: 250ms; }

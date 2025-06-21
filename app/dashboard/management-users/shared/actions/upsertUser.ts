@@ -66,6 +66,14 @@ async function createUser(data: UserFormData, role: UserRole) {
       latitude: data.latitude,
       longitude: data.longitude,
       role,
+      // Vehicle fields for drivers
+      vehicleType: data.vehicleType as any,
+      vehiclePlateNumber: data.vehiclePlateNumber || undefined,
+      vehicleColor: data.vehicleColor || undefined,
+      vehicleModel: data.vehicleModel || undefined,
+      driverLicenseNumber: data.driverLicenseNumber || undefined,
+      experience: data.experience ? parseInt(data.experience) : undefined,
+      maxOrders: data.maxOrders ? parseInt(data.maxOrders) : 3,
     },
   });
 
@@ -101,6 +109,14 @@ async function updateUser(data: UserFormData, role: UserRole) {
       latitude: data.latitude,
       longitude: data.longitude,
       role,
+      // Vehicle fields for drivers
+      vehicleType: data.vehicleType as any,
+      vehiclePlateNumber: data.vehiclePlateNumber || undefined,
+      vehicleColor: data.vehicleColor || undefined,
+      vehicleModel: data.vehicleModel || undefined,
+      driverLicenseNumber: data.driverLicenseNumber || undefined,
+      experience: data.experience ? parseInt(data.experience) : undefined,
+      maxOrders: data.maxOrders ? parseInt(data.maxOrders) : 3,
     },
   });
 

@@ -23,13 +23,15 @@ interface PendingOrdersViewProps {
   pendingCount: number;
   currentPage: number;
   pageSize: number;
+  orderType?: 'pending' | 'assigned';
 }
 
 export default function PendingOrdersView({
   orders,
   pendingCount,
   currentPage,
-  pageSize
+  pageSize,
+  orderType = 'pending'
 }: PendingOrdersViewProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -93,10 +95,10 @@ export default function PendingOrdersView({
   return (
     <div className="space-y-4">
       {/* Enhanced Search & Filter Section */}
-      <Card className="shadow-lg border-l-4 border-l-status-pending card-hover-effect">
+      <Card className="shadow-lg border-l-4 border-l-status-pending">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Search className="h-5 w-5 text-status-pending icon-enhanced" />
+            <Search className="h-5 w-5 text-status-pending" />
             البحث والتصفية
           </CardTitle>
         </CardHeader>
@@ -106,7 +108,10 @@ export default function PendingOrdersView({
             <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3">
               <Input
                 type="search"
-                placeholder="بحث عن طلب (رقم الطلب، اسم العميل، رقم الهاتف)..."
+                placeholder={orderType === 'assigned'
+                  ? "بحث في الطلبات المُخصصة (رقم الطلب، اسم العميل، اسم السائق)..."
+                  : "بحث عن طلب (رقم الطلب، اسم العميل، رقم الهاتف)..."
+                }
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="flex-1"
@@ -120,12 +125,15 @@ export default function PendingOrdersView({
             {/* Search Results Info */}
             <div className="flex justify-between items-center">
               {search ? (
-                <Badge variant="outline" className="bg-status-pending-soft text-status-pending border-status-pending">
+                <Badge variant="outline" className={`${orderType === 'assigned'
+                    ? 'bg-blue-50 text-blue-600 border-blue-200'
+                    : 'bg-status-pending-soft text-status-pending border-status-pending'
+                  }`}>
                   نتائج البحث: {orders.length}
                 </Badge>
               ) : (
                 <Badge variant="outline" className="bg-muted text-muted-foreground">
-                  إجمالي الطلبات: {pendingCount}
+                  {orderType === 'assigned' ? 'إجمالي الطلبات المُخصصة:' : 'إجمالي الطلبات:'} {pendingCount}
                 </Badge>
               )}
             </div>
@@ -147,7 +155,7 @@ export default function PendingOrdersView({
                   variant="outline"
                   size="sm"
                   onClick={handleClearFilters}
-                  className="gap-2 text-muted-foreground hover:text-destructive border-dashed"
+                  className="gap-2 text-muted-foreground border-dashed"
                 >
                   <X className="h-3 w-3" />
                   مسح الفلاتر
@@ -160,7 +168,7 @@ export default function PendingOrdersView({
                 variant={sortBy === 'createdAt' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => handleSort('createdAt')}
-                className="gap-1 flex-1 sm:flex-initial min-w-[90px]"
+                className="gap-1 min-w-[90px]"
               >
                 الأحدث
                 {getSortIcon('createdAt')}
@@ -170,7 +178,7 @@ export default function PendingOrdersView({
                 variant={sortBy === 'amount' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => handleSort('amount')}
-                className="gap-1 flex-1 sm:flex-initial min-w-[90px]"
+                className="gap-1 min-w-[90px]"
               >
                 المبلغ
                 {getSortIcon('amount')}
@@ -180,7 +188,7 @@ export default function PendingOrdersView({
                 variant={sortBy === 'orderNumber' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => handleSort('orderNumber')}
-                className="gap-1 flex-1 sm:flex-initial min-w-[90px]"
+                className="gap-1 min-w-[90px]"
               >
                 رقم الطلب
                 {getSortIcon('orderNumber')}
@@ -219,12 +227,15 @@ export default function PendingOrdersView({
       </Card>
 
       {/* Orders Results Section */}
-      <Card className="shadow-lg border-l-4 border-l-feature-commerce card-hover-effect">
+      <Card className="shadow-lg border-l-4 border-l-feature-commerce">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <FileText className="h-5 w-5 text-feature-commerce icon-enhanced" />
-            الطلبات قيد الانتظار
-            <Badge className="bg-status-pending text-white px-2 py-1 ml-2 text-sm">
+            <FileText className="h-5 w-5 text-feature-commerce" />
+            {orderType === 'assigned' ? 'الطلبات المُخصصة للسائقين' : 'الطلبات قيد الانتظار'}
+            <Badge className={`px-2 py-1 ml-2 text-sm ${orderType === 'assigned'
+              ? 'bg-blue-500 text-white'
+              : 'bg-status-pending text-white'
+              }`}>
               {orders.length}
             </Badge>
           </CardTitle>
@@ -238,6 +249,7 @@ export default function PendingOrdersView({
             updatePage={(page) => updateQuery({ page, sortBy, sortOrder, search: searchTerm })}
             sortBy={sortBy}
             sortOrder={sortOrder}
+            orderType={orderType}
           />
         </CardContent>
       </Card>

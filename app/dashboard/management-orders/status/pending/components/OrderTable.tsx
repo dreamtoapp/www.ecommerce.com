@@ -17,7 +17,6 @@ import {
   Package,
   Clock,
   AlertCircle,
-  CheckCircle2,
   MousePointerBan,
 } from 'lucide-react';
 
@@ -37,6 +36,7 @@ import { Separator } from '@/components/ui/separator';
 
 import AssignToDriver from './AssignToDriver';
 import CancelOrderDialog from './CancelOrderDialog';
+import UnassignDriver from './UnassignDriver';
 
 interface OrderTableProps {
   orders: Order[];
@@ -46,6 +46,7 @@ interface OrderTableProps {
   totalPages: number;
   sortBy?: 'createdAt' | 'amount' | 'orderNumber';
   sortOrder?: 'asc' | 'desc';
+  orderType?: 'pending' | 'assigned';
 }
 
 export default function OrderTable({
@@ -55,7 +56,12 @@ export default function OrderTable({
   totalPages,
   sortBy = 'createdAt',
   sortOrder = 'desc',
+  orderType = 'pending',
 }: OrderTableProps) {
+  // Note: sortBy and sortOrder are not currently used in the implementation
+  // They are kept for future feature development
+  void sortBy;
+  void sortOrder;
 
   const renderPagination = () => {
     const pages = [];
@@ -120,14 +126,14 @@ export default function OrderTable({
 
     return (
       <Card className={cn(
-        "border-l-4 hover:shadow-xl transition-all duration-300 card-hover-effect border rounded-lg overflow-hidden",
+        "border-l-4 border rounded-lg overflow-hidden",
         isUrgent ? "border-l-status-urgent bg-status-urgent-soft" : "border-l-status-pending bg-status-pending-soft"
       )}>
         <CardHeader className="pb-3 bg-card border-b rounded-t-lg">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-              <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground icon-enhanced" />
-              <Link href={`/dashboard/show-invoice/${order.id}`} className="text-primary hover:text-primary/80 font-semibold hover:underline">
+              <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+              <Link href={`/dashboard/show-invoice/${order.id}`} className="text-primary font-semibold">
                 طلب #{order.orderNumber}
               </Link>
             </CardTitle>
@@ -146,7 +152,7 @@ export default function OrderTable({
               )}
               <Badge variant="outline" className="bg-status-pending-soft text-status-pending border-status-pending gap-1 shadow-sm text-xs rounded-md">
                 <MousePointerBan className="h-3 w-3" />
-                قيد الانتظار
+                {orderType === 'assigned' ? 'مُخصص للسائق' : 'قيد الانتظار'}
               </Badge>
             </div>
           </div>
@@ -179,35 +185,61 @@ export default function OrderTable({
               </div>
             </div>
 
-            <div className="space-y-3">
-              <h4 className="font-bold text-sm text-foreground flex items-center gap-2 border-b pb-2">
-                <Package className="h-4 w-4 text-feature-settings" />
-                تفاصيل الطلب
-              </h4>
-              <div className="space-y-2 pr-4">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-                  <span className="text-xs font-semibold text-muted-foreground">المبلغ الإجمالي:</span>
-                  <div className="flex items-center gap-1">
-                    <DollarSign className="h-3 w-3 text-status-high-value" />
-                    <span className="font-bold text-lg text-status-high-value">{order.amount} ر.س</span>
+            {/* Driver Information Section (for assigned orders) */}
+            {orderType === 'assigned' && order.driver ? (
+              <div className="space-y-3">
+                <h4 className="font-bold text-sm text-foreground flex items-center gap-2 border-b pb-2">
+                  <User className="h-4 w-4 text-blue-500" />
+                  معلومات السائق المُخصص
+                </h4>
+                <div className="space-y-2 pr-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                    <span className="text-xs font-semibold text-muted-foreground">الاسم:</span>
+                    <span className="text-sm text-foreground font-medium">{order.driver.name || 'غير معروف'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-3 w-3 text-blue-500" />
+                    <span className="text-sm text-foreground font-medium">{order.driver.phone || 'غير متوفر'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-muted-foreground">الحالة:</span>
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs">
+                      {order.driver.isActive ? 'نشط' : 'غير نشط'}
+                    </Badge>
                   </div>
                 </div>
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-                  <span className="text-xs font-semibold text-muted-foreground">طريقة الدفع:</span>
-                  <Badge variant="outline" className="bg-status-priority-soft text-status-priority border-status-priority gap-1 text-xs self-start rounded-md">
-                    <CreditCard className="h-3 w-3" />
-                    {order.paymentMethod}
-                  </Badge>
-                </div>
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-                  <span className="text-xs font-semibold text-muted-foreground">عدد الأصناف:</span>
-                  <Badge variant="outline" className="bg-feature-analytics-soft text-feature-analytics border-feature-analytics gap-1 text-xs self-start rounded-md">
-                    <Package className="h-3 w-3" />
-                    {order.items?.length || 0} صنف
-                  </Badge>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <h4 className="font-bold text-sm text-foreground flex items-center gap-2 border-b pb-2">
+                  <Package className="h-4 w-4 text-feature-settings" />
+                  تفاصيل الطلب الإضافية
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                    <span className="text-xs font-semibold text-muted-foreground">المبلغ الإجمالي:</span>
+                    <div className="flex items-center gap-1">
+                      <DollarSign className="h-3 w-3 text-status-high-value" />
+                      <span className="font-bold text-lg text-status-high-value">{order.amount} ر.س</span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                    <span className="text-xs font-semibold text-muted-foreground">طريقة الدفع:</span>
+                    <Badge variant="outline" className="bg-status-priority-soft text-status-priority border-status-priority gap-1 text-xs self-start rounded-md">
+                      <CreditCard className="h-3 w-3" />
+                      {order.paymentMethod}
+                    </Badge>
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                    <span className="text-xs font-semibold text-muted-foreground">عدد الأصناف:</span>
+                    <Badge variant="outline" className="bg-feature-analytics-soft text-feature-analytics border-feature-analytics gap-1 text-xs self-start rounded-md">
+                      <Package className="h-3 w-3" />
+                      {order.items?.length || 0} صنف
+                    </Badge>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           <Separator />
@@ -305,7 +337,7 @@ export default function OrderTable({
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <Link
               href={`/dashboard/show-invoice/${order.id}`}
-              className="inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-bold transition-colors bg-primary text-primary-foreground hover:bg-primary/90 shadow-md hover:shadow-lg gap-2 w-full sm:w-auto"
+              className="inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-bold bg-primary text-primary-foreground shadow-md gap-2 w-full sm:w-auto"
             >
               <Search className="h-4 w-4" />
               عرض التفاصيل
@@ -313,7 +345,14 @@ export default function OrderTable({
           </div>
 
           <div className="flex items-center gap-2 w-full sm:w-auto justify-center">
-            <AssignToDriver orderId={order.id} />
+            {orderType === 'assigned' ? (
+              <UnassignDriver
+                orderId={order.id}
+                driverName={order.driver?.name || undefined}
+              />
+            ) : (
+              <AssignToDriver orderId={order.id} />
+            )}
             <CancelOrderDialog orderId={order.id} />
           </div>
         </CardFooter>
@@ -328,9 +367,14 @@ export default function OrderTable({
         <Card className="border-dashed border-2 border-muted bg-muted/30">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <FileText className="h-20 w-20 text-muted-foreground/50 mb-6" />
-            <h3 className="text-xl font-bold text-foreground mb-3">لا توجد طلبات قيد الانتظار</h3>
+            <h3 className="text-xl font-bold text-foreground mb-3">
+              {orderType === 'assigned' ? 'لا توجد طلبات مُخصصة للسائقين' : 'لا توجد طلبات قيد الانتظار'}
+            </h3>
             <p className="text-sm text-muted-foreground text-center max-w-md">
-              جميع الطلبات تمت معالجتها أو لا توجد طلبات جديدة في الوقت الحالي
+              {orderType === 'assigned'
+                ? 'جميع الطلبات المُخصصة تم تسليمها أو لا توجد طلبات مُخصصة حالياً'
+                : 'جميع الطلبات تمت معالجتها أو لا توجد طلبات جديدة في الوقت الحالي'
+              }
             </p>
           </CardContent>
         </Card>

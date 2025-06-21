@@ -64,58 +64,29 @@ export default function EnhancedBreadcrumb() {
 
     return (
         <div className="flex items-center justify-between w-full">
-            {/* Left Side - Back Button + Breadcrumb */}
-            <div className="flex items-center gap-4">
-                {/* Enhanced Back Button */}
-                {breadcrumbs.length > 1 && (
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => router.back()}
-                        className="btn-professional hover:bg-feature-analytics-soft hover:border-feature-analytics transition-all"
-                    >
-                        <ArrowLeft className="h-4 w-4 text-feature-analytics" />
-                        <span className="hidden md:inline mr-1">رجوع</span>
-                    </Button>
-                )}
-
-                {/* Enhanced Breadcrumb */}
-                <nav className="flex items-center gap-2" aria-label="breadcrumb">
+            {/* Left Side - Breadcrumb Navigation */}
+            <nav className="flex items-center space-x-1 space-x-reverse" aria-label="Breadcrumb">
+                <ol className="flex items-center gap-2">
                     {breadcrumbs.map((item, index) => (
-                        <React.Fragment key={item.href}>
+                        <li key={item.href} className="flex items-center">
                             {index > 0 && (
-                                <ChevronRight className="h-4 w-4 text-muted-foreground mx-1" />
+                                <ChevronRight className="h-4 w-4 mx-2 text-muted-foreground rotate-180" />
                             )}
-
-                            <div className="flex items-center gap-2">
-                                {item.isActive ? (
-                                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-feature-analytics-soft border border-feature-analytics/30">
-                                        {item.icon && (
-                                            <item.icon className="h-4 w-4 text-feature-analytics icon-enhanced" />
-                                        )}
-                                        <span className="font-semibold text-feature-analytics text-sm">
-                                            {item.label}
-                                        </span>
-                                        <Badge variant="secondary" className="text-xs">
-                                            الحالية
-                                        </Badge>
-                                    </div>
-                                ) : (
-                                    <Link
-                                        href={item.href}
-                                        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted/50 transition-colors text-sm font-medium text-muted-foreground hover:text-foreground"
-                                    >
-                                        {item.icon && (
-                                            <item.icon className="h-4 w-4" />
-                                        )}
-                                        <span>{item.label}</span>
-                                    </Link>
-                                )}
-                            </div>
-                        </React.Fragment>
+                            <Link
+                                href={item.href}
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors duration-150 ${item.isActive
+                                    ? 'bg-primary/10 text-primary border border-primary/20'
+                                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                                    }`}
+                                aria-current={item.isActive ? 'page' : undefined}
+                            >
+                                {item.icon && <item.icon className="h-4 w-4" />}
+                                <span>{item.label}</span>
+                            </Link>
+                        </li>
                     ))}
-                </nav>
-            </div>
+                </ol>
+            </nav>
 
             {/* Right Side - Page Actions */}
             <div className="flex items-center gap-2">

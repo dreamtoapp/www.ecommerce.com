@@ -1,11 +1,13 @@
 // seedData.ts
 import { ORDER_STATUS } from '@/constant/order-status';
-import { faker } from '@faker-js/faker/locale/ar'; // Use Arabic locale
+import { faker } from '@faker-js/faker/locale/ar'; // Use Arabic locale for realistic names
 import {
   Prisma,
   Product,
   User,
   UserRole,
+  Shift,
+  OrderStatus,
 } from '@prisma/client';
 
 import {
@@ -643,36 +645,34 @@ async function createProductCategories() {
 
 // Create drivers as users with role: 'DRIVER'
 async function createDrivers() {
-  const driversData: Prisma.UserCreateInput[] = [
-    {
-      name: 'سائق 1',
-      phone: '+966500001111',
-      password: 'driver123',
-      role: UserRole.DRIVER,
-      image: '/fallback/driver1.jpg', // Changed from imageUrl to image to match schema
-    },
-    {
-      name: 'سائق 2',
-      phone: '+966500002222',
-      password: 'driver123',
-      role: UserRole.DRIVER,
-      image: '/fallback/driver2.jpg',
-    },
-    {
-      name: 'سائق 3',
-      phone: '+966500003333',
-      password: 'driver123',
-      role: UserRole.DRIVER,
-      image: '/fallback/driver3.jpg',
-    },
+  // Generate realistic Arabic driver names
+  const driverNames = [
+    'أحمد محمد السالم',
+    'محمد عبدالله القحطاني', 
+    'عبدالرحمن سعد الغامدي',
+    'فهد خالد العتيبي',
+    'سعد عبدالعزيز المطيري',
+    'عبدالله أحمد الشهري',
+    'خالد محمد الدوسري',
+    'سلطان عبدالرحمن الحربي',
+    'ناصر فهد الزهراني',
+    'عبدالعزيز سعد القرشي'
   ];
+
+  const driversData: Prisma.UserCreateInput[] = driverNames.map((name, index) => ({
+    name: name,
+    phone: `+96650000${(1111 + index).toString()}`,
+    password: 'driver123',
+    role: UserRole.DRIVER,
+    image: `/fallback/driver${(index % 3) + 1}.jpg`,
+  }));
 
   const createdDrivers: User[] = [];
   for (const driver of driversData) {
     const created = await db.user.create({ data: driver });
     createdDrivers.push(created);
   }
-  log(`Created ${createdDrivers.length} drivers as users with role: 'DRIVER'`);
+  log(`Created ${createdDrivers.length} drivers with realistic Arabic names`);
   return createdDrivers;
 }
 
@@ -910,20 +910,25 @@ function getWeightedRandomDate() {
   return getRandomDateInLastMonths(6);
 }
 
-// Generate orders with realistic fashion shopping patterns
-async function generateFashionOrders(count: number, shiftId: string) {
+// Generate orders with realistic customer assignments
+async function generateFashionOrders(count: number, shifts: Shift[]) {
   log(`Generating ${count} fashion orders...`);
 
-  const users = await db.user.findMany();
+  // Get only CUSTOMER users for order assignment
+  const customers = await db.user.findMany({
+    where: { role: UserRole.CUSTOMER }
+  });
   const products = await db.product.findMany();
   // Get users with DRIVER role and properly type them
   const drivers = await db.user.findMany({
     where: { role: UserRole.DRIVER }
   });
 
-  if (!users.length || !products.length) {
-    throw new Error('No users or products found. Please seed users and products first.');
+  if (!customers.length || !products.length) {
+    throw new Error('No customers or products found. Please seed customers and products first.');
   }
+
+  log(`Found ${customers.length} customers and ${drivers.length} drivers for order generation`);
 
   // Group products by category to create realistic shopping patterns
   const productsByCategory = products.reduce(
@@ -985,10 +990,15 @@ async function generateFashionOrders(count: number, shiftId: string) {
 
     try {
       const orderNumber = await generateOrderNumber();
-      const user = faker.helpers.arrayElement(users);
+      // Only assign to actual customers, not admins or drivers
+      const customer = faker.helpers.arrayElement(customers);
 
       // Assign a driver randomly (if available)
       const driverId = drivers.length > 0 ? faker.helpers.arrayElement(drivers).id : undefined;
+
+      // Assign a real shiftId from the seeded shifts
+      const shift = faker.helpers.arrayElement(shifts);
+      const shiftId = shift.id;
 
       // Create more realistic order status distribution
       const orderStatus = faker.helpers.weightedArrayElement([
@@ -1001,7 +1011,7 @@ async function generateFashionOrders(count: number, shiftId: string) {
       const createdOrder = await db.order.create({
         data: {
           orderNumber,
-          customerId: user.id,
+          customerId: customer.id,
           driverId: driverId,
           status: orderStatus,
           amount: totalAmount,
@@ -1010,7 +1020,6 @@ async function generateFashionOrders(count: number, shiftId: string) {
           },
           latitude: faker.location.latitude().toString(),
           longitude: faker.location.longitude().toString(),
-          isTripStart: orderStatus === ORDER_STATUS.IN_TRANSIT,
           resonOfcancel:
             orderStatus === 'CANCELED'
               ? faker.helpers.arrayElement([
@@ -1098,7 +1107,7 @@ async function generateProductReviews() {
       // Create a set of user IDs who have purchased this product
       const purchaserIds = new Set(
         orderItems
-          .filter((item) => item.order?.status === 'Delivered')
+          .filter((item) => item.order?.status === OrderStatus.DELIVERED)
           .map((item) => item.order?.customerId)
           .filter(Boolean),
       );
@@ -1188,10 +1197,173 @@ async function generateProductReviews() {
   }
 }
 
+// Step 1: Create Shifts
+async function createShifts() {
+  const shiftsData = [
+    { name: 'Morning', startTime: '06:00', endTime: '14:00' },
+    { name: 'Afternoon', startTime: '14:00', endTime: '22:00' },
+    { name: 'Night', startTime: '22:00', endTime: '06:00' },
+  ];
+  const createdShifts: Shift[] = [];
+  for (const shift of shiftsData) {
+    const created = await db.shift.create({ data: shift });
+    createdShifts.push(created);
+  }
+  log(`Created ${createdShifts.length} shifts`);
+  return createdShifts;
+}
+
+// Step 2: Create Users (all roles) with many more customers
+async function createUsers() {
+  // Create the main admin user and a few system users
+  const systemUsers: Prisma.UserCreateInput[] = [
+    // Main admin user (you)
+    {
+      name: 'khalid',
+      phone: '0545642264',
+      password: '123456',
+      role: UserRole.ADMIN,
+      image: '/fallback/admin.jpg',
+      email: 'khalid@example.com',
+    },
+    // Additional system user
+    {
+      name: 'مدير النظام',
+      phone: '+966500000001',
+      password: 'admin123',
+      role: UserRole.ADMIN,
+      image: '/fallback/admin.jpg',
+      email: 'admin@example.com',
+    },
+    // Marketer user
+    {
+      name: 'مسوق المتجر',
+      phone: '+966500000004',
+      password: 'marketer123',
+      role: UserRole.MARKETER,
+      image: '/fallback/marketer.jpg',
+      email: 'marketer@example.com',
+    },
+  ];
+
+  // Generate many realistic customers (50-100 customers)
+  const customerCount = 75;
+  const customerUsers: Prisma.UserCreateInput[] = [];
+  
+  for (let i = 0; i < customerCount; i++) {
+    // Generate realistic Saudi phone numbers
+    const phoneNumber = `+96656${faker.string.numeric(7)}`;
+    
+    customerUsers.push({
+      name: faker.person.fullName(),
+      phone: phoneNumber,
+      password: 'customer123',
+      role: UserRole.CUSTOMER,
+      image: '/fallback/customer.jpg',
+      email: `customer${i + 1}@example.com`,
+    });
+  }
+
+  // Combine system users and customers
+  const allUsers = [...systemUsers, ...customerUsers];
+  
+  const createdUsers: User[] = [];
+  for (const user of allUsers) {
+    if (!user.phone) continue; // skip if phone is null/undefined
+    const upserted = await db.user.upsert({
+      where: { phone: String(user.phone) },
+      update: {
+        name: user.name,
+        password: user.password,
+        role: user.role,
+        image: user.image,
+        email: user.email,
+      },
+      create: { ...user, phone: String(user.phone) },
+    });
+    createdUsers.push(upserted);
+  }
+  
+  const customerCount_final = createdUsers.filter(u => u.role === UserRole.CUSTOMER).length;
+  const adminCount = createdUsers.filter(u => u.role === UserRole.ADMIN).length;
+  const marketerCount = createdUsers.filter(u => u.role === UserRole.MARKETER).length;
+  
+  log(`Upserted ${createdUsers.length} users total:`);
+  log(`  - ${customerCount_final} customers with realistic names`);
+  log(`  - ${adminCount} admins`);
+  log(`  - ${marketerCount} marketers`);
+  
+  return createdUsers;
+}
+
+// Step 3: Create WishlistItems for real users and products
+async function createWishlistItems(users: User[], products: Product[]) {
+  if (!users.length || !products.length) {
+    log('No users or products for wishlist. Skipping.');
+    return [];
+  }
+  const wishlistItems = [];
+  // Each user will wishlist 2-4 random products
+  for (const user of users) {
+    const count = faker.number.int({ min: 2, max: 4 });
+    const selectedProducts = faker.helpers.arrayElements(products, count);
+    for (const product of selectedProducts) {
+      try {
+        const item = await db.wishlistItem.create({
+          data: {
+            userId: user.id,
+            productId: product.id,
+          },
+        });
+        wishlistItems.push(item);
+      } catch (e) {
+        // Ignore duplicates due to unique constraint
+      }
+    }
+  }
+  log(`Created ${wishlistItems.length} wishlist items for real users and products`);
+  return wishlistItems;
+}
+
+// Utility: Clear all old data before seeding
+async function clearAllData() {
+  log('Clearing all old data...');
+  // Order of deletion matters due to relations
+  await db.orderInWay.deleteMany({});
+  await db.orderItem.deleteMany({});
+  await db.order.deleteMany({});
+  await db.review.deleteMany({});
+  await db.wishlistItem.deleteMany({});
+  await db.notification.deleteMany({});
+  await db.account.deleteMany({});
+  await db.locationHistory.deleteMany({});
+  await db.offerProduct.deleteMany({});
+  await db.offer.deleteMany({});
+  await db.productTranslation.deleteMany({});
+  await db.categoryProduct.deleteMany({});
+  await db.categoryTranslation.deleteMany({});
+  await db.product.deleteMany({});
+  await db.category.deleteMany({});
+  await db.supplierTranslation.deleteMany({});
+  await db.supplier.deleteMany({});
+  await db.shift.deleteMany({});
+  await db.user.deleteMany({});
+  log('All old data cleared.');
+}
+
 // Main function to seed the database
 async function seedDatabase() {
   try {
     log('Seeding database...');
+
+    // Clear all old data first
+    await clearAllData();
+
+    // Step 1: Shifts
+    const shifts = await createShifts();
+
+    // Step 2: Users
+    const users = await createUsers();
 
     // Create suppliers
     await createFashionSuppliers();
@@ -1203,10 +1375,13 @@ async function seedDatabase() {
     await createDrivers();
 
     // Generate products
-    await generateFashionProducts(getArgValue('productCount', 100), '');
+    const products = await generateFashionProducts(getArgValue('productCount', 100), '');
 
-    // Generate orders
-    await generateFashionOrders(getArgValue('orderCount', 100), '');
+    // Step 3: WishlistItems (after products and users)
+    await createWishlistItems(users, products);
+
+    // Generate orders (pass shifts array)
+    await generateFashionOrders(getArgValue('orderCount', 100), shifts);
 
     // Generate reviews
     await generateProductReviews();

@@ -9,13 +9,11 @@ import db from '../../../../lib/prisma';
 export async function getOrderByStatus(driverId: string, status: OrderStatus) {
   try {
     const ordersToShip = await db.order.findMany({
-      where: { driverId, status, isTripStart: false },
+      where: { driverId, status },
       select: {
         id: true,
         orderNumber: true,
         customerId: true,
-        isTripStart: true,
-        driverId: true,
         status: true,
         amount: true,
         createdAt: true,

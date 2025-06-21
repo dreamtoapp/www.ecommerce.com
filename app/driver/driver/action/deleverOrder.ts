@@ -9,7 +9,7 @@ import db from '@/lib/prisma';
 export const deleverOrder = async (orderId: string) => {
   await db.order.update({
     where: { id: orderId },
-    data: { status: ORDER_STATUS.DELIVERED, isTripStart: false },
+    data: { status: ORDER_STATUS.DELIVERED },
   });
   await db.orderInWay.delete({
     where: { orderId: orderId },

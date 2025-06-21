@@ -22,7 +22,7 @@ export default function BackButton() {
       size="icon"
       aria-label="العودة للخلف"
       onClick={() => router.back()}
-      className="mr-1 md:mr-2 rounded-full border border-border bg-background hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary"
+      className="mr-1 md:mr-2 rounded-full border border-border bg-background"
     >
       {isRtl ? <ArrowRight size={22} /> : <ArrowLeft size={22} />}
     </Button>

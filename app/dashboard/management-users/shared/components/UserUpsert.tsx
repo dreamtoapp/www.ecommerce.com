@@ -1,6 +1,8 @@
 'use client';
 
 import {
+  ChevronDown,
+  ChevronUp,
   Edit,
   LocateFixed,
   MapPin,
@@ -8,12 +10,14 @@ import {
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { useState } from 'react';
 
 import AppDialog from '@/components/app-dialog';
 import FormError from '@/components/form-error';
 import InfoTooltip from '@/components/InfoTooltip';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { iconVariants } from '@/lib/utils';
 import {
   extractCoordinatesFromUrl,
@@ -37,6 +41,18 @@ interface userProps {
 }
 
 export default function AddUser({ role, mode, defaultValues, title, description }: userProps) {
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['البيانات الشخصية']));
+
+  const toggleSection = (sectionName: string) => {
+    const newExpanded = new Set(expandedSections);
+    if (newExpanded.has(sectionName)) {
+      newExpanded.delete(sectionName);
+    } else {
+      newExpanded.add(sectionName);
+    }
+    setExpandedSections(newExpanded);
+  };
+
   const {
     register,
     handleSubmit,
@@ -56,6 +72,13 @@ export default function AddUser({ role, mode, defaultValues, title, description 
       sharedLocationLink: defaultValues.sharedLocationLink || '',
       latitude: defaultValues.latitude || '',
       longitude: defaultValues.longitude || '',
+      vehicleType: defaultValues.vehicleType || undefined,
+      vehiclePlateNumber: defaultValues.vehiclePlateNumber || '',
+      vehicleColor: defaultValues.vehicleColor || '',
+      vehicleModel: defaultValues.vehicleModel || '',
+      driverLicenseNumber: defaultValues.driverLicenseNumber || '',
+      experience: defaultValues.experience || '',
+      maxOrders: defaultValues.maxOrders || '',
     },
   });
 
@@ -123,86 +146,148 @@ export default function AddUser({ role, mode, defaultValues, title, description 
       title={title}
       description={description}
       mode={mode}
+      footer={
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          className="min-w-[120px]"
+          form="user-form"
+        >
+          {isSubmitting ? 'جارٍ الحفظ...' : 'حفظ'}
+        </Button>
+      }
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {getDriverFields(register, errors).map((section) => (
-          <div key={section.section} className="space-y-3">
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200">
-                {section.section}
-              </h3>
-              {section.hint && (
-                <InfoTooltip content="يمكنك الحصول على خط العرض والطول من خلال مشاركة الموقع معك من خرائط Google أو أي تطبيق GPS آخر." />
+      <form id="user-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {getDriverFields(register, errors).map((section) => {
+          const isExpanded = expandedSections.has(section.section);
+
+          return (
+            <div key={section.section} className="border rounded-lg">
+              <div className="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                <button
+                  type="button"
+                  onClick={() => toggleSection(section.section)}
+                  className="flex items-center gap-2 flex-1 text-left"
+                >
+                  <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                    {section.section}
+                  </h3>
+                  {!isExpanded && (
+                    <span className="text-xs text-gray-500">({section.fields.length} حقول)</span>
+                  )}
+                </button>
+
+                <div className="flex items-center gap-2">
+                  {section.hint && (
+                    <InfoTooltip content="يمكنك الحصول على خط العرض والطول من خلال مشاركة الموقع معك من خرائط Google أو أي تطبيق GPS آخر." />
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => toggleSection(section.section)}
+                    className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                  >
+                    {isExpanded ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {isExpanded && (
+                <div className="p-4 pt-0 space-y-3">
+                  <div className="grid grid-cols-1 gap-4">
+                    {section.fields.map((field) => {
+                      if (field.name === 'sharedLocationLink') {
+                        return (
+                          <div
+                            key={field.name}
+                            className="flex gap-2 items-start"
+                          >
+                            <div className="flex-1">
+                              <Input
+                                {...field.register}
+                                type={field.type}
+                                placeholder={field.placeholder}
+                                disabled={isSubmitting}
+                              />
+                              <FormError message={field.error} />
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={handleExtractCoordinates}
+                                disabled={isSubmitting || !isWhatsAppLinkValid()}
+                              >
+                                <LocateFixed />
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="secondary"
+                                onClick={handleOpenWhatsApp}
+                                disabled={!isWhatsAppLinkValid()}
+                              >
+                                <MapPin />
+                              </Button>
+                              <InfoTooltip content="  يمكنك نسخ رابط مشاركة الموقع من WhatsApp أو خرائط Google وسنقوم باستخراج الإحداثيات تلقائياً." />
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      // Handle select fields (like vehicle type)
+                      if (field.type === 'select' && field.options) {
+                        return (
+                          <div key={field.name} className={field.className}>
+                            <Select
+                              onValueChange={(value) => setValue(field.name as any, value)}
+                              defaultValue={getValues(field.name as any)}
+                              disabled={isSubmitting}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder={field.placeholder} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {field.options.map((option) => (
+                                  <SelectItem key={option.value} value={option.value}>
+                                    {option.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormError message={field.error} />
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div key={field.name} className={field.className}>
+                          <Input
+                            {...field.register}
+                            type={field.type}
+                            placeholder={field.placeholder}
+                            disabled={isSubmitting}
+                            maxLength={field.maxLength}
+                          />
+                          <FormError message={field.error} />
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {section.hint && (
+                    <p className="text-xs text-muted-foreground text-right max-w-md">
+
+                    </p>
+                  )}
+                </div>
               )}
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {section.fields.map((field) => {
-                if (field.name === 'sharedLocationLink') {
-                  return (
-                    <div
-                      key={field.name}
-                      className="col-span-2 flex gap-2 items-start"
-                    >
-                      <div className="flex-1">
-                        <Input
-                          {...field.register}
-                          type={field.type}
-                          placeholder={field.placeholder}
-                          disabled={isSubmitting}
-                        />
-                        <FormError message={field.error} />
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={handleExtractCoordinates}
-                          disabled={isSubmitting || !isWhatsAppLinkValid()}
-                        >
-                          <LocateFixed />
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          onClick={handleOpenWhatsApp}
-                          disabled={!isWhatsAppLinkValid()}
-                        >
-                          <MapPin />
-                        </Button>
-                        <InfoTooltip content="  يمكنك نسخ رابط مشاركة الموقع من WhatsApp أو خرائط Google وسنقوم باستخراج الإحداثيات تلقائياً." />
-                      </div>
-                    </div>
-                  );
-                }
-
-                return (
-                  <div key={field.name} className={field.className}>
-                    <Input
-                      {...field.register}
-                      type={field.type}
-                      placeholder={field.placeholder}
-                      disabled={isSubmitting}
-                      maxLength={field.maxLength}
-                    />
-                    <FormError message={field.error} />
-                  </div>
-                );
-              })}
-            </div>
-
-            {section.hint && (
-              <p className="text-xs text-muted-foreground text-right max-w-md">
-
-              </p>
-            )}
-          </div>
-        ))}
-
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'جارٍ الحفظ...' : 'حفظ '}
-        </Button>
+          );
+        })}
       </form>
     </AppDialog>
   );

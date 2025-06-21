@@ -40,7 +40,7 @@ export default function CancelOrderDialog({ orderId }: CancelOrderDialogProps) {
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 w-8 p-0 text-red-600 hover:bg-red-100 hover:text-red-700"
+          className="h-8 w-8 p-0 text-red-600 hover:bg-red-100 hover:text-red-700 transition-colors duration-150"
         >
           <X className="h-4 w-4" />
 

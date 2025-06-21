@@ -42,7 +42,7 @@ export default function OrderManagementView({
                     <div className="flex items-center gap-3">
                         <div className="h-8 w-1 bg-feature-commerce rounded-full"></div>
                         <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-                            <Package className="h-6 w-6 text-feature-commerce icon-enhanced" />
+                            <Package className="h-6 w-6 text-feature-commerce" />
                             إدارة الطلبات
                         </h1>
                     </div>
@@ -68,10 +68,10 @@ export default function OrderManagementView({
             />
 
             {/* Orders Management Card */}
-            <Card className="shadow-lg border-l-4 border-l-feature-commerce card-hover-effect">
+            <Card className="shadow-lg border-l-4 border-l-feature-commerce">
                 <CardHeader className="pb-3">
                     <CardTitle className="flex items-center gap-2 text-lg">
-                        <List className="h-5 w-5 text-feature-commerce icon-enhanced" />
+                        <List className="h-5 w-5 text-feature-commerce" />
                         إدارة الطلبات اليومية
                     </CardTitle>
                 </CardHeader>

@@ -365,7 +365,7 @@ export default function OrderAnalyticsClient({
             <TableBody>
               {paginatedOrders.map((o) => (
                 <TableRow key={o.id}>
-                  <TableCell>{o.orderNumber ?? o.id}</TableCell>
+                  <TableCell>{o.orderNumber || '—'}</TableCell>
                   <TableCell>{o.customer?.name ?? '-'}</TableCell>
                   <TableCell>{o.status}</TableCell>
                   <TableCell>

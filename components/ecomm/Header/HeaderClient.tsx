@@ -52,8 +52,8 @@ export default function HeaderClient({ session }: HeaderClientProps) {
       <span className="md:hidden">
         <MobileMenu aria-label="القائمة الرئيسية" />
       </span>
-      {/* Back button for mobile only */}
-      <span className="md:hidden">
+      {/* Back button for all devices */}
+      <span>
         <BackButton />
       </span>
       <CartIcon aria-label='Cart' />

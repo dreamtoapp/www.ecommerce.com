@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import { auth } from '@/auth';
 import db from '@/lib/prisma';
+import { OrderStatus } from '@prisma/client';
 
 export async function restoreOrder(orderId: string) {
   console.log(orderId);
@@ -19,7 +20,7 @@ export async function restoreOrder(orderId: string) {
         id: orderId,
       },
       data: {
-        status: 'PENDING',
+        status: OrderStatus.ASSIGNED,
         resonOfcancel: null,
       },
     });

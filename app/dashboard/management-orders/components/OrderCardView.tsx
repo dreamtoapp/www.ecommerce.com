@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { Search, Filter, RefreshCw, AlertCircle, TrendingUp, Package, Info } from 'lucide-react';
+import { Search, RefreshCw, AlertCircle, TrendingUp, Package, Info } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -36,7 +36,7 @@ export default function OrderCardView({ initialOrders = [], status }: OrderCardV
 
     const pageRef = useRef(page);
     const initialOrdersRef = useRef(initialOrders);
-    const searchTimeoutRef = useRef<NodeJS.Timeout>();
+    const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const pageSize = 12; // Increased for better performance
 
     // Optimize initial orders comparison

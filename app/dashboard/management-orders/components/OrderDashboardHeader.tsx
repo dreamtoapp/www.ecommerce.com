@@ -55,8 +55,8 @@ const OrderDashboardHeader = function OrderDashboardHeader({
         };
     }, [totalOrders, pendingOrders, deliveredOrders, inWaydOrders, cancelOrders]);
 
-    // Enhanced card style with hover animations
-    const cardStyle = 'flex flex-col items-center justify-center gap-2 p-4 card-hover-effect transition-all duration-300 hover:scale-105';
+    // Enhanced card style with hover animations - removed scale to prevent scroll issues
+    const cardStyle = 'flex flex-col items-center justify-center gap-2 p-4';
 
     // Status cards data with enhanced styling
     const statusCards = [
@@ -144,7 +144,7 @@ const OrderDashboardHeader = function OrderDashboardHeader({
     return (
         <div className="space-y-4">
             {/* Status Cards */}
-            <Card className="shadow-lg border-l-4 border-l-feature-commerce card-hover-effect">
+            <Card className="shadow-lg border-l-4 border-l-feature-commerce">
                 <CardHeader className="pb-3">
                     <CardTitle className="flex items-center gap-2 text-lg">
                         <Calendar className="h-5 w-5 text-feature-commerce icon-enhanced" />
@@ -166,8 +166,7 @@ const OrderDashboardHeader = function OrderDashboardHeader({
                                             <Card
                                                 className={`
                                                     cursor-pointer shadow-md border-l-4 ${card.borderColor} 
-                                                    card-hover-effect transition-all duration-300 hover:scale-105 hover:shadow-lg
-                                                    ${initialFilter === card.filter ? `${card.bgColor} shadow-xl scale-105` : 'hover:bg-muted/20'}
+                                                                                                                                                                ${initialFilter === card.filter ? `${card.bgColor} shadow-xl` : ''}
                                                 `}
                                             >
                                                 <CardContent className={cardStyle}>
@@ -229,7 +228,7 @@ const OrderDashboardHeader = function OrderDashboardHeader({
             </Card>
 
             {/* Performance Overview Card - Compact */}
-            <Card className="shadow-lg border-l-4 border-l-feature-analytics card-hover-effect">
+            <Card className="shadow-lg border-l-4 border-l-feature-analytics">
                 <CardHeader className="pb-3">
                     <CardTitle className="flex items-center gap-2 text-lg">
                         <TrendingUp className="h-5 w-5 text-feature-analytics icon-enhanced" />

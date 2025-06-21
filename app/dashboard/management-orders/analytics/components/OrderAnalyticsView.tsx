@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, BarChart3 } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
 import BackButton from '@/components/BackButton';
 
 import OrderAnalyticsDashboard from '../../components/OrderAnalyticsDashboard';

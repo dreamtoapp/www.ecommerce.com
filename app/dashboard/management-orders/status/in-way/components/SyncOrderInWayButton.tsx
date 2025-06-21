@@ -1,7 +1,10 @@
 "use client";
 import { useState } from 'react';
+import { RefreshCw } from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
 import { syncOrderInWay } from '@/utils/syncOrderInWay';
+import { toast } from 'sonner';
 
 export default function SyncOrderInWayButton() {
   const [syncing, setSyncing] = useState(false);
@@ -9,21 +12,25 @@ export default function SyncOrderInWayButton() {
   const handleSync = async () => {
     setSyncing(true);
     try {
-      await syncOrderInWay()
+      await syncOrderInWay();
+      toast.success('تم تحديث الطلبات بنجاح');
     } catch (e) {
-      alert("Sync failed!");
+      toast.error('فشل في تحديث الطلبات');
     } finally {
       setSyncing(false);
     }
   };
 
   return (
-    <button
+    <Button
       onClick={handleSync}
       disabled={syncing}
-      className="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+      variant="outline"
+      size="sm"
+      className="gap-2 transition-all duration-150 hover:shadow-md"
     >
-      {syncing ? "Syncing..." : "Sync OrderInWay (TEMP)"}
-    </button>
+      <RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : 'icon-enhanced'}`} />
+      {syncing ? "جارٍ التحديث..." : "تحديث الطلبات"}
+    </Button>
   );
 }

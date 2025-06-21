@@ -19,28 +19,32 @@ const quickActions = [
         title: 'منتج جديد',
         href: '/dashboard/management-products/new',
         icon: Package,
-        color: 'feature-products',
+        color: 'text-green-600',
+        bgColor: '',
         shortcut: 'Ctrl+N',
     },
     {
         title: 'عرض جديد',
         href: '/dashboard/management-offer/new',
         icon: Plus,
-        color: 'feature-commerce',
+        color: 'text-blue-600',
+        bgColor: '',
         shortcut: 'Ctrl+O',
     },
     {
         title: 'تقرير سريع',
         href: '/dashboard/management-reports',
         icon: BarChart3,
-        color: 'feature-analytics',
+        color: 'text-purple-600',
+        bgColor: '',
         shortcut: 'Ctrl+R',
     },
     {
         title: 'إضافة مستخدم',
         href: '/dashboard/management-users/customer',
         icon: Users,
-        color: 'feature-users',
+        color: 'text-orange-600',
+        bgColor: '',
         shortcut: 'Ctrl+U',
     },
 ];
@@ -58,8 +62,8 @@ export default function QuickActions() {
             {/* Quick Actions Dropdown */}
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="btn-professional hover:bg-feature-commerce-soft">
-                        <Zap className="h-4 w-4 text-feature-commerce" />
+                    <Button variant="outline" size="sm" className="hover:bg-feature-analytics-soft hover:border-feature-analytics transition-colors duration-200">
+                        <Zap className="h-4 w-4 text-blue-600 icon-enhanced" />
                         <span className="hidden md:inline mr-1">إجراءات سريعة</span>
                     </Button>
                 </DropdownMenuTrigger>
@@ -71,10 +75,10 @@ export default function QuickActions() {
                     <div className="grid grid-cols-2 gap-2 mb-4">
                         {quickActions.map((action) => (
                             <Link key={action.href} href={action.href}>
-                                <Card className={`card-hover-effect cursor-pointer hover:bg-${action.color}-soft transition-all duration-200 p-0`}>
+                                <Card className="cursor-pointer card-hover-effect">
                                     <CardContent className="p-3">
                                         <div className="flex items-center gap-2 mb-2">
-                                            <action.icon className={`h-4 w-4 text-${action.color} icon-enhanced`} />
+                                            <action.icon className={`h-4 w-4 ${action.color} icon-enhanced`} />
                                             <span className="text-sm font-semibold">{action.title}</span>
                                         </div>
                                         <Badge variant="outline" className="text-xs">

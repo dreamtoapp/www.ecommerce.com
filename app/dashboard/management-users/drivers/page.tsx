@@ -39,6 +39,13 @@ export default async function DriversPage() {
             sharedLocationLink: '',
             latitude: '',
             longitude: '',
+            vehicleType: undefined,
+            vehiclePlateNumber: '',
+            vehicleColor: '',
+            vehicleModel: '',
+            driverLicenseNumber: '',
+            experience: '',
+            maxOrders: '3',
           }} />
       </div>
 

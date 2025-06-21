@@ -7,7 +7,8 @@ import {
   DollarSign,
   Package,
   Calculator,
-  CheckCircle2
+  CheckCircle2,
+  Clock
 } from 'lucide-react';
 
 import BackButton from '@/components/BackButton';
@@ -50,61 +51,100 @@ export default async function InvoicePage({ params, searchParams }: ParamsProp) 
   const taxAmount = subtotal * taxRate;
   const total = subtotal + taxAmount;
 
-  // Status color mapping
-  const getStatusColor = (status: string) => {
+  // Status color mapping with Arabic labels
+  const getStatusInfo = (status: string) => {
     switch (status?.toLowerCase()) {
       case 'pending':
-        return 'border-status-pending text-status-pending bg-status-pending/10';
+        return {
+          label: 'قيد الانتظار',
+          className: 'bg-amber-50 text-amber-800 border border-amber-200',
+          icon: Clock
+        };
       case 'delivered':
-        return 'border-green-500 text-green-700 bg-green-50';
+        return {
+          label: 'تم التوصيل',
+          className: 'bg-green-50 text-green-800 border border-green-200',
+          icon: CheckCircle2
+        };
       case 'cancelled':
-        return 'border-red-500 text-red-700 bg-red-50';
+        return {
+          label: 'ملغي',
+          className: 'bg-red-50 text-red-800 border border-red-200',
+          icon: CheckCircle2
+        };
       case 'in_transit':
-        return 'border-feature-commerce text-feature-commerce bg-feature-commerce-soft';
+        return {
+          label: 'في الطريق',
+          className: 'bg-blue-50 text-blue-800 border border-blue-200',
+          icon: CheckCircle2
+        };
       default:
-        return 'border-muted-foreground text-muted-foreground bg-muted/30';
+        return {
+          label: status || 'غير محدد',
+          className: 'bg-gray-50 text-gray-800 border border-gray-200',
+          icon: CheckCircle2
+        };
     }
   };
 
+  const statusInfo = getStatusInfo(order?.status || '');
+  const StatusIcon = statusInfo.icon;
+
   return (
-    <div className="font-cairo p-4 bg-background min-h-screen" dir="rtl">
-      <div className="mx-auto max-w-4xl space-y-4">
+    <div className="font-cairo p-4 bg-background" dir="rtl">
+      <div className="mx-auto max-w-4xl space-y-6">
         {/* Header Section */}
-        <div className="flex flex-col gap-4">
-          <BackButton variant="default" />
+        <div className="space-y-4">
+          {/* Clean Header Card */}
+          <Card className="shadow-sm border-0 bg-muted/30">
+            <CardContent className="p-6">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                {/* Left side - Order info with BackButton */}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                  <div className="flex items-center gap-3">
+                    <BackButton variant="default" />
+                    <div className="space-y-1">
+                      <h1 className="text-2xl font-bold text-foreground">
+                        الطلبات المسلمة
+                      </h1>
+                      <p className="text-sm text-muted-foreground">
+                        رقم الطلب: {order?.orderNumber || '—'}
+                      </p>
+                    </div>
+                  </div>
 
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div className="space-y-1">
-              <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-foreground">
-                <Receipt className="h-6 w-6 text-feature-commerce icon-enhanced" />
-                فاتورة رقم #{order?.invoiceNo}
-              </h1>
-              <p className="text-muted-foreground">تفاصيل الطلب والفاتورة الكاملة</p>
-            </div>
+                  {/* Status Badge */}
+                  <Badge className={`flex items-center gap-2 px-3 py-1.5 rounded-lg font-medium ${statusInfo.className}`}>
+                    <StatusIcon className="w-4 h-4" />
+                    {statusInfo.label}
+                  </Badge>
+                </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3">
-              {order && (
-                <SendOrderViaEmail
-                  orderId={orderId}
-                  invoiceNumber={order.orderNumber}
-                  email={order.customerEmail}
-                />
-              )}
-              {status === 'ship' && (
-                <ConfirmDriver
-                  orderNo={order?.orderNumber || ''}
-                  driverList={drivers?.filter(d => d.name !== null) as { id: string; name: string; }[]}
-                />
-              )}
-            </div>
-          </div>
+                {/* Right side - Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  {order && (
+                    <SendOrderViaEmail
+                      orderId={orderId}
+                      invoiceNumber={order.orderNumber}
+                      email={order.customerEmail}
+                    />
+                  )}
+                  {status === 'ship' && (
+                    <ConfirmDriver
+                      orderNo={order?.orderNumber || ''}
+                      driverList={drivers?.filter(d => d.name !== null) as { id: string; name: string; }[]}
+                    />
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Main Invoice Content */}
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Customer Information Card */}
-          <Card className="shadow-lg border-l-4 border-l-feature-users card-hover-effect lg:col-span-1">
+          <Card className="shadow-lg border-l-4 border-l-feature-users lg:col-span-1">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-xl">
                 <User className="h-5 w-5 text-feature-users icon-enhanced" />
@@ -149,7 +189,7 @@ export default async function InvoicePage({ params, searchParams }: ParamsProp) 
                   <CheckCircle2 className="h-4 w-4 text-feature-users" />
                   <div>
                     <p className="text-sm text-muted-foreground">حالة الطلب</p>
-                    <Badge className={`rounded-md ${getStatusColor(order?.status || '')}`}>
+                    <Badge className={`rounded-md ${getStatusInfo(order?.status || '').className}`}>
                       {order?.status}
                     </Badge>
                   </div>
@@ -159,7 +199,7 @@ export default async function InvoicePage({ params, searchParams }: ParamsProp) 
           </Card>
 
           {/* Order Items Card */}
-          <Card className="shadow-lg border-l-4 border-l-feature-products card-hover-effect lg:col-span-2">
+          <Card className="shadow-lg border-l-4 border-l-feature-products lg:col-span-2">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-xl">
                 <Package className="h-5 w-5 text-feature-products icon-enhanced" />
@@ -227,7 +267,7 @@ export default async function InvoicePage({ params, searchParams }: ParamsProp) 
           </Card>
 
           {/* Financial Summary Card */}
-          <Card className="shadow-lg border-l-4 border-l-feature-analytics card-hover-effect lg:col-span-3">
+          <Card className="shadow-lg border-l-4 border-l-feature-analytics lg:col-span-3">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-xl">
                 <Calculator className="h-5 w-5 text-feature-analytics icon-enhanced" />

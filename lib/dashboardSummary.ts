@@ -1,9 +1,5 @@
-import {
-  ORDER_STATUS,
-  OrderStatus,
-} from '@/constant/order-status';
+import { OrderStatus, UserRole } from '@prisma/client';
 import db from '@/lib/prisma';
-import { UserRole } from '@prisma/client';
 
 export async function getDashboardSummary() {
   // Orders
@@ -11,9 +7,9 @@ export async function getDashboardSummary() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const ordersToday = await db.order.count({ where: { createdAt: { gte: today } } });
-  const pendingOrders = await db.order.count({ where: { status: ORDER_STATUS.PENDING } });
-  const completedOrders = await db.order.count({ where: { status: ORDER_STATUS.DELIVERED } });
-  const cancelledOrders = await db.order.count({ where: { status: ORDER_STATUS.CANCELED } });
+  const pendingOrders = await db.order.count({ where: { status: { in: [OrderStatus.PENDING, OrderStatus.ASSIGNED].filter(Boolean) } } });
+  const completedOrders = await db.order.count({ where: { status: OrderStatus.DELIVERED } });
+  const cancelledOrders = await db.order.count({ where: { status: OrderStatus.CANCELED } });
 
   // Sales
   const totalSales = await db.order.aggregate({ _sum: { amount: true } });
@@ -85,7 +81,7 @@ export async function getDashboardSummary() {
     _count: { _all: true },
     where: {
       status: {
-        in: [ORDER_STATUS.PENDING, ORDER_STATUS.IN_TRANSIT, ORDER_STATUS.DELIVERED, ORDER_STATUS.CANCELED]
+        in: [OrderStatus.PENDING, OrderStatus.IN_TRANSIT, OrderStatus.DELIVERED, OrderStatus.CANCELED].filter(Boolean)
       }
     }
   });
@@ -98,12 +94,17 @@ export async function getDashboardSummary() {
   const recentOrders = await db.order.findMany({
     where: {
       status: {
-        in: [ORDER_STATUS.PENDING, ORDER_STATUS.IN_TRANSIT, ORDER_STATUS.DELIVERED, ORDER_STATUS.CANCELED]
+        in: [OrderStatus.PENDING, OrderStatus.IN_TRANSIT, OrderStatus.DELIVERED, OrderStatus.CANCELED].filter(Boolean)
       }
     },
     orderBy: { createdAt: 'desc' },
     take: 5,
-    include: {
+    select: {
+      id: true,
+      orderNumber: true,
+      amount: true,
+      status: true,
+      createdAt: true,
       customer: {
         select: {
           name: true,
@@ -131,7 +132,8 @@ export async function getDashboardSummary() {
     orderStatus,
     recentOrders: recentOrders.map((o) => ({
       id: o.id,
-      customer: o.customer?.name || '---',
+      orderNumber: o.orderNumber,
+      customer: o.customer?.name || o.customer?.email || o.customer?.phone || '—',
       amount: o.amount,
       status: o.status as OrderStatus, // Cast to OrderStatus
       date: o.createdAt instanceof Date ? o.createdAt.toISOString() : o.createdAt,

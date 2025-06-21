@@ -10,7 +10,6 @@ import {
     List,
     MapPin,
     MapPinX,
-    MousePointerBan,
     Phone,
     ReceiptText,
     RefreshCw,
@@ -19,7 +18,8 @@ import {
     X,
     Clock,
     Package,
-    CreditCard
+    CreditCard,
+    Box
 } from 'lucide-react';
 
 import Link from '@/components/link';
@@ -41,7 +41,7 @@ import {
     ORDER_STATUS,
     OrderStatus,
 } from '@/constant/order-status';
-import { iconVariants } from '@/lib/utils';
+// import { iconVariants } from '@/lib/utils';
 import { Order } from '@/types/databaseTypes';
 
 // Enhanced status styles following the design system with feature colors
@@ -50,6 +50,7 @@ const STATUS_STYLES = {
     [ORDER_STATUS.IN_TRANSIT]: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100',
     [ORDER_STATUS.DELIVERED]: 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100',
     [ORDER_STATUS.CANCELED]: 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100',
+    [ORDER_STATUS.ASSIGNED]: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100',
 };
 
 const STATUS_TRANSLATIONS = {
@@ -57,6 +58,7 @@ const STATUS_TRANSLATIONS = {
     [ORDER_STATUS.IN_TRANSIT]: 'في الطريق',
     [ORDER_STATUS.DELIVERED]: 'تم التسليم',
     [ORDER_STATUS.CANCELED]: 'ملغي',
+    [ORDER_STATUS.ASSIGNED]: 'في السيارة',
     Default: 'غير محدد',
 };
 
@@ -67,6 +69,7 @@ const StatusIcon = ({ status }: { status: OrderStatus }) => {
         [ORDER_STATUS.IN_TRANSIT]: <Truck className="h-4 w-4 text-blue-600" />,
         [ORDER_STATUS.DELIVERED]: <CheckCircle className="h-4 w-4 text-green-600" />,
         [ORDER_STATUS.CANCELED]: <X className="h-4 w-4 text-red-600" />,
+        [ORDER_STATUS.ASSIGNED]: <Box className="h-4 w-4 text-blue-600" />,
     };
     return icons[status.toUpperCase() as OrderStatus] || <Package className="h-4 w-4 text-muted-foreground" />;
 };
@@ -260,12 +263,12 @@ const OrderContent = ({ order }: { order: Order }) => (
             </div>
         )}
 
-        {order.status === ORDER_STATUS.CANCELED && order.statusReason && (
+        {order.status === ORDER_STATUS.CANCELED && (
             <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
                 <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
                 <div>
-                    <p className="text-sm font-medium text-red-700">سبب الإلغاء:</p>
-                    <p className="text-sm text-red-600">{order.statusReason}</p>
+                    <p className="text-sm font-medium text-red-700">الطلب ملغي</p>
+                    <p className="text-sm text-red-600">تم إلغاء هذا الطلب</p>
                 </div>
             </div>
         )}
@@ -291,6 +294,8 @@ export default function OrderCard({ order }: OrderCardProps) {
                 return 'border-l-green-500';
             case ORDER_STATUS.CANCELED:
                 return 'border-l-red-500';
+            case ORDER_STATUS.ASSIGNED:
+                return 'border-l-blue-500';
             default:
                 return 'border-l-feature-commerce';
         }
@@ -312,8 +317,9 @@ export default function OrderCard({ order }: OrderCardProps) {
                 <div className="flex items-center justify-between w-full text-xs text-muted-foreground">
                     <div className="flex items-center gap-1">
                         <div className={`h-2 w-2 rounded-full ${order.status === ORDER_STATUS.DELIVERED ? 'bg-green-500' :
-                                order.status === ORDER_STATUS.IN_TRANSIT ? 'bg-blue-500 animate-pulse' :
-                                    order.status === ORDER_STATUS.PENDING ? 'bg-yellow-500 animate-pulse' :
+                            order.status === ORDER_STATUS.IN_TRANSIT ? 'bg-blue-500 animate-pulse' :
+                                order.status === ORDER_STATUS.PENDING ? 'bg-yellow-500 animate-pulse' :
+                                    order.status === ORDER_STATUS.ASSIGNED ? 'bg-blue-500 animate-pulse' :
                                         'bg-red-500'
                             }`} />
                         <span>انقر للتفاصيل</span>

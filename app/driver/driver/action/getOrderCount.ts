@@ -1,4 +1,3 @@
-
 import {
   ORDER_STATUS,
 } from '@/constant/order-status';
@@ -13,7 +12,6 @@ export async function getOrderCount(driverId: string) {
         where: {
           driverId,
           status: ORDER_STATUS.IN_TRANSIT,
-          isTripStart: false,
         },
       }),
 
@@ -22,7 +20,6 @@ export async function getOrderCount(driverId: string) {
         where: {
           driverId,
           status: ORDER_STATUS.CANCELED,
-          isTripStart: false,
         },
       }),
 
@@ -31,7 +28,6 @@ export async function getOrderCount(driverId: string) {
         where: {
           driverId,
           status: ORDER_STATUS.DELIVERED,
-          isTripStart: false,
         },
       }),
     ]);

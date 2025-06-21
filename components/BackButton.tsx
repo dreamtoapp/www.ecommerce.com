@@ -2,10 +2,7 @@
 
 import { ArrowLeft, ChevronLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { useEffect, useState } from 'react';
 
 interface BackButtonProps {
   label?: string;
@@ -16,7 +13,7 @@ interface BackButtonProps {
   fallbackUrl?: string;
 }
 
-export default function BackButton({
+function BackButton({
   label = "الرجوع",
   className = "",
   variant = 'default',
@@ -25,11 +22,8 @@ export default function BackButton({
   fallbackUrl = "/dashboard"
 }: BackButtonProps) {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
 
-  const handleBack = async () => {
-    setIsLoading(true);
-
+  const handleBack = () => {
     try {
       if (window.history.length > 1) {
         router.back();
@@ -39,58 +33,49 @@ export default function BackButton({
     } catch (error) {
       console.error('Navigation error:', error);
       router.push(fallbackUrl);
-    } finally {
-      // Reset loading state after a short delay to prevent flickering
-      setTimeout(() => setIsLoading(false), 300);
     }
   };
 
   const IconComponent = icon === 'chevron' ? ChevronLeft : ArrowLeft;
 
-  const variants = {
-    default: "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 transition-all duration-300 ease-in-out bg-background hover:bg-muted border border-border hover:border-primary/20 btn-professional btn-cancel-outline",
-
-    minimal: "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-primary/60 transition-all duration-200 ease-in-out text-muted-foreground hover:text-foreground btn-cancel-outline",
-
-    floating: "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium shadow-lg hover:shadow-xl focus-visible:ring-2 focus-visible:ring-primary/60 transition-all duration-300 ease-in-out bg-background/80 backdrop-blur-sm border border-border/50 hover:border-primary/30 card-hover-effect btn-cancel-outline",
-
-    gradient: "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg focus-visible:ring-2 focus-visible:ring-white/60 transition-all duration-300 ease-in-out bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/90 hover:to-primary/70 btn-professional"
+  // Professional, minimal, safe classes
+  const baseClasses = "inline-flex items-center justify-center select-none";
+  const variantClasses = {
+    default: "gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-border bg-background text-foreground hover:bg-muted hover:text-foreground",
+    minimal: "gap-1 px-2 py-1 text-sm rounded-md text-muted-foreground hover:bg-muted",
+    floating: "gap-2 px-3 py-2 text-sm font-medium rounded-full bg-background/80 border border-border/50 hover:bg-muted",
+    gradient: "gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-gradient-to-r from-primary/90 to-primary text-primary-foreground hover:from-primary hover:to-primary/90"
+  };
+  const iconSizeClasses = {
+    default: "w-4 h-4",
+    minimal: "w-3 h-3",
+    floating: "w-4 h-4",
+    gradient: "w-4 h-4"
   };
 
   return (
-    <Button
+    <button
       type="button"
-      variant="ghost"
       onClick={handleBack}
-      disabled={isLoading}
-      className={cn(
-        variants[variant],
-        isLoading && "opacity-50 cursor-not-allowed",
-        className
-      )}
+      className={[baseClasses, variantClasses[variant], className].join(' ')}
       aria-label={label}
     >
-      <IconComponent
-        className={cn(
-          "w-4 h-4 rtl:rotate-180 icon-enhanced transition-transform duration-200",
-          isLoading && "animate-pulse"
-        )}
-      />
-      {showLabel && (
-        <span className={cn(
-          "hidden xs:inline-block transition-opacity duration-200",
-          isLoading && "opacity-50"
-        )}>
-          {isLoading ? "جاري التحميل..." : label}
-        </span>
-      )}
-
-      {/* Loading indicator */}
-      {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin opacity-50" />
-        </div>
-      )}
-    </Button>
+      <IconComponent className={iconSizeClasses[variant]} />
+      {showLabel && <span>{label}</span>}
+    </button>
   );
+}
+
+// Wrapper to prevent hydration scroll jump
+export default function BackButtonWrapper(props: BackButtonProps) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    // Render a plain skeleton with the same size as the default BackButton
+    return <div style={{ height: 40, width: 96, borderRadius: 8, background: '#eee' }} />;
+  }
+  return <BackButton {...props} />;
 }

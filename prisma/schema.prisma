@@ -15,6 +15,14 @@ enum UserRole {
   MARKETER
 }
 
+enum VehicleType {
+  MOTORCYCLE  // دراجة نارية
+  CAR         // سيارة
+  VAN         // فان
+  TRUCK       // شاحنة صغيرة
+  BICYCLE     // دراجة هوائية
+}
+
 model Supplier {
   id        String    @id @default(auto()) @map("_id") @db.ObjectId
   name      String    @default("")
@@ -143,6 +151,16 @@ model User {
   wishlist      WishlistItem[] // User's wishlist items
   Notification  Notification[]
 
+  // Driver-specific fields
+  vehicleType       VehicleType? // Type of vehicle for drivers
+  vehiclePlateNumber String?     // Vehicle plate number
+  vehicleColor      String?      // Vehicle color
+  vehicleModel      String?      // Vehicle model (e.g., "Honda CBR", "Toyota Camry")
+  driverLicenseNumber String?    // Driver's license number
+  isActive          Boolean      @default(true) // For driver availability management
+  maxOrders         Int?         @default(3) // Maximum orders driver can handle simultaneously
+  experience        Int?         // Years of driving experience
+
   // Relations for orders as customer and as driver
   customerOrders Order[] @relation("OrderCustomer")
   driverOrders   Order[] @relation("OrderDriver")
@@ -171,6 +189,14 @@ model Account {
   @@unique([provider, providerAccountId])
 }
 
+enum OrderStatus {
+  PENDING
+  ASSIGNED
+  IN_TRANSIT
+  DELIVERED
+  CANCELED
+}
+
 model Order {
   id            String  @id @default(auto()) @map("_id") @db.ObjectId 
   orderNumber   String  @unique
@@ -180,8 +206,7 @@ model Order {
   driver        User?   @relation("OrderDriver", fields: [driverId], references: [id]) // Updated to User, explicit relation name
   latitude      String? 
   longitude    String?  
-  status        String @default("PENDING") 
-  isTripStart   Boolean @default(false)
+  status        OrderStatus @default(PENDING)
   amount        Float   @default(0)
   resonOfcancel String? @default("")
   paymentMethod String? @default("CASH") // Default payment method

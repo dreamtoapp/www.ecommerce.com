@@ -2,6 +2,7 @@
 import { ORDER_STATUS } from '@/constant/order-status';
 import db from '@/lib/prisma';
 import { Order, orderIncludeRelation } from '@/types/databaseTypes';
+import { OrderStatus } from '@prisma/client';
 
 export type OrdersResponse = {
   orders: Order[];
@@ -19,7 +20,7 @@ export async function fetchOrders({
   sortBy = 'createdAt',
   sortOrder = 'desc',
 }: {
-  status?: string; // Using string values to match database
+  status?: OrderStatus | OrderStatus[];
   page?: number;
   pageSize?: number;
   dateRange?: 'all' | 'today' | 'week' | 'month' | 'year';
@@ -33,7 +34,18 @@ export async function fetchOrders({
     const skip = (page - 1) * pageSize;
 
     // Create base query
-    let where: any = status ? { status } : {};
+    let where: any = {};
+    if (status) {
+      if (Array.isArray(status)) {
+        // Filter out undefined/null and ensure all are valid OrderStatus
+        const filteredStatuses = status.filter((s): s is OrderStatus => Boolean(s));
+        if (filteredStatuses.length > 0) {
+          where.status = { in: filteredStatuses };
+        }
+      } else {
+        where.status = status;
+      }
+    }
 
     // Add reason filter for canceled orders
     if (status === 'CANCELED' && reason) {
@@ -113,17 +125,28 @@ export async function fetchOrders({
 
 export async function fetchAnalytics() {
   try {
-
     const orderCount = await db.order.count({
-      where: { status: ORDER_STATUS.PENDING }
+      where: { status: OrderStatus.PENDING }
     });
-
-
 
     return orderCount;
   } catch (error) {
     console.error('Error fetching analytics:', error);
     // Return default analytics on error
-    return 0
+    return 0;
+  }
+}
+
+export async function fetchAssignedAnalytics() {
+  try {
+    const orderCount = await db.order.count({
+      where: { status: OrderStatus.ASSIGNED }
+    });
+
+    return orderCount;
+  } catch (error) {
+    console.error('Error fetching assigned analytics:', error);
+    // Return default analytics on error
+    return 0;
   }
 }
