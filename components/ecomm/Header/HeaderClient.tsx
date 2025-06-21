@@ -5,6 +5,7 @@ import {
   useEffect,
   useState
 } from 'react';
+import { usePathname } from 'next/navigation';
 import BackButton from './BackButton';
 
 import { Session } from 'next-auth';
@@ -38,7 +39,7 @@ interface HeaderClientProps {
 
 export default function HeaderClient({ session }: HeaderClientProps) {
   const [isMounted, setIsMounted] = useState(false);
-
+  const pathname = usePathname();
 
   useEffect(() => {
     setIsMounted(true);
@@ -46,16 +47,22 @@ export default function HeaderClient({ session }: HeaderClientProps) {
 
   if (!isMounted) return null;
 
+  // Only show BackButton on sub-routes, not on homepage
+  const isHomepage = pathname === '/';
+  const showBackButton = !isHomepage;
+
   return (
     <div className='flex items-center gap-4 md:gap-6'>
       {/* Burger menu for mobile only (first action) */}
       <span className="md:hidden">
         <MobileMenu aria-label="القائمة الرئيسية" />
       </span>
-      {/* Back button for all devices */}
-      <span>
-        <BackButton />
-      </span>
+      {/* Back button for sub-routes only (not homepage) */}
+      {showBackButton && (
+        <span>
+          <BackButton />
+        </span>
+      )}
       <CartIcon aria-label='Cart' />
       <UserMenu session={session} aria-label="User account menu" />
     </div>

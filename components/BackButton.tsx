@@ -1,81 +1,98 @@
 "use client";
 
-import { ArrowLeft, ChevronLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { ArrowRight, ChevronRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface BackButtonProps {
-  label?: string;
-  className?: string;
   variant?: 'default' | 'minimal' | 'floating' | 'gradient';
-  icon?: 'arrow' | 'chevron';
+  icon?: 'chevron' | 'arrow';
   showLabel?: boolean;
-  fallbackUrl?: string;
+  customText?: string;
+  customHref?: string;
+  className?: string;
+  size?: 'sm' | 'default' | 'lg';
 }
 
-function BackButton({
-  label = "الرجوع",
-  className = "",
+export default function BackButton({
   variant = 'default',
-  icon = 'arrow',
+  icon = 'chevron',
   showLabel = true,
-  fallbackUrl = "/dashboard"
+  customText,
+  customHref,
+  className,
+  size = 'default'
 }: BackButtonProps) {
   const router = useRouter();
 
   const handleBack = () => {
-    try {
-      if (window.history.length > 1) {
-        router.back();
-      } else {
-        router.push(fallbackUrl);
-      }
-    } catch (error) {
-      console.error('Navigation error:', error);
-      router.push(fallbackUrl);
+    if (customHref) {
+      router.push(customHref);
+    } else {
+      router.back();
     }
   };
 
-  const IconComponent = icon === 'chevron' ? ChevronLeft : ArrowLeft;
+  // Icon selection based on RTL/LTR support
+  const IconComponent = icon === 'chevron' ? ChevronRight : ArrowRight;
 
-  // Professional, minimal, safe classes
-  const baseClasses = "inline-flex items-center justify-center select-none";
-  const variantClasses = {
-    default: "gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-border bg-background text-foreground hover:bg-muted hover:text-foreground",
-    minimal: "gap-1 px-2 py-1 text-sm rounded-md text-muted-foreground hover:bg-muted",
-    floating: "gap-2 px-3 py-2 text-sm font-medium rounded-full bg-background/80 border border-border/50 hover:bg-muted",
-    gradient: "gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-gradient-to-r from-primary/90 to-primary text-primary-foreground hover:from-primary hover:to-primary/90"
+  // Mobile-First Variant styles with proper touch targets
+  const variantStyles = {
+    default: 'bg-background hover:bg-muted border border-border shadow-sm hover:shadow-md transition-all duration-300 active:scale-95',
+    minimal: 'bg-transparent hover:bg-muted/50 border-0 shadow-none hover:shadow-sm transition-all duration-300 active:scale-95',
+    floating: 'bg-background/90 backdrop-blur-sm hover:bg-background/95 border border-border/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-full active:scale-95',
+    gradient: 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95'
   };
-  const iconSizeClasses = {
-    default: "w-4 h-4",
-    minimal: "w-3 h-3",
-    floating: "w-4 h-4",
-    gradient: "w-4 h-4"
+
+  // Mobile-First Size styles with proper touch targets (minimum 44px)
+  const sizeStyles = {
+    sm: 'min-h-[44px] h-10 px-3 text-sm sm:h-8 sm:min-h-[32px]', // Mobile: 44px, Desktop: 32px
+    default: 'min-h-[48px] h-12 px-4 text-base sm:h-10 sm:min-h-[40px]', // Mobile: 48px, Desktop: 40px
+    lg: 'min-h-[52px] h-14 px-6 text-lg sm:h-12 sm:min-h-[48px]' // Mobile: 52px, Desktop: 48px
   };
+
+  const buttonText = customText || 'رجوع';
 
   return (
-    <button
-      type="button"
+    <Button
       onClick={handleBack}
-      className={[baseClasses, variantClasses[variant], className].join(' ')}
-      aria-label={label}
+      variant="outline"
+      className={cn(
+        // Base mobile-first styles
+        'flex items-center justify-center gap-2 font-medium will-change-transform',
+        // Touch-friendly minimum width
+        'min-w-[44px]',
+        // RTL support
+        'flex-row-reverse',
+        // Variant and size styles
+        variantStyles[variant],
+        sizeStyles[size],
+        // Enhanced mobile interactions
+        'touch-manipulation select-none',
+        // Focus states for accessibility
+        'focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+        className
+      )}
     >
-      <IconComponent className={iconSizeClasses[variant]} />
-      {showLabel && <span>{label}</span>}
-    </button>
+      <IconComponent
+        className={cn(
+          'transition-transform duration-300 flex-shrink-0',
+          // Mobile-first icon sizes
+          size === 'sm' ? 'h-4 w-4' : size === 'lg' ? 'h-6 w-6' : 'h-5 w-5',
+          // Hover animation
+          'group-hover:-translate-x-1'
+        )}
+      />
+      {showLabel && (
+        <span className={cn(
+          'transition-all duration-300 whitespace-nowrap',
+          // Hide text on very small screens if needed
+          size === 'sm' && 'hidden xs:inline'
+        )}>
+          {buttonText}
+        </span>
+      )}
+    </Button>
   );
-}
-
-// Wrapper to prevent hydration scroll jump
-export default function BackButtonWrapper(props: BackButtonProps) {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    // Render a plain skeleton with the same size as the default BackButton
-    return <div style={{ height: 40, width: 96, borderRadius: 8, background: '#eee' }} />;
-  }
-  return <BackButton {...props} />;
 }

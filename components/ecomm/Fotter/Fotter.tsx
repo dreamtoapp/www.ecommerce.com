@@ -16,21 +16,9 @@ const Newsletter = dynamic(() => import('./Newsletter'), {
   loading: () => <div>Loading newsletter…</div>,
 });
 
-// Dynamic import for WhatsAppButton (optional, lightweight)
-const WhatsAppButton = dynamic(() => import('@/app/(e-comm)/homepage/component/WhatsAppButton'), {
-  ssr: false,
-  loading: () => null,
-});
+// WhatsApp functionality moved to mobile action buttons
 
-// Dynamic import for SupportPingButton (optional, lightweight)
-// FIX: Use default import for dynamic() when component is exported as named function
-const SupportPingButton = dynamic(
-  () => import('@/components/SupportPingButton').then((mod) => mod.SupportPingButton),
-  {
-    ssr: false,
-    loading: () => null,
-  },
-);
+// Support ping functionality moved to mobile action buttons
 
 interface FooterProps {
   aboutus?: string;
@@ -89,13 +77,8 @@ const Footer = ({
         />
 
         <Copyright />
-        {/* --- Floating Support & WhatsApp Buttons --- */}
-        <div className='fixed bottom-24 right-6 z-50 flex flex-col items-end gap-4'>
-          {/* Support Ping Button (with badge overlay for timer) */}
-          <SupportPingButton userId='guest' />
-          {/* WhatsApp Button (large, round, shadow) */}
-          {whatsapp && <WhatsAppButton whatsapp={whatsapp} />}
-        </div>
+        {/* --- Floating Support & WhatsApp moved to mobile action buttons --- */}
+        {/* Support and WhatsApp functionality now integrated into mobile navigation */}
       </div>
     </footer>
   );

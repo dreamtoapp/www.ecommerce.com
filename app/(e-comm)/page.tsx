@@ -1,4 +1,5 @@
 import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
 
 import { auth } from '@/auth';
 import BackToTopButton from '@/components/ecomm/BackToTopButton';
@@ -12,16 +13,20 @@ import {
 import { UserRole } from '@prisma/client';
 import { PageProps } from '@/types/commonTypes';
 
-// Dynamically import components with optimized loading strategies
-// Critical above-the-fold components with priority
-const SliderSection = dynamic(() => import('./homepage/component/slider/SliderSection'), {
+// Import our new optimized components with high priority
+const OptimizedHeroSection = dynamic(() => import('./homepage/component/slider/OptimizedHeroSection'), {
   ssr: true,
-  loading: () => <div className='h-64 w-full animate-pulse rounded-xl bg-gray-100 shadow-md'></div>,
+});
+
+const CriticalCSS = dynamic(() => import('./homepage/component/CriticalCSS'), {
+  ssr: true,
 });
 
 const PreloadScript = dynamic(() => import('./homepage/component/PreloadScript'), {
   ssr: true,
 });
+
+// Critical above-the-fold components with optimized loading
 
 // Main category section with priority loading
 const RealCategoryListClient = dynamic(
@@ -29,11 +34,11 @@ const RealCategoryListClient = dynamic(
   {
     ssr: true,
     loading: () => (
-      <div className='w-full animate-pulse rounded-xl border border-border bg-card p-4'>
-        <div className='mb-4 h-8 w-1/3 rounded bg-gray-200'></div>
-        <div className='flex gap-4 overflow-x-auto pb-4'>
+      <div className='w-full animate-pulse rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 shadow-lg'>
+        <div className='mb-6 h-8 w-1/3 rounded-lg bg-gradient-to-r from-muted to-muted/50'></div>
+        <div className='flex gap-6 overflow-x-auto pb-4'>
           {[...Array(4)].map((_, i) => (
-            <div key={i} className='h-40 w-64 flex-shrink-0 rounded-xl bg-gray-200'></div>
+            <div key={i} className='h-48 w-72 flex-shrink-0 rounded-2xl bg-gradient-to-br from-muted to-muted/70 shadow-md'></div>
           ))}
         </div>
       </div>
@@ -41,15 +46,15 @@ const RealCategoryListClient = dynamic(
   },
 );
 
-// Featured promotions component
+// Enhanced featured promotions component
 const FeaturedPromotions = dynamic(() => import('./homepage/component/FeaturedPromotions'), {
   ssr: true,
   loading: () => (
-    <div className='w-full animate-pulse rounded-xl border border-border bg-card p-4'>
-      <div className='mb-4 h-8 w-1/3 rounded bg-gray-200'></div>
-      <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3'>
+    <div className='w-full animate-pulse rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 shadow-lg'>
+      <div className='mb-6 h-8 w-1/3 rounded-lg bg-gradient-to-r from-muted to-muted/50'></div>
+      <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
         {[...Array(3)].map((_, i) => (
-          <div key={i} className='h-64 rounded-xl bg-gray-200'></div>
+          <div key={i} className='h-72 rounded-2xl bg-gradient-to-br from-muted to-muted/70 shadow-md'></div>
         ))}
       </div>
     </div>
@@ -62,11 +67,11 @@ const CategoryListClient = dynamic(
   {
     ssr: true,
     loading: () => (
-      <div className='w-full animate-pulse rounded-xl border border-border bg-card p-4'>
-        <div className='mb-4 h-8 w-1/3 rounded bg-gray-200'></div>
+      <div className='w-full animate-pulse rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 shadow-lg'>
+        <div className='mb-6 h-8 w-1/3 rounded-lg bg-gradient-to-r from-muted to-muted/50'></div>
         <div className='grid grid-cols-2 gap-4 md:grid-cols-4'>
           {[...Array(4)].map((_, i) => (
-            <div key={i} className='h-32 rounded bg-gray-200'></div>
+            <div key={i} className='h-40 rounded-xl bg-gradient-to-br from-muted to-muted/70 shadow-md'></div>
           ))}
         </div>
       </div>
@@ -85,7 +90,7 @@ type UserWithRole = {
   // ... other fields ...
 };
 
-// Dynamically import components
+// Dynamically import components with enhanced loading states
 const CheckUserActivationClient = dynamic(
   () => import('./homepage/component/EcommClientWrappers').then((mod) => mod.CheckUserActivationClient),
   { ssr: true }
@@ -98,25 +103,26 @@ const CheckUserLocationClient = dynamic(
 
 const ClearButton = dynamic(() => import('./homepage/component/supplier/ClearButton'), {
   ssr: true,
-  loading: () => <div className='h-12 w-full animate-pulse rounded-xl bg-card'></div>,
+  loading: () => <div className='h-12 w-full animate-pulse rounded-xl bg-gradient-to-r from-card to-card/70 shadow-md'></div>,
 });
 
 // Use dynamic imports with optimized component for product section
 const ProductsSection = dynamic(() => import('./homepage/component/product/ProductsSection'), {
   ssr: true,
   loading: () => (
-    <div className='container mx-auto p-4'>
-      <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
+    <div className='container mx-auto p-6'>
+      <div className='mb-8 h-10 w-1/4 animate-pulse rounded-lg bg-gradient-to-r from-muted to-muted/50'></div>
+      <div className='grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
         {[...Array(8)].map((_, i) => (
           <div
             key={i}
-            className='relative h-80 animate-pulse overflow-hidden rounded-2xl border-border bg-card shadow-md'
+            className='relative h-96 animate-pulse overflow-hidden rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm shadow-lg'
           >
-            <div className='h-40 bg-gray-300'></div>
-            <div className='space-y-4 p-4'>
-              <div className='h-4 w-3/4 rounded bg-gray-300'></div>
-              <div className='h-4 w-1/2 rounded bg-gray-300'></div>
-              <div className='h-8 rounded bg-gray-300'></div>
+            <div className='h-48 bg-gradient-to-br from-muted to-muted/70'></div>
+            <div className='space-y-4 p-6'>
+              <div className='h-5 w-3/4 rounded-lg bg-gradient-to-r from-muted to-muted/50'></div>
+              <div className='h-4 w-1/2 rounded-lg bg-gradient-to-r from-muted to-muted/50'></div>
+              <div className='h-12 rounded-xl bg-gradient-to-r from-muted to-muted/50'></div>
             </div>
           </div>
         ))}
@@ -135,94 +141,187 @@ export default async function HomePage({ searchParams }: PageProps<Record<string
   const slug = resolvedSearchParams?.slug || '';
   const session = await auth();
 
-  // Fetch data in parallel
+  // Fetch data in parallel for better performance
   const [supplierWithItems, promotionsData, categories] = await Promise.all([
     fetchSuppliersWithProducts(),
     getPromotions(),
     getCategories(),
   ]);
 
-  // Use offers if available, otherwise use fallback data
+  // Create optimized hero slides from promotions with better data structure
+  const heroSlides = promotionsData.length > 0
+    ? promotionsData.map(promo => ({
+      id: promo.id,
+      title: promo.name || 'عرض خاص مميز',
+      subtitle: 'اكتشف أفضل المنتجات بأسعار لا تُقاوم',
+      description: 'تسوق الآن واستمتع بأفضل العروض والخصومات الحصرية على مجموعة واسعة من المنتجات عالية الجودة',
+      imageUrl: promo.imageUrl || '/fallback/fallback.avif',
+      ctaText: 'تسوق الآن',
+      ctaLink: '/categories',
+      discountPercentage: 30,
+      isActive: promo.isActive,
+    }))
+    : [
+      {
+        id: 'fallback-hero',
+        title: 'مرحباً بك في متجرنا الإلكتروني',
+        subtitle: 'اكتشف أفضل المنتجات بأسعار مناسبة',
+        description: 'تسوق من مجموعة واسعة من المنتجات عالية الجودة مع ضمان أفضل الأسعار وخدمة توصيل سريعة',
+        imageUrl: '/fallback/fallback.avif',
+        ctaText: 'استكشف المنتجات',
+        ctaLink: '/categories',
+        discountPercentage: 25,
+        isActive: true,
+      }
+    ];
+
+  // Enhanced promotions with fallback data
   const displayPromotions =
     promotionsData.length > 0
       ? promotionsData
       : [
         {
-          id: 'fallback-1',
-          name: 'Special Summer Collection',
+          id: 'promo-1',
+          name: 'مجموعة الصيف الجديدة',
           imageUrl: '/fallback/fallback.avif',
           isActive: true,
         },
         {
-          id: 'fallback-2',
-          name: 'New Arrivals - Spring 2025',
+          id: 'promo-2',
+          name: 'عروض الربيع 2025',
           imageUrl: '/fallback/fallback.webp',
+          isActive: true,
+        },
+        {
+          id: 'promo-3',
+          name: 'تخفيضات نهاية الموسم',
+          imageUrl: '/fallback/fallback.avif',
           isActive: true,
         },
       ];
 
   return (
-    <div className='container mx-auto flex flex-col gap-4 bg-background text-foreground'>
-      {/* Performance optimization script */}
-      <PreloadScript />
+    <>
+      {/* Inline Critical CSS for above-the-fold content */}
+      <CriticalCSS />
 
-      {/* User-specific components */}
-      {session && (
-        <>
-          <CheckUserActivationClient user={session.user as Partial<UserWithRole>} />
-          <CheckUserLocationClient user={session.user as Partial<UserWithRole>} />
-        </>
-      )}
+      <div className='container mx-auto flex flex-col gap-8 bg-background text-foreground px-4 sm:px-6 lg:px-8'>
+        {/* Performance optimization script */}
+        <PreloadScript />
 
-      {/* Critical above-the-fold content */}
-      <SliderSection promotions={displayPromotions} />
+        {/* User-specific components */}
+        {session && (
+          <Suspense fallback={null}>
+            <CheckUserActivationClient user={session.user as Partial<UserWithRole>} />
+            <CheckUserLocationClient user={session.user as Partial<UserWithRole>} />
+          </Suspense>
+        )}
 
-      {/* MAIN CATEGORIES SECTION - Featured prominently at the top */}
-      <section className="py-2">
-        <RealCategoryListClient
-          categories={categories}
-          title="تسوق حسب الفئة"
-          description="استكشف مجموعتنا المتنوعة من المنتجات حسب الفئة"
-        />
-      </section>
+        {/* Enhanced Hero Section with compelling value proposition */}
+        <section className="relative -mx-4 sm:-mx-6 lg:-mx-8" aria-label="Hero banner">
+          <OptimizedHeroSection slides={heroSlides} />
+        </section>
 
-      {/* FEATURED PROMOTIONS SECTION */}
-      <FeaturedPromotions promotions={promotionsData} />
+        {/* Main Categories Section */}
+        <section className="space-y-6" aria-label="Product categories">
+          <Suspense
+            fallback={
+              <div className='w-full animate-pulse rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 shadow-lg'>
+                <div className='mb-6 h-8 w-1/3 rounded-lg bg-gradient-to-r from-muted to-muted/50'></div>
+                <div className='grid grid-cols-2 gap-4 md:grid-cols-4'>
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className='h-40 rounded-xl bg-gradient-to-br from-muted to-muted/70 shadow-md'></div>
+                  ))}
+                </div>
+              </div>
+            }
+          >
+            <RealCategoryListClient
+              categories={categories}
+              title="تسوق حسب الفئة"
+              description="استكشف مجموعتنا المتنوعة من المنتجات حسب الفئة"
+            />
+          </Suspense>
+        </section>
 
-      {/* Filter button - only shown when needed */}
-      <ClearButton slugString={slug} />
+        {/* Featured Promotions Section */}
+        <section className="space-y-6" aria-label="Featured promotions">
+          <Suspense
+            fallback={
+              <div className='w-full animate-pulse rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 shadow-lg'>
+                <div className='mb-6 h-8 w-1/3 rounded-lg bg-gradient-to-r from-muted to-muted/50'></div>
+                <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className='h-72 rounded-2xl bg-gradient-to-br from-muted to-muted/70 shadow-md'></div>
+                  ))}
+                </div>
+              </div>
+            }
+          >
+            <FeaturedPromotions promotions={displayPromotions} />
+          </Suspense>
+        </section>
 
-      {/* Main product grid */}
-      <section className="py-2">
-        <ProductsSection slug={slug} />
-      </section>
+        {/* Products Section */}
+        <section className="space-y-6" aria-label="Featured products">
+          <Suspense
+            fallback={
+              <div className='container mx-auto p-6'>
+                <div className='mb-8 h-10 w-1/4 animate-pulse rounded-lg bg-gradient-to-r from-muted to-muted/50'></div>
+                <div className='grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
+                  {[...Array(8)].map((_, i) => (
+                    <div
+                      key={i}
+                      className='relative h-96 animate-pulse overflow-hidden rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm shadow-lg'
+                    >
+                      <div className='h-48 bg-gradient-to-br from-muted to-muted/70'></div>
+                      <div className='space-y-4 p-6'>
+                        <div className='h-5 w-3/4 rounded-lg bg-gradient-to-r from-muted to-muted/50'></div>
+                        <div className='h-4 w-1/2 rounded-lg bg-gradient-to-r from-muted to-muted/50'></div>
+                        <div className='h-12 rounded-xl bg-gradient-to-r from-muted to-muted/50'></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            }
+          >
+            <ProductsSection slug={slug} />
+          </Suspense>
+        </section>
 
-      {/* SUPPLIERS SECTION - Moved lower in the page hierarchy */}
-      <section className="border-t border-border mt-6 pt-6">
-        <h2 className="mb-4 text-xl font-semibold">متاجر وموردون</h2>
-
-        {/* Only show if we have suppliers */}
-        {supplierWithItems.companyData && supplierWithItems.companyData.length > 0 && (
-          <div className="mb-6">
+        {/* Categories Section (Secondary) */}
+        <section className="space-y-6" aria-label="All categories">
+          <Suspense
+            fallback={
+              <div className='w-full animate-pulse rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 shadow-lg'>
+                <div className='mb-6 h-8 w-1/3 rounded-lg bg-gradient-to-r from-muted to-muted/50'></div>
+                <div className='grid grid-cols-2 gap-4 md:grid-cols-4'>
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className='h-40 rounded-xl bg-gradient-to-br from-muted to-muted/70 shadow-md'></div>
+                  ))}
+                </div>
+              </div>
+            }
+          >
             <CategoryListClient
-              suppliers={supplierWithItems.companyData}
-              cardDescription='اكتشف المنتجات من الموردين الموثوقة وتمتع بأفضل الخيارات المتاحة'
+              suppliers={supplierWithItems.companyData || []}
+              cardDescription='اكتشف المنتجات من الموردين الموثوقين وتمتع بأفضل الخيارات المتاحة'
               cardHeader='قائمة الموردين المميزة'
             />
-          </div>
-        )}
+          </Suspense>
+        </section>
 
-        {/* Only show offer section if we have offers */}
-        {supplierWithItems.offerData && supplierWithItems.offerData.length > 0 && (
-          <CategoryListClient
-            suppliers={supplierWithItems.offerData}
-            cardDescription='استمتع بأفضل العروض والخصومات على المنتجات المختارة'
-            cardHeader='قائمة العروض الحصرية'
-          />
-        )}
-      </section>
+        {/* Suppliers Section */}
+        <section className="space-y-6" aria-label="Our suppliers">
+          <Suspense fallback={<div className='h-12 w-full animate-pulse rounded-xl bg-gradient-to-r from-card to-card/70 shadow-md'></div>}>
+            <ClearButton slugString={slug} />
+          </Suspense>
+        </section>
 
-      <BackToTopButton />
-    </div>
+        {/* Back to Top Button */}
+        <BackToTopButton />
+      </div>
+    </>
   );
 }

@@ -1,5 +1,6 @@
 import Fotter from '../../components/ecomm/Fotter/Fotter';
 import Header from '../../components/ecomm/Header/Header';
+import MobileHeader from '../../components/ecomm/Header/MobileHeader';
 // app/(ecommerce)/layout.tsx
 import { TooltipProvider } from '../../components/ui/tooltip';
 import getSession from '../../lib/getSession';
@@ -14,13 +15,36 @@ export default async function EcommerceLayout({ children }: { children: React.Re
   return (
     <TooltipProvider>
       <CartProvider>
-        {/* Header is shared across all e-commerce pages */}
-        <Header
-          session={session}
-          logo={companyData?.logo || ''}
-          logoAlt={companyData?.fullName || 'Dream to app'}
-        />
-        <main className='container mx-auto min-h-screen p-4'>{children}</main>
+        {/* Desktop Header */}
+        <div className="hidden md:block">
+          <Header
+            session={session}
+            logo={companyData?.logo || ''}
+            logoAlt={companyData?.fullName || 'Dream to app'}
+          />
+        </div>
+
+        {/* Mobile Header */}
+        <div className="md:hidden">
+          <MobileHeader
+            cartCount={0} // TODO: Get from cart context
+            wishlistCount={0} // TODO: Get from wishlist context
+            notificationCount={0} // TODO: Get from notifications
+            isLoggedIn={!!session}
+            currentLocation="الرياض"
+            currentLanguage="ar"
+            supportEnabled={true}
+            whatsappNumber={companyData?.whatsappNumber}
+            userId={session?.user?.id || 'guest'}
+          />
+        </div>
+
+        {/* Mobile-First Main Content */}
+        <main className='min-h-screen'>
+          <div className='container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6'>
+            {children}
+          </div>
+        </main>
         <Fotter
           companyName={companyData?.fullName}
           aboutus={companyData?.bio}

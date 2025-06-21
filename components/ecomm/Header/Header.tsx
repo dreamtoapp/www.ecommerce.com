@@ -1,7 +1,5 @@
 import { Session } from 'next-auth';
 
-import FixLatAndLong from '@/utils/FixLatAndLong';
-
 // import NavLinks from './NavLinks'; 
 import HeaderClient from './HeaderClient';
 // Header.tsx (Server Component)
@@ -37,9 +35,6 @@ export default function Header({ session, logo, logoAlt }: HeaderProps) {
 
           {/* Actions: Cart, User, etc. - grouped with spacing */}
           <div className='flex items-center gap-2 md:gap-3'>
-
-            <FixLatAndLong />
-
             <HeaderClient session={session} />
           </div>
         </nav>
