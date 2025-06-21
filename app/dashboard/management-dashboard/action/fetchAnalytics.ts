@@ -19,7 +19,7 @@ export const fetchAnalytics = cacheData(
       
       const inWayOrders = await db.order.count({
         where: {
-          status: 'INWAY'
+          status: 'IN_TRANSIT'
         }
       });
       

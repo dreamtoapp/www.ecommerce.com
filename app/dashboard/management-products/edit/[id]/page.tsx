@@ -85,7 +85,7 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
 
             <div className="mb-8">
                 <p className="text-sm text-muted-foreground">
-                    قم بتحديث معلومات المنتج "{product.name}". الحقول المطلوبة مشار إليها بعلامة (*).
+                    قم بتحديث معلومات المنتج &quot;{product.name}&quot;. الحقول المطلوبة مشار إليها بعلامة (*).
                 </p>
             </div>
 

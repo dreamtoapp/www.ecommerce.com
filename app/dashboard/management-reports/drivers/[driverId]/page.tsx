@@ -88,7 +88,7 @@ export default async function DriverDetailsPage({ params, searchParams }: PagePr
               orders.map((order) => (
                 <TableRow key={order.id}>
                   <TableCell className='text-right'>{order.orderNumber || order.id}</TableCell>
-                  <TableCell className={`text-right font-bold ${order.status === 'Completed' ? 'text-success-foreground' : order.status === 'Cancelled' ? 'text-destructive-foreground' : ''}`}>{order.status}</TableCell>
+                  <TableCell className={`text-right font-bold ${order.status === 'DELIVERED' ? 'text-success-foreground' : order.status === 'CANCELED' ? 'text-destructive-foreground' : ''}`}>{order.status}</TableCell>
                   <TableCell className='text-right'>
                     {order.amount?.toLocaleString('ar-EG', { minimumFractionDigits: 2 })} ر.س
                   </TableCell>

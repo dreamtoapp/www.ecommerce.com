@@ -39,9 +39,10 @@ export const startTrip = async (
       },
     });
 
+    // Update order status to IN_TRANSIT when trip starts
     await db.order.update({
       where: { id: orderId },
-      data: { isTripStart: true },
+      data: { status: 'IN_TRANSIT' },
     });
 
     return { success: true, data: record };

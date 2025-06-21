@@ -126,8 +126,8 @@ export default function PendingOrdersView({
             <div className="flex justify-between items-center">
               {search ? (
                 <Badge variant="outline" className={`${orderType === 'assigned'
-                    ? 'bg-blue-50 text-blue-600 border-blue-200'
-                    : 'bg-status-pending-soft text-status-pending border-status-pending'
+                  ? 'bg-blue-50 text-blue-600 border-blue-200'
+                  : 'bg-status-pending-soft text-status-pending border-status-pending'
                   }`}>
                   نتائج البحث: {orders.length}
                 </Badge>
@@ -218,7 +218,7 @@ export default function PendingOrdersView({
 
               {search && (
                 <Badge variant="outline" className="bg-status-priority-soft text-status-priority border-status-priority">
-                  البحث: "{search}"
+                  البحث: &quot;{search}&quot;
                 </Badge>
               )}
             </div>

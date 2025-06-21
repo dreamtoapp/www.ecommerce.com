@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import BackButton from '@/components/BackButton';
+import Image from 'next/image';
 
 import { OrderDetails } from '../actions/get-order-details';
 
@@ -215,9 +216,11 @@ export default function OrderSummaryPanel({ order }: OrderSummaryPanelProps) {
                                         {/* Product Image */}
                                         <div className="w-12 h-12 rounded-lg overflow-hidden bg-feature-products/10 flex-shrink-0 border border-feature-products/20">
                                             {item.product.images?.[0] ? (
-                                                <img
+                                                <Image
                                                     src={item.product.images[0]}
                                                     alt={item.product.name}
+                                                    width={48}
+                                                    height={48}
                                                     className="w-full h-full object-cover"
                                                 />
                                             ) : (

@@ -5,9 +5,9 @@ import { ActionError } from '@/types/commonType';
 
 export async function syncOrderInWay() {
   try {
-    console.log('🔄 Syncing OrderInWay table with orders where isTripStart=true...');
-    const tripOrders = await db.order.findMany({ where: { isTripStart: true } });
-    console.log(tripOrders.length, 'orders found with isTripStart=true');
+    console.log('🔄 Syncing OrderInWay table with orders where status=IN_TRANSIT...');
+    const tripOrders = await db.order.findMany({ where: { status: 'IN_TRANSIT' } });
+    console.log(tripOrders.length, 'orders found with status=IN_TRANSIT');
     let addedCount = 0;
     for (const order of tripOrders) {
       if (!order.driverId) continue;

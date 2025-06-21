@@ -196,7 +196,7 @@ export function AssignedProducts({
                                                             حذف المنتج من المجموعة
                                                         </AlertDialogTitle>
                                                         <AlertDialogDescription>
-                                                            هل أنت متأكد من حذف "{product.name}" من مجموعة "{offerName}"؟
+                                                            هل أنت متأكد من حذف &quot;{product.name}&quot; من مجموعة &quot;{offerName}&quot;؟
                                                             <br />
                                                             <span className="text-xs text-muted-foreground mt-2 block">
                                                                 لن يتم حذف المنتج نفسه، فقط إزالته من هذه المجموعة.

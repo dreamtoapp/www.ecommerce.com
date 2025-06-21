@@ -1,10 +1,9 @@
 'use client';
 
 import React from 'react';
-import { ChevronRight, Home, ArrowLeft } from 'lucide-react';
-import { usePathname, useRouter } from 'next/navigation';
+import { ChevronRight, Home } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import Link from '@/components/link';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { menuGroups } from '../helpers/mainMenu';
@@ -22,7 +21,6 @@ function normalizePath(path: string): string {
 
 export default function EnhancedBreadcrumb() {
     const pathname = usePathname();
-    const router = useRouter();
 
     // Find current menu item and build breadcrumb
     const buildBreadcrumb = (): BreadcrumbItem[] => {

@@ -4,6 +4,8 @@ import { cacheData } from '@/lib/cache';
 import db from '@/lib/prisma';
 import { Order } from '@/types/databaseTypes';
 
+import { OrderStatus } from '@prisma/client';
+
 /**
  * Options for fetching orders
  */
@@ -33,8 +35,10 @@ export const fetchOrdersAction = cacheData<
     } = options || {};
 
     try {
-      // Build where clause conditionally
-      const where = status ? { status } : {};
+      // Build where clause conditionally with proper type conversion
+      const where = status && Object.values(OrderStatus).includes(status as OrderStatus) 
+        ? { status: status as OrderStatus } 
+        : undefined;
 
       // Fetch orders with relations
       const orders = await db.order.findMany({

@@ -6,7 +6,6 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
 import {
-    Calendar,
     XCircle,
     ChevronLeft,
     ChevronRight,
@@ -17,7 +16,6 @@ import {
     Users,
     Truck,
     Eye,
-    FileText,
     BarChart3,
     Phone,
     User,
@@ -36,8 +34,6 @@ import Link from '@/components/link';
 import { Button } from '@/components/ui/button';
 import {
     Card,
-    CardHeader,
-    CardTitle,
     CardContent,
     CardFooter,
 } from '@/components/ui/card';
@@ -52,7 +48,6 @@ import {
 import { cn } from '@/lib/utils';
 import { Order } from '@/types/databaseTypes';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 
 import { restoreOrder } from '../actions/restore-order';
 
@@ -78,7 +73,7 @@ export default function CanceledOrdersView({
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedReason, setSelectedReason] = useState(reasonFilter || 'all');
     const [sortBy, setSortBy] = useState('canceledAt');
-    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+    const [sortOrder] = useState<'asc' | 'desc'>('desc');
     const [loading, setLoading] = useState(false);
 
     // Calculate statistics

@@ -17,7 +17,6 @@ import {
   Users,
   Truck,
   Eye,
-  FileText,
   BarChart3,
   Phone,
   User,
@@ -46,7 +45,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { cn } from '@/lib/utils';
+
 import { Order } from '@/types/databaseTypes';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -73,7 +72,7 @@ export default function DeliveredOrdersView({
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDateRange, setSelectedDateRange] = useState(dateRange);
   const [sortBy, setSortBy] = useState('deliveredAt');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [sortOrder] = useState<'asc' | 'desc'>('desc');
 
   // Calculate statistics
   const statistics = useMemo(() => {

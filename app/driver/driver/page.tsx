@@ -1,4 +1,5 @@
 import { RocketIcon } from 'lucide-react';
+import { OrderStatus } from '@prisma/client';
 
 import {
   Alert,
@@ -43,30 +44,23 @@ async function Page({
     ]);
 
     // Patch: convert status string to OrderStatus enum if needed
-    if (activeTrip && typeof activeTrip.status === 'string') {
-      // Import ORDER_STATUS and OrderStatus at the top if not already
+    if (activeTrip && activeTrip.status) {
+      // Normalize status values to proper enum values
       switch (activeTrip.status) {
-        case 'PENDING':
-        case 'Pending':
-          activeTrip.status = 'PENDING';
+        case OrderStatus.PENDING:
+          activeTrip.status = OrderStatus.PENDING;
           break;
-        case 'IN_TRANSIT':
-        case 'IN_WAY':
-        case 'InWay':
-        case 'in_way':
-          activeTrip.status = 'IN_TRANSIT';
+        case OrderStatus.IN_TRANSIT:
+          activeTrip.status = OrderStatus.IN_TRANSIT;
           break;
-        case 'DELIVERED':
-        case 'Delivered':
-          activeTrip.status = 'DELIVERED';
+        case OrderStatus.DELIVERED:
+          activeTrip.status = OrderStatus.DELIVERED;
           break;
-        case 'CANCELED':
-        case 'Canceled':
-        case 'canceled':
-          activeTrip.status = 'CANCELED';
+        case OrderStatus.CANCELED:
+          activeTrip.status = OrderStatus.CANCELED;
           break;
         default:
-          activeTrip.status = 'PENDING';
+          activeTrip.status = OrderStatus.PENDING;
       }
     }
 

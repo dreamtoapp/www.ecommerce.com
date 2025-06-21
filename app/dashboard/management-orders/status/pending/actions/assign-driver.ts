@@ -4,7 +4,6 @@ import { revalidatePath } from 'next/cache';
 import { OrderStatus } from '@prisma/client';
 
 import { auth } from '@/auth';
-import { ORDER_STATUS } from '@/constant/order-status';
 import db from '@/lib/prisma';
 
 export async function assignDriver(orderId: string, driverId: string) {

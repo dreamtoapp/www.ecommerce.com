@@ -88,7 +88,7 @@ export default function OrderCardView({ initialOrders = [], status }: OrderCardV
 
         try {
             const newOrders = await fetchOrdersAction({
-                status: status || '',
+                status: status,
                 page: pageRef.current + 1,
                 pageSize,
             });
@@ -135,7 +135,7 @@ export default function OrderCardView({ initialOrders = [], status }: OrderCardV
 
         try {
             const refreshedOrders = await fetchOrdersAction({
-                status: status || '',
+                status: status,
                 page: 1,
                 pageSize: pageSize * page, // Get all previously loaded data
             });
@@ -279,7 +279,7 @@ export default function OrderCardView({ initialOrders = [], status }: OrderCardV
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Info className="h-4 w-4" />
                             <span>
-                                {filteredOrders.length} من {orders.length} طلب يطابق البحث "{searchTerm}"
+                                {filteredOrders.length} من {orders.length} طلب يطابق البحث &quot;{searchTerm}&quot;
                             </span>
                             {filteredOrders.length === 0 && (
                                 <Button

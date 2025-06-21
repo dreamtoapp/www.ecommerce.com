@@ -63,14 +63,14 @@ export default function ProductGalleryManager({ product }: ProductGalleryManager
         return () => {
             previewImages.forEach(preview => URL.revokeObjectURL(preview.url));
         };
-    }, []);
+    }, [previewImages]);
 
     // Sync effect: Ensure imageUrl is always in the gallery when component mounts or data changes
     useEffect(() => {
         if (product.imageUrl && !allImages.includes(product.imageUrl)) {
             setAllImages(prev => [product.imageUrl!, ...prev]);
         }
-    }, [product.imageUrl]);
+    }, [product.imageUrl, allImages]);
 
     const handleImageSelection = async (files: File[] | null) => {
         if (!files || files.length === 0) return;
@@ -488,7 +488,7 @@ export default function ProductGalleryManager({ product }: ProductGalleryManager
                                 </Button>
                             </CardTitle>
                             <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-                                راجع الصور المحددة وقم بحذف غير المرغوب فيها، ثم اضغط "رفع" لإضافتها للمعرض
+                                راجع الصور المحددة وقم بحذف غير المرغوب فيها، ثم اضغط &quot;رفع&quot; لإضافتها للمعرض
                             </p>
                         </CardHeader>
                         <CardContent>
