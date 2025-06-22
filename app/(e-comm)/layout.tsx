@@ -31,6 +31,7 @@ export default async function EcommerceLayout({ children }: { children: React.Re
             wishlistCount={0} // TODO: Get from wishlist context
             notificationCount={0} // TODO: Get from notifications
             isLoggedIn={!!session}
+            userImage={session?.user?.image || null}
             currentLanguage="ar"
             supportEnabled={true}
             whatsappNumber={companyData?.whatsappNumber}

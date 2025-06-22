@@ -1,7 +1,6 @@
 "use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import WebVitalsCollector from "@/components/seo/WebVitalsCollector";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import { Info } from "lucide-react";
@@ -47,7 +46,6 @@ export default function PerformanceClient({ vitals }: { vitals: any[] }) {
 
   return (
     <div className="max-w-3xl mx-auto py-8 px-4">
-      <WebVitalsCollector />
       <h1 className="text-3xl font-bold mb-6 text-center">Site Performance (Core Web Vitals)</h1>
       <div className="mb-6 flex flex-col items-center gap-2">
         <div className="mb-1 text-sm font-medium text-muted-foreground">Filter by Page:</div>

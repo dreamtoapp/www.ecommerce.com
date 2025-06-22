@@ -14,6 +14,7 @@ import {
     TrendingUp,
     Zap,
 } from 'lucide-react';
+import Image from 'next/image';
 import { FaWhatsapp } from 'react-icons/fa';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -27,88 +28,60 @@ interface BottomNavItem {
     href: string;
     badge?: number;
     color: string;
+    userImage?: string | null;
 }
 
 interface MobileBottomNavProps {
     wishlistCount?: number;
     isLoggedIn?: boolean;
+    userImage?: string | null;
     supportEnabled?: boolean;
     whatsappNumber?: string;
     userId?: string;
-    onSearchOpen?: () => void;
+    onSearchClick?: () => void;
 }
 
-// Navigation Item Component (69 lines)
+// Navigation Item Component (80 lines)
 function NavigationItem({
     item,
     isActive,
     onTabPress,
-    onSearchOpen
+    onSearchClick
 }: {
     item: BottomNavItem;
     isActive: boolean;
     onTabPress: (id: string) => void;
-    onSearchOpen?: () => void;
+    onSearchClick?: () => void;
 }) {
     const Icon = item.icon;
 
-    if (item.id === 'search') {
-        return (
-            <button
-                onClick={() => {
-                    onTabPress(item.id);
-                    onSearchOpen?.();
-                }}
-                className={cn(
-                    "flex flex-col items-center justify-center relative transition-all duration-300 w-full h-full",
-                    "hover:bg-muted/50 active:bg-muted",
-                    isActive ? "bg-muted/50" : ""
-                )}
-            >
-                <div className="relative">
+    const content = (
+        <>
+            <div className="relative flex items-center justify-center h-7 w-7">
+                {item.id === 'account' && item.userImage ? (
+                    <div className={cn(
+                        "relative h-6 w-6 rounded-full transition-all duration-300",
+                        isActive
+                            ? `ring-2 ring-offset-1 ${item.color.replace('text-', 'ring-')} ring-offset-background`
+                            : "ring-1 ring-muted/50"
+                    )}>
+                        <Image
+                            src={item.userImage}
+                            alt="User Profile"
+                            fill
+                            className="rounded-full object-cover"
+                        />
+                    </div>
+                ) : (
                     <Icon className={cn(
                         "h-5 w-5 transition-all duration-300",
-                        isActive ? `${item.color} scale-110` : "text-muted-foreground"
+                        isActive ? `${item.color} scale-110` : "text-muted-foreground",
+                        item.id === 'wishlist' && item.badge && item.badge > 0
+                            ? "text-feature-users animate-pulse fill-current" : ""
                     )} />
-                    {isActive && (
-                        <motion.div
-                            layoutId="activeTab"
-                            className={cn(
-                                "absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full",
-                                item.color.replace('text-', 'bg-')
-                            )}
-                            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                        />
-                    )}
-                </div>
-                <span className={cn(
-                    "text-xs mt-1 transition-colors duration-300",
-                    isActive ? item.color : "text-muted-foreground"
-                )}>
-                    {item.label}
-                </span>
-            </button>
-        );
-    }
+                )}
 
-    return (
-        <Link
-            href={item.href}
-            onClick={() => onTabPress(item.id)}
-            className={cn(
-                "flex flex-col items-center justify-center relative transition-all duration-300 w-full h-full",
-                "hover:bg-muted/50 active:bg-muted",
-                isActive ? "bg-muted/50" : ""
-            )}
-        >
-            <div className="relative">
-                <Icon className={cn(
-                    "h-5 w-5 transition-all duration-300",
-                    isActive ? `${item.color} scale-110` : "text-muted-foreground",
-                    item.id === 'wishlist' && item.badge && item.badge > 0
-                        ? "text-feature-users animate-pulse fill-current" : ""
-                )} />
-                {isActive && (
+                {isActive && !item.userImage && (
                     <motion.div
                         layoutId="activeTab"
                         className={cn(
@@ -143,6 +116,38 @@ function NavigationItem({
                     </motion.div>
                 )}
             </div>
+        </>
+    );
+
+    if (item.id === 'search') {
+        return (
+            <button
+                onClick={() => {
+                    onTabPress(item.id);
+                    onSearchClick?.();
+                }}
+                className={cn(
+                    "flex flex-col items-center justify-center relative transition-all duration-300 w-full h-full pt-1",
+                    "hover:bg-muted/50 active:bg-muted",
+                    isActive ? "bg-muted/50" : ""
+                )}
+            >
+                {content}
+            </button>
+        );
+    }
+
+    return (
+        <Link
+            href={item.href}
+            onClick={() => onTabPress(item.id)}
+            className={cn(
+                "flex flex-col items-center justify-center relative transition-all duration-300 w-full h-full pt-1",
+                "hover:bg-muted/50 active:bg-muted",
+                isActive ? "bg-muted/50" : ""
+            )}
+        >
+            {content}
         </Link>
     );
 }
@@ -294,10 +299,11 @@ function QuickActionButtons({
 export default function MobileBottomNav({
     wishlistCount = 0,
     isLoggedIn = false,
+    userImage,
     supportEnabled = true,
     whatsappNumber,
     userId = 'guest',
-    onSearchOpen
+    onSearchClick
 }: MobileBottomNavProps) {
     const pathname = usePathname();
     const [activeTab, setActiveTab] = useState('home');
@@ -314,11 +320,18 @@ export default function MobileBottomNav({
     const LAST_PING_KEY = 'support_ping_last_time';
 
     const navItems: BottomNavItem[] = [
-        { id: 'home', label: 'الرئيسية', icon: Home, href: '/', color: 'text-feature-products' },
-        { id: 'categories', label: 'الأقسام', icon: Grid3X3, href: '/categories', color: 'text-feature-analytics' },
-        { id: 'search', label: 'البحث', icon: Search, href: '#', color: 'text-feature-users' },
-        { id: 'wishlist', label: 'المفضلة', icon: Heart, href: '/wishlist', badge: wishlistCount, color: 'text-feature-suppliers' },
-        { id: 'account', label: isLoggedIn ? 'حسابي' : 'دخول', icon: User, href: isLoggedIn ? '/user/profile' : '/auth/login', color: 'text-feature-settings' }
+        { id: 'home', label: 'الرئيسية', icon: Home, href: '/', color: 'text-feature-commerce' },
+        { id: 'categories', label: 'الأقسام', icon: Grid3X3, href: '/categories', color: 'text-feature-products' },
+        { id: 'search', label: 'البحث', icon: Search, href: '#', color: 'text-feature-analytics' },
+        { id: 'wishlist', label: 'المفضلة', icon: Heart, href: '/user/wishlist', badge: wishlistCount, color: 'text-feature-users' },
+        {
+            id: 'account',
+            label: isLoggedIn ? 'حسابي' : 'دخول',
+            icon: User,
+            href: isLoggedIn ? '/user/profile' : '/auth/login',
+            color: 'text-feature-settings',
+            userImage: isLoggedIn ? userImage : null
+        },
     ];
 
     // Scroll handling
@@ -403,7 +416,7 @@ export default function MobileBottomNav({
                                 item={item}
                                 isActive={activeTab === item.id}
                                 onTabPress={handleTabPress}
-                                onSearchOpen={onSearchOpen}
+                                onSearchClick={onSearchClick}
                             />
                         </div>
                     ))}

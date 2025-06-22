@@ -16,7 +16,8 @@ import {
   Shield,
   Camera,
   Award,
-  Settings
+  Settings,
+  LogOut
 } from 'lucide-react';
 
 import BackButton from '@/components/BackButton';
@@ -30,6 +31,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import useAccurateGeolocation from '@/hooks/use-geo';
 
 import { updateUserProfile } from '../action/update-user-profile';
+import { handleLogout } from '../action/logout';
 import { UserFormData, UserSchema } from '../helper/userZodAndInputs';
 
 // Profile Header Component (65 lines)
@@ -408,8 +410,8 @@ function PreferencesCard() {
                 type="button"
                 onClick={() => setTheme(item.value)}
                 className={`p-3 rounded-lg border-2 transition-all duration-200 hover:scale-105 ${theme === item.value
-                    ? 'border-feature-analytics bg-feature-analytics/10 ring-2 ring-feature-analytics/20'
-                    : 'border-border hover:border-feature-analytics/50'
+                  ? 'border-feature-analytics bg-feature-analytics/10 ring-2 ring-feature-analytics/20'
+                  : 'border-border hover:border-feature-analytics/50'
                   }`}
               >
                 <div className="text-center space-y-1">
@@ -433,10 +435,10 @@ function PreferencesCard() {
                 onClick={() => handleLanguageChange(lang.value)}
                 disabled={!lang.available}
                 className={`p-3 rounded-lg border-2 transition-all duration-200 ${selectedLanguage === lang.value
-                    ? 'border-feature-analytics bg-feature-analytics/10 ring-2 ring-feature-analytics/20'
-                    : lang.available
-                      ? 'border-border hover:border-feature-analytics/50 hover:scale-105'
-                      : 'border-border bg-muted/50 opacity-50 cursor-not-allowed'
+                  ? 'border-feature-analytics bg-feature-analytics/10 ring-2 ring-feature-analytics/20'
+                  : lang.available
+                    ? 'border-border hover:border-feature-analytics/50 hover:scale-105'
+                    : 'border-border bg-muted/50 opacity-50 cursor-not-allowed'
                   }`}
               >
                 <div className="flex items-center justify-center gap-2">
@@ -459,7 +461,6 @@ function PreferencesCard() {
     </Card>
   );
 }
-
 
 // Profile Actions Component
 function ProfileActions({ isSubmitting, onReset }: {
@@ -501,6 +502,33 @@ function ProfileActions({ isSubmitting, onReset }: {
 
         <p className="text-xs text-muted-foreground text-center mt-3">
           سيتم حفظ التغييرات تلقائياً وإعادة تحميل الصفحة
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Logout Card Component
+function LogoutCard() {
+  return (
+    <Card className="shadow-lg border-l-4 border-l-destructive card-hover-effect">
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2 text-xl">
+          <LogOut className="h-5 w-5 text-destructive icon-enhanced" />
+          تسجيل الخروج
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form action={handleLogout}>
+          <Button
+            type="submit"
+            className="w-full btn-delete"
+          >
+            تأكيد الخروج
+          </Button>
+        </form>
+        <p className="text-xs text-muted-foreground text-center mt-3">
+          سيتم إنهاء جلستك وتوجيهك لصفحة تسجيل الدخول.
         </p>
       </CardContent>
     </Card>
@@ -562,7 +590,7 @@ export default function UserProfileForm({ userData }: { userData: UserFormData }
 
   return (
     <div className="min-h-screen bg-muted/30 py-6">
-      <div className="container mx-auto px-4 max-w-4xl">
+      <div className="container mx-auto px-4 max-w-4xl space-y-6">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <ProfileHeader userData={userData} />
 
@@ -596,6 +624,8 @@ export default function UserProfileForm({ userData }: { userData: UserFormData }
             onReset={handleReset}
           />
         </form>
+
+        <LogoutCard />
       </div>
     </div>
   );

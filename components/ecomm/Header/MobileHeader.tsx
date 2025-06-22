@@ -28,6 +28,7 @@ interface MobileHeaderProps {
     wishlistCount?: number;
     notificationCount?: number;
     isLoggedIn?: boolean;
+    userImage?: string | null;
     currentLanguage?: 'ar' | 'en';
     supportEnabled?: boolean;
     whatsappNumber?: string;
@@ -40,6 +41,7 @@ export default function MobileHeader({
     wishlistCount = 0,
     notificationCount = 0,
     isLoggedIn = false,
+    userImage,
     currentLanguage = 'ar',
     supportEnabled = true,
     whatsappNumber,
@@ -336,12 +338,9 @@ export default function MobileHeader({
 
             {/* Bottom Navigation */}
             <MobileBottomNav
-                wishlistCount={wishlistCount}
                 isLoggedIn={isLoggedIn}
-                supportEnabled={supportEnabled}
-                whatsappNumber={whatsappNumber}
-                userId={userId}
-                onSearchOpen={() => setIsSearchOpen(true)}
+                userImage={userImage}
+                onSearchClick={() => setIsSearchOpen(true)}
             />
 
             {/* Search Drawer */}
