@@ -1,7 +1,6 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import Image from 'next/image';
 import Link from 'next/link';
 import {
   Building2,
@@ -30,7 +29,7 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 
 // Dynamic import for Newsletter (client-only, interactive)  
-const Newsletter = dynamic(() => import('./Newsletter'), {
+const Newsletter = dynamic(() => import('@/components/ecomm/Fotter/Newsletter'), {
   ssr: false,
   loading: () => <div className="h-20 bg-muted/50 animate-pulse rounded"></div>,
 });
@@ -40,8 +39,6 @@ interface FooterProps {
   email?: string;
   phone?: string;
   address?: string;
-  latitude?: string;
-  longitude?: string;
   companyName?: string;
   facebook?: string;
   instagram?: string;
@@ -286,8 +283,6 @@ const Footer = ({
   email,
   phone,
   address,
-  latitude,
-  longitude,
   facebook,
   instagram,
   twitter,

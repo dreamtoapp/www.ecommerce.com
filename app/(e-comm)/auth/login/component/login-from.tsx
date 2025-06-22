@@ -1,6 +1,6 @@
 'use client';
 import { useActionState } from 'react';
-import { Lock, Phone, Eye, EyeOff, Loader2, Shield, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, Loader2, Shield, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
