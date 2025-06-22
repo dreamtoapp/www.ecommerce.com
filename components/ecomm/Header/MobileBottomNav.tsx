@@ -11,11 +11,8 @@ import {
     Heart,
     User,
     ShoppingBag,
-    Plus,
     Sparkles,
     TrendingUp,
-    Package,
-    HelpCircle,
     MessageCircle,
     Zap
 } from 'lucide-react';

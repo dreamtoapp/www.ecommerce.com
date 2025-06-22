@@ -32,14 +32,12 @@ interface FooterProps {
   instagram?: string;
   twitter?: string;
   linkedin?: string;
-  whatsapp?: string;
 }
 
 const Footer = ({
   aboutus,
   email,
   phone,
-  whatsapp,
   address,
   latitude,
   longitude,

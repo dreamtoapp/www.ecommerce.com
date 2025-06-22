@@ -42,8 +42,8 @@ export default function EnhancedHeader({ session, logo, logoAlt }: EnhancedHeade
     const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [cartItemsCount, setCartItemsCount] = useState(0);
-    const [wishlistCount, setWishlistCount] = useState(0);
+    const [cartItemsCount, _setCartItemsCount] = useState(0); // TODO: Connect to cart context
+    const [wishlistCount, _setWishlistCount] = useState(0); // TODO: Connect to wishlist context
 
     // Close mega menu when clicking outside
     useEffect(() => {

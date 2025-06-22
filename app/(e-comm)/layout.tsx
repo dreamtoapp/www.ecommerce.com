@@ -57,7 +57,6 @@ export default async function EcommerceLayout({ children }: { children: React.Re
           instagram={companyData?.instagram}
           twitter={companyData?.twitter}
           linkedin={companyData?.linkedin}
-          whatsapp={companyData?.whatsappNumber}
         />
       </CartProvider>
     </TooltipProvider>

@@ -1,26 +1,20 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Search,
     X,
-    Clock,
     TrendingUp,
-    Star,
     Camera,
     Mic,
     Filter,
-    ArrowRight,
     Globe,
     Zap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 interface SearchSuggestion {
@@ -57,10 +51,10 @@ export default function MobileSearchBar({
 }: MobileSearchBarProps) {
     const [query, setQuery] = useState('');
     const [isExpanded, setIsExpanded] = useState(false);
-    const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
-    const [recentSearches, setRecentSearches] = useState<RecentSearch[]>([]);
+    const [_suggestions, _setSuggestions] = useState<SearchSuggestion[]>([]); // TODO: Implement search suggestions
+    const [_recentSearches, _setRecentSearches] = useState<RecentSearch[]>([]); // TODO: Implement recent searches
     const [trendingSearches, setTrendingSearches] = useState<string[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
+    const [_isLoading, _setIsLoading] = useState(false); // TODO: Implement loading states
 
     const searchInputRef = useRef<HTMLInputElement>(null);
 
