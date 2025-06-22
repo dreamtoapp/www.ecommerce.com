@@ -35,10 +35,10 @@ const MobileMenu = dynamic(() => import('./MobileMenu'), {
 });
 
 interface HeaderClientProps {
-  session: Session | null; // Allow null
+  user: any; // Using 'any' for now, will be properly typed in child components
 }
 
-export default function HeaderClient({ session }: HeaderClientProps) {
+export default function HeaderClient({ user }: HeaderClientProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
@@ -75,14 +75,14 @@ export default function HeaderClient({ session }: HeaderClientProps) {
           </span>
         )}
         <CartIcon aria-label='Cart' />
-        <UserMenu session={session} aria-label="User account menu" />
+        <UserMenu user={user} aria-label="User account menu" />
       </div>
 
       {/* Mobile Menu */}
       <MobileMenu
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
-        session={session}
+        user={user}
       />
     </>
   );

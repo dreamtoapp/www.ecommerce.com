@@ -9,10 +9,10 @@ import SearchBar from './SearchBar';
 interface HeaderProps {
   logo: string;
   logoAlt: string;
-  session: Session | null;
+  user: any; // Using 'any' for now to match layout, will be properly typed in child components
 }
 
-export default function Header({ session, logo, logoAlt }: HeaderProps) {
+export default function Header({ user, logo, logoAlt }: HeaderProps) {
   return (
     <header className='sticky top-0 z-50 bg-background/95 shadow-md backdrop-blur-md supports-[backdrop-filter]:bg-background/80 dark:shadow-lg dark:shadow-gray-800/50'>
       {/* Main Header Bar */}
@@ -35,7 +35,7 @@ export default function Header({ session, logo, logoAlt }: HeaderProps) {
 
           {/* Actions: Cart, User, etc. - grouped with spacing */}
           <div className='flex items-center gap-2 md:gap-3'>
-            <HeaderClient session={session} />
+            <HeaderClient user={user} />
           </div>
         </nav>
       </div>

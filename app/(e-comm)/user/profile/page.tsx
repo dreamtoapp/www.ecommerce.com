@@ -19,17 +19,20 @@ async function ProfilePage() {
     return <EmptyState message='لم يتم العثور على بيانات المستخدم' />;
   }
 
-  return <UserProfileForm userData={{
-    id: userData.id ?? '',
-    image: userData.image ?? '',
-    name: userData.name ?? '',
-    email: userData.email ?? '',
-    phone: userData.phone ?? '',
-    address: userData.address ?? '',
-    password: userData.password ?? '',
-    latitude: userData.latitude?.toString(),
-    longitude: userData.longitude?.toString(),
-  }} />;
+  return <UserProfileForm
+    userData={{
+      id: userData.id ?? '',
+      image: userData.image ?? '',
+      name: userData.name ?? '',
+      email: userData.email ?? '',
+      phone: userData.phone ?? '',
+      address: userData.address ?? '',
+      password: userData.password ?? '',
+      latitude: userData.latitude?.toString(),
+      longitude: userData.longitude?.toString(),
+    }}
+    isOtp={userData.isOtp}
+  />;
 }
 
 export default ProfilePage;

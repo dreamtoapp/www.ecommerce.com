@@ -31,6 +31,7 @@ import {
   UserCircle,
 } from 'lucide-react';
 import type { Session } from 'next-auth';
+import { User as UserData } from '@prisma/client';
 
 import Link from '@/components/link';
 import {
@@ -93,13 +94,14 @@ import { UserRole } from '@/constant/enums';
 import { iconVariants } from '@/lib/utils';
 import { useCartStore } from '@/store/cartStore';
 
+import { NotificationDropdown } from '@/components/notifications/NotificationDropdown';
 import { userLogOut } from '../../../app/(e-comm)/auth/action';
 
 interface UserMenuProps {
-  session: Session | null
+  user: UserData | null;
 }
 
-export default function UserMenu({ session }: UserMenuProps) {
+export default function UserMenu({ user }: UserMenuProps) {
   const [isMounted, setIsMounted] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [isClearingCart, setIsClearingCart] = useState(false)
@@ -147,7 +149,29 @@ export default function UserMenu({ session }: UserMenuProps) {
     }
   }
 
-  if (!session) {
+  const alerts = [];
+  if (user) {
+    if (!user.isOtp) {
+      alerts.push({
+        id: 'otp-verification',
+        type: 'destructive' as const,
+        title: 'حساب غير مفعل',
+        description: 'يرجى تفعيل حسابك للوصول الكامل للميزات.',
+        href: '/auth/verify',
+      });
+    }
+    if (!user.latitude || !user.longitude) {
+      alerts.push({
+        id: 'location-missing',
+        type: 'warning' as const,
+        title: 'الموقع الجغرافي مطلوب',
+        description: 'يرجى تحديث موقعك لتسهيل توصيل الطلبات.',
+        href: '/user/profile',
+      });
+    }
+  }
+
+  if (!user) {
     return (
       <TooltipProvider>
         <Tooltip>
@@ -181,7 +205,7 @@ export default function UserMenu({ session }: UserMenuProps) {
 
   const navLinks = [
     {
-      href: `/user/profile?id=${session.user.id}`,
+      href: `/user/profile?id=${user.id}`,
       label: "الملف الشخصي",
       icon: <UserCircle className={iconVariants({ size: "sm" })} />,
       description: "إدارة معلوماتك الشخصية",
@@ -189,7 +213,7 @@ export default function UserMenu({ session }: UserMenuProps) {
       badge: null,
     },
     {
-      href: `/user/statement?id=${session.user.id}`,
+      href: `/user/statement?id=${user.id}`,
       label: "الحركات المالية",
       icon: <Activity className={iconVariants({ size: "sm" })} />,
       description: "عرض تاريخ المعاملات المالية",
@@ -248,37 +272,53 @@ export default function UserMenu({ session }: UserMenuProps) {
   }
 
   return (
-    <TooltipProvider>
+    <div className='flex items-center gap-3'>
+      <NotificationDropdown alerts={alerts}>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant='ghost' size='icon' className='rounded-full'>
+                <Bell className={iconVariants({ size: 'sm' })} />
+                <span className='sr-only'>الإشعارات</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side='bottom'>
+              <p>الإشعارات</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </NotificationDropdown>
+
       <Sheet>
         <SheetTrigger asChild>
           <Button
             variant="ghost"
-            className="group relative flex items-center gap-3 p-3 rounded-xl hover:bg-muted/50 transition-all duration-300 hover:shadow-lg hover:scale-105"
+            className="group flex items-center gap-3 p-3 rounded-full hover:bg-muted"
           >
             <div className="relative">
               <Avatar className="h-12 w-12 border-2 border-border group-hover:border-primary/50 transition-all duration-300 shadow-md group-hover:shadow-lg">
                 <AvatarImage
-                  src={session.user.image || "/default-avatar.png"}
-                  alt={session.user.name || "User"}
+                  src={user.image || "/default-avatar.png"}
+                  alt={user.name || "User"}
                   className="object-cover"
                 />
                 <AvatarFallback className="bg-muted text-muted-foreground font-bold text-lg">
-                  {session.user.name?.[0]?.toUpperCase() || "?"}
+                  {user.name?.[0]?.toUpperCase() || "?"}
                 </AvatarFallback>
               </Avatar>
-              {session.user.role === UserRole.ADMIN && (
+              {user.role === UserRole.ADMIN && (
                 <div className="absolute -top-1 -right-1 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full p-1 shadow-lg">
                   <Crown className="w-3 h-3 text-white" />
                 </div>
               )}
-              <div className="absolute -bottom-1 -left-1 w-4 h-4 bg-green-500 border-2 border-background rounded-full" />
             </div>
+
             <div className="hidden sm:flex flex-col items-start">
               <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
-                {session.user.name}
+                {user.name}
               </span>
               <span className="text-xs text-muted-foreground">
-                {session.user.role === UserRole.ADMIN ? "مدير النظام" : "عضو مميز"}
+                {user.role === UserRole.ADMIN ? "مدير النظام" : "عضو مميز"}
               </span>
             </div>
             <Menu className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors ml-auto" />
@@ -386,15 +426,15 @@ export default function UserMenu({ session }: UserMenuProps) {
                     <div className="flex items-center gap-4">
                       <Avatar className="h-16 w-16 border-2 border-primary/30 shadow-lg">
                         <AvatarImage
-                          src={session.user.image || "/default-avatar.png"}
-                          alt={session.user.name || "User"}
+                          src={user.image || "/default-avatar.png"}
+                          alt={user.name || "User"}
                         />
                         <AvatarFallback className="bg-muted text-muted-foreground font-bold text-xl">
-                          {session.user.name?.[0]?.toUpperCase() || "?"}
+                          {user.name?.[0]?.toUpperCase() || "?"}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
-                        <h3 className="font-bold text-lg text-foreground">أهلاً وسهلاً، {session.user.name}</h3>
+                        <h3 className="font-bold text-lg text-foreground">أهلاً وسهلاً، {user.name}</h3>
                         <p className="text-sm text-muted-foreground">نتمنى لك تجربة تسوق ممتعة</p>
                         <div className="flex items-center gap-2 mt-2">
                           <Progress value={75} className="flex-1 h-2" />
@@ -406,7 +446,7 @@ export default function UserMenu({ session }: UserMenuProps) {
                 </Card>
 
                 {/* Admin Dashboard Quick Access */}
-                {session.user.role === UserRole.ADMIN && (
+                {user.role === UserRole.ADMIN && (
                   <Card className="bg-gradient-to-r from-violet-500/10 to-purple-500/10 border-violet-500/20 hover:from-violet-500/20 hover:to-purple-500/20 transition-all duration-300">
                     <CardContent className="p-4">
                       <Link href="/dashboard" className="flex items-center gap-3 group">
@@ -428,18 +468,18 @@ export default function UserMenu({ session }: UserMenuProps) {
               {!isHeaderExpanded && (
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-card/30 border border-border/50 animate-in slide-in-from-top duration-300">
                   <Avatar className="h-10 w-10 border border-primary/30">
-                    <AvatarImage src={session.user.image || "/default-avatar.png"} alt={session.user.name || "User"} />
+                    <AvatarImage src={user.image || "/default-avatar.png"} alt={user.name || "User"} />
                     <AvatarFallback className="bg-muted text-muted-foreground font-semibold text-sm">
-                      {session.user.name?.[0]?.toUpperCase() || "?"}
+                      {user.name?.[0]?.toUpperCase() || "?"}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <p className="font-semibold text-sm text-foreground">{session.user.name}</p>
+                    <p className="font-semibold text-sm text-foreground">{user.name}</p>
                     <p className="text-xs text-muted-foreground">
                       {userStats.totalOrders} طلب • {userStats.loyaltyPoints} نقطة
                     </p>
                   </div>
-                  {session.user.role === UserRole.ADMIN && (
+                  {user.role === UserRole.ADMIN && (
                     <Badge variant="secondary" className="text-xs">
                       <Crown className="w-3 h-3 mr-1" />
                       مدير
@@ -577,7 +617,7 @@ export default function UserMenu({ session }: UserMenuProps) {
           </ScrollArea>
         </SheetContent>
       </Sheet>
-      {/* Separate HoverCard for user info - positioned after the Sheet */}
+
       <HoverCard>
         <HoverCardTrigger asChild>
           <Button variant="ghost" size="sm" className="ml-2">
@@ -587,11 +627,11 @@ export default function UserMenu({ session }: UserMenuProps) {
         <HoverCardContent className="w-80" side="bottom">
           <div className="flex justify-between space-x-4">
             <Avatar>
-              <AvatarImage src={session.user.image || "/default-avatar.png"} />
-              <AvatarFallback>{session.user.name?.[0]?.toUpperCase()}</AvatarFallback>
+              <AvatarImage src={user.image || "/default-avatar.png"} />
+              <AvatarFallback>{user.name?.[0]?.toUpperCase()}</AvatarFallback>
             </Avatar>
             <div className="space-y-1 flex-1">
-              <h4 className="text-sm font-semibold">{session.user.name}</h4>
+              <h4 className="text-sm font-semibold">{user.name}</h4>
               <p className="text-sm text-muted-foreground">
                 عضو منذ {userStats.memberSince} • {userStats.loyaltyPoints} نقطة ولاء
               </p>
@@ -603,6 +643,6 @@ export default function UserMenu({ session }: UserMenuProps) {
           </div>
         </HoverCardContent>
       </HoverCard>
-    </TooltipProvider>
+    </div>
   )
 }

@@ -210,12 +210,12 @@ export default async function HomePage({ searchParams }: PageProps<Record<string
         <PreloadScript />
 
         {/* User-specific components */}
-        {session && (
+        {/* {session && (
           <Suspense fallback={null}>
             <CheckUserActivationClient user={session.user as Partial<UserWithRole>} />
             <CheckUserLocationClient user={session.user as Partial<UserWithRole>} />
           </Suspense>
-        )}
+        )} */}
 
         {/* Enhanced Hero Section with compelling value proposition */}
         <section className="relative -mx-4 sm:-mx-6 lg:-mx-8" aria-label="Hero banner">

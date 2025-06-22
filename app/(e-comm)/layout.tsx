@@ -6,11 +6,17 @@ import { TooltipProvider } from '../../components/ui/tooltip';
 import getSession from '../../lib/getSession';
 import { CartProvider } from '../../providers/cart-provider';
 import { companyInfo } from './homepage/actions/companyDetail';
+import { userProfile } from './user/profile/action/action';
 
 export default async function EcommerceLayout({ children }: { children: React.ReactNode }) {
   const companyData = await companyInfo();
-  // const session = await auth()
   const session = await getSession();
+  const user = session?.user;
+
+  let fullUser = null;
+  if (user?.id) {
+    fullUser = await userProfile(user.id);
+  }
 
   return (
     <TooltipProvider>
@@ -18,7 +24,7 @@ export default async function EcommerceLayout({ children }: { children: React.Re
         {/* Desktop Header */}
         <div className="hidden md:block">
           <Header
-            session={session}
+            user={fullUser}
             logo={companyData?.logo || ''}
             logoAlt={companyData?.fullName || 'Dream to app'}
           />
@@ -27,6 +33,7 @@ export default async function EcommerceLayout({ children }: { children: React.Re
         {/* Mobile Header */}
         <div className="md:hidden">
           <MobileHeader
+            user={fullUser}
             cartCount={0} // TODO: Get from cart context
             wishlistCount={0} // TODO: Get from wishlist context
             notificationCount={0} // TODO: Get from notifications

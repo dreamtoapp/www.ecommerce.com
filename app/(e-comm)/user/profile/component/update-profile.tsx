@@ -21,6 +21,7 @@ import {
   Settings,
   LogOut
 } from 'lucide-react';
+import { User as UserData } from '@prisma/client';
 
 import BackButton from '@/components/BackButton';
 import AddImage from '@/components/AddImage';
@@ -31,6 +32,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import useAccurateGeolocation from '@/hooks/use-geo';
+import { ActionAlert } from './ActionAlert';
 
 import { updateUserProfile } from '../action/update-user-profile';
 import { handleLogout } from '../action/logout';
@@ -551,7 +553,13 @@ function calculateProfileCompletion(userData: UserFormData): number {
 }
 
 // Main Profile Component
-export default function UserProfileForm({ userData }: { userData: UserFormData }) {
+export default function UserProfileForm({
+  userData,
+  isOtp,
+}: {
+  userData: UserFormData;
+  isOtp: boolean;
+}) {
   const router = useRouter();
   const { update } = useSession();
   const {
@@ -564,14 +572,14 @@ export default function UserProfileForm({ userData }: { userData: UserFormData }
     resolver: zodResolver(UserSchema),
     mode: 'onChange',
     defaultValues: {
+      id: userData.id ?? '',
       name: userData.name ?? '',
       phone: userData.phone ?? '',
       email: userData.email ?? '',
       address: userData.address ?? '',
       password: userData.password ?? '',
-      latitude: userData.latitude?.toString(),
-      longitude: userData.longitude?.toString(),
-      id: userData.id ?? '',
+      latitude: userData.latitude?.toString() ?? '',
+      longitude: userData.longitude?.toString() ?? '',
       image: userData.image ?? '',
     },
   });
@@ -594,8 +602,30 @@ export default function UserProfileForm({ userData }: { userData: UserFormData }
   };
 
   const handleReset = () => {
-    reset(userData);
+    const formValues: UserFormData = {
+      id: userData.id ?? '',
+      name: userData.name ?? '',
+      email: userData.email ?? '',
+      phone: userData.phone ?? '',
+      address: userData.address ?? '',
+      password: '',
+      image: userData.image ?? '',
+      latitude: userData.latitude?.toString() ?? '',
+      longitude: userData.longitude?.toString() ?? '',
+    };
+    reset(formValues);
     toast.info('تمت إعادة تعيين الحقول إلى قيمها الأصلية.');
+  };
+
+  const scrollToComponent = (elementId: string) => {
+    const element = document.getElementById(elementId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      element.classList.add('ring-2', 'ring-offset-2', 'ring-primary', 'transition-shadow', 'duration-300');
+      setTimeout(() => {
+        element.classList.remove('ring-2', 'ring-offset-2', 'ring-primary', 'transition-shadow', 'duration-300');
+      }, 2000);
+    }
   };
 
   return (
@@ -603,6 +633,27 @@ export default function UserProfileForm({ userData }: { userData: UserFormData }
       <div className="container mx-auto px-4 max-w-4xl space-y-6">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <ProfileHeader userData={userData} />
+
+          <div className='space-y-4'>
+            {!isOtp && (
+              <ActionAlert
+                variant='destructive'
+                title='حساب غير مفعل'
+                description='تفعيل حسابك مطلوب للوصول الكامل إلى ميزات التطبيق وتقديم الطلبات.'
+                buttonText='الانتقال إلى التفعيل'
+                onAction={() => router.push('/auth/verify')}
+              />
+            )}
+            {(!userData.latitude || !userData.longitude) && (
+              <ActionAlert
+                variant='warning'
+                title='الموقع الجغرافي مطلوب'
+                description='يرجى تحديث موقعك لإكمال ملفك الشخصي وتسهيل عملية توصيل الطلبات.'
+                buttonText='تحديث الموقع الآن'
+                onAction={() => scrollToComponent('location-card')}
+              />
+            )}
+          </div>
 
           <div className="grid lg:grid-cols-2 gap-6">
             <div className="space-y-6">

@@ -22,8 +22,11 @@ import { cn } from '@/lib/utils';
 // MobileSearchBar removed - search is now in drawer
 import MobileBottomNav from './MobileBottomNav';
 import MobileSearchDrawer from './MobileSearchDrawer';
+import { User as UserData } from '@prisma/client';
+import { NotificationDropdown } from '@/components/notifications/NotificationDropdown';
 
 interface MobileHeaderProps {
+    user: UserData | null;
     cartCount?: number;
     wishlistCount?: number;
     notificationCount?: number;
@@ -37,6 +40,7 @@ interface MobileHeaderProps {
 }
 
 export default function MobileHeader({
+    user,
     cartCount = 0,
     wishlistCount = 0,
     notificationCount = 0,
@@ -67,6 +71,28 @@ export default function MobileHeader({
         console.log('Searching for:', query);
         window.location.href = `/search?q=${encodeURIComponent(query)}`;
     };
+
+    const alerts = [];
+    if (user) {
+        if (!user.isOtp) {
+            alerts.push({
+                id: 'otp-verification-mobile',
+                type: 'destructive' as const,
+                title: 'حساب غير مفعل',
+                description: 'يرجى تفعيل حسابك للوصول الكامل للميزات.',
+                href: '/auth/verify',
+            });
+        }
+        if (!user.latitude || !user.longitude) {
+            alerts.push({
+                id: 'location-missing-mobile',
+                type: 'warning' as const,
+                title: 'الموقع الجغرافي مطلوب',
+                description: 'يرجى تحديث موقعك لتسهيل توصيل الطلبات.',
+                href: '/user/profile',
+            });
+        }
+    }
 
     const menuItems = [
         {
@@ -175,18 +201,15 @@ export default function MobileHeader({
                             </Link>
 
                             {/* Notifications */}
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="w-10 h-10 p-0 relative"
-                            >
-                                <Bell className="h-5 w-5" />
-                                {notificationCount > 0 && (
-                                    <Badge className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs min-w-[16px] h-[16px] rounded-full flex items-center justify-center p-0">
-                                        {notificationCount > 99 ? '99+' : notificationCount}
-                                    </Badge>
-                                )}
-                            </Button>
+                            <NotificationDropdown alerts={alerts}>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-10 h-10 p-0 relative"
+                                >
+                                    <Bell className="h-5 w-5" />
+                                </Button>
+                            </NotificationDropdown>
                         </div>
                     </div>
 
