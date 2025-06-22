@@ -10,11 +10,10 @@ import {
     Search,
     Heart,
     User,
-    ShoppingBag,
     Sparkles,
     TrendingUp,
     MessageCircle,
-    Zap
+    Zap,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -32,21 +31,21 @@ interface BottomNavItem {
 }
 
 interface MobileBottomNavProps {
-    cartCount?: number;
     wishlistCount?: number;
     isLoggedIn?: boolean;
     supportEnabled?: boolean;
     whatsappNumber?: string;
     userId?: string;
+    onSearchOpen?: () => void;
 }
 
 export default function MobileBottomNav({
-    cartCount = 0,
     wishlistCount = 0,
     isLoggedIn = false,
     supportEnabled = true,
     whatsappNumber,
-    userId = 'guest'
+    userId = 'guest',
+    onSearchOpen
 }: MobileBottomNavProps) {
     const pathname = usePathname();
     const [activeTab, setActiveTab] = useState('home');
@@ -143,7 +142,7 @@ export default function MobileBottomNav({
             id: 'search',
             label: 'البحث',
             icon: Search,
-            href: '/search',
+            href: '#',
             color: 'text-feature-users'
         },
         {
@@ -212,94 +211,127 @@ export default function MobileBottomNav({
                         const Icon = item.icon;
 
                         return (
-                            <Link
-                                key={item.id}
-                                href={item.href}
-                                onClick={() => handleTabPress(item.id)}
-                                className={cn(
-                                    "flex flex-col items-center justify-center relative transition-all duration-200",
-                                    "hover:bg-muted/50 active:bg-muted",
-                                    isActive ? "bg-muted/50" : ""
-                                )}
-                            >
-                                <div className="relative">
-                                    <Icon
+                            <div key={item.id} className="relative">
+                                {item.id === 'search' ? (
+                                    <button
+                                        onClick={() => {
+                                            handleTabPress(item.id);
+                                            onSearchOpen?.();
+                                        }}
                                         className={cn(
-                                            "h-5 w-5 transition-all duration-200",
-                                            isActive
-                                                ? `${item.color} scale-110`
-                                                : "text-muted-foreground"
+                                            "flex flex-col items-center justify-center relative transition-all duration-300 w-full h-full",
+                                            "hover:bg-muted/50 active:bg-muted",
+                                            isActive ? "bg-muted/50" : ""
                                         )}
-                                    />
+                                    >
+                                        <div className="relative">
+                                            <Icon
+                                                className={cn(
+                                                    "h-5 w-5 transition-all duration-300",
+                                                    isActive
+                                                        ? `${item.color} scale-110`
+                                                        : "text-muted-foreground"
+                                                )}
+                                            />
 
-                                    {/* Badge for notifications */}
-                                    {item.badge && item.badge > 0 && (
-                                        <Badge className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground text-xs min-w-[16px] h-[16px] rounded-full flex items-center justify-center p-0">
-                                            {item.badge > 99 ? '99+' : item.badge}
-                                        </Badge>
-                                    )}
-
-                                    {/* Active indicator */}
-                                    {isActive && (
-                                        <motion.div
-                                            layoutId="activeTab"
-                                            className={cn(
-                                                "absolute -bottom-1 left-1/2 transform -translate-x-1/2",
-                                                "w-1 h-1 rounded-full",
-                                                item.color.replace('text-', 'bg-')
+                                            {/* Active indicator */}
+                                            {isActive && (
+                                                <motion.div
+                                                    layoutId="activeTab"
+                                                    className={cn(
+                                                        "absolute -bottom-1 left-1/2 transform -translate-x-1/2",
+                                                        "w-1 h-1 rounded-full",
+                                                        item.color.replace('text-', 'bg-')
+                                                    )}
+                                                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                                                />
                                             )}
-                                            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                                        />
-                                    )}
-                                </div>
+                                        </div>
 
-                                <span className={cn(
-                                    "text-xs mt-1 transition-colors duration-200",
-                                    isActive
-                                        ? item.color
-                                        : "text-muted-foreground"
-                                )}>
-                                    {item.label}
-                                </span>
-                            </Link>
+                                        <span className={cn(
+                                            "text-xs mt-1 transition-colors duration-300",
+                                            isActive
+                                                ? item.color
+                                                : "text-muted-foreground"
+                                        )}>
+                                            {item.label}
+                                        </span>
+                                    </button>
+                                ) : (
+                                    <Link
+                                        href={item.href}
+                                        onClick={() => handleTabPress(item.id)}
+                                        className={cn(
+                                            "flex flex-col items-center justify-center relative transition-all duration-300 w-full h-full",
+                                            "hover:bg-muted/50 active:bg-muted",
+                                            isActive ? "bg-muted/50" : ""
+                                        )}
+                                    >
+                                        <div className="relative">
+                                            <Icon
+                                                className={cn(
+                                                    "h-5 w-5 transition-all duration-300",
+                                                    isActive
+                                                        ? `${item.color} scale-110`
+                                                        : "text-muted-foreground",
+                                                    // Special styling for wishlist with items
+                                                    item.id === 'wishlist' && item.badge && item.badge > 0
+                                                        ? "text-pink-500 animate-pulse fill-current"
+                                                        : ""
+                                                )}
+                                            />
+
+                                            {/* Active indicator */}
+                                            {isActive && (
+                                                <motion.div
+                                                    layoutId="activeTab"
+                                                    className={cn(
+                                                        "absolute -bottom-1 left-1/2 transform -translate-x-1/2",
+                                                        "w-1 h-1 rounded-full",
+                                                        item.color.replace('text-', 'bg-')
+                                                    )}
+                                                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                                                />
+                                            )}
+                                        </div>
+
+                                        <div className="flex items-center gap-1 mt-1">
+                                            <span className={cn(
+                                                "text-xs transition-colors duration-300",
+                                                isActive
+                                                    ? item.color
+                                                    : "text-muted-foreground"
+                                            )}>
+                                                {item.label}
+                                            </span>
+
+                                            {/* Enhanced Badge beside text */}
+                                            {item.badge && item.badge > 0 && (
+                                                <motion.div
+                                                    initial={{ scale: 0 }}
+                                                    animate={{ scale: 1 }}
+                                                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                                                >
+                                                    <Badge className={cn(
+                                                        "text-xs min-w-[16px] h-[16px] rounded-full flex items-center justify-center p-0 font-bold shadow-sm",
+                                                        item.id === 'wishlist'
+                                                            ? "bg-gradient-to-r from-pink-500 to-red-500 text-white"
+                                                            : "bg-destructive text-destructive-foreground"
+                                                    )}>
+                                                        {item.badge > 99 ? '99+' : item.badge}
+                                                    </Badge>
+                                                </motion.div>
+                                            )}
+                                        </div>
+                                    </Link>
+                                )}
+                            </div>
                         );
                     })}
                 </div>
             </motion.div>
 
-            {/* Floating Action Button (Cart) */}
-            <AnimatePresence>
-                {showFAB && (
-                    <motion.div
-                        initial={{ scale: 0, y: 100 }}
-                        animate={{ scale: 1, y: 0 }}
-                        exit={{ scale: 0, y: 100 }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                        className="fixed bottom-20 right-4 z-50 md:hidden"
-                    >
-                        <Link href="/cart">
-                            <Button
-                                size="lg"
-                                className={cn(
-                                    "w-14 h-14 rounded-full shadow-xl",
-                                    "bg-gradient-to-r from-feature-commerce to-feature-products",
-                                    "hover:shadow-2xl hover:scale-110 transition-all duration-300",
-                                    "border-4 border-white"
-                                )}
-                            >
-                                <div className="relative">
-                                    <ShoppingBag className="h-6 w-6 text-white" />
-                                    {cartCount > 0 && (
-                                        <Badge className="absolute -top-3 -right-3 bg-destructive text-destructive-foreground text-xs min-w-[20px] h-[20px] rounded-full flex items-center justify-center">
-                                            {cartCount > 99 ? '99+' : cartCount}
-                                        </Badge>
-                                    )}
-                                </div>
-                            </Button>
-                        </Link>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+
 
             {/* Quick Action Buttons */}
             <AnimatePresence>
@@ -309,7 +341,7 @@ export default function MobileBottomNav({
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 100 }}
                         transition={{ delay: 0.1 }}
-                        className="fixed bottom-32 right-4 z-40 md:hidden space-y-3"
+                        className="fixed bottom-20 right-4 z-40 md:hidden space-y-3"
                     >
                         {/* WhatsApp Support */}
                         {whatsappNumber && (
@@ -363,40 +395,22 @@ export default function MobileBottomNav({
                             </motion.div>
                         )}
 
-                        {/* Quick Search */}
-                        <motion.div
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                        >
-                            <Button
-                                size="sm"
-                                variant="secondary"
-                                className="w-12 h-12 rounded-full shadow-lg bg-background border border-border"
-                                onClick={() => {
-                                    // Open search modal or focus search input
-                                    const searchInput = document.querySelector('input[type="search"]') as HTMLInputElement;
-                                    if (searchInput) {
-                                        searchInput.focus();
-                                    }
-                                }}
-                            >
-                                <Search className="h-5 w-5 text-muted-foreground" />
-                            </Button>
-                        </motion.div>
+
 
                         {/* Trending Products */}
                         <motion.div
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
                         >
-                            <Link href="/trending">
+                            <Link href="/categories">
                                 <Button
                                     size="sm"
                                     variant="secondary"
-                                    className="w-12 h-12 rounded-full shadow-lg bg-background border border-border relative"
+                                    className="w-12 h-12 rounded-full shadow-lg bg-gradient-to-r from-feature-analytics to-feature-settings border-0 relative"
+                                    title="المنتجات الرائجة"
                                 >
-                                    <TrendingUp className="h-5 w-5 text-feature-analytics" />
-                                    <Sparkles className="h-3 w-3 text-feature-analytics absolute -top-1 -right-1" />
+                                    <TrendingUp className="h-5 w-5 text-white" />
+                                    <Sparkles className="h-3 w-3 text-white absolute -top-1 -right-1 animate-pulse" />
                                 </Button>
                             </Link>
                         </motion.div>

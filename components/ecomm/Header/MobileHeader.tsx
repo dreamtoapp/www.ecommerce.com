@@ -8,33 +8,31 @@ import {
     Menu,
     X,
     Bell,
-    MapPin,
     Globe,
-    ChevronDown,
     Percent,
     Gift,
     Truck,
     Shield,
-    Headphones
+    Headphones,
+    ShoppingBag
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import MobileSearchBar from './MobileSearchBar';
+// MobileSearchBar removed - search is now in drawer
 import MobileBottomNav from './MobileBottomNav';
+import MobileSearchDrawer from './MobileSearchDrawer';
 
 interface MobileHeaderProps {
     cartCount?: number;
     wishlistCount?: number;
     notificationCount?: number;
     isLoggedIn?: boolean;
-    currentLocation?: string;
     currentLanguage?: 'ar' | 'en';
     supportEnabled?: boolean;
     whatsappNumber?: string;
     userId?: string;
     onLanguageChange?: (lang: 'ar' | 'en') => void;
-    onLocationChange?: () => void;
 }
 
 export default function MobileHeader({
@@ -42,17 +40,16 @@ export default function MobileHeader({
     wishlistCount = 0,
     notificationCount = 0,
     isLoggedIn = false,
-    currentLocation = 'الرياض',
     currentLanguage = 'ar',
     supportEnabled = true,
     whatsappNumber,
     userId = 'guest',
-    onLanguageChange,
-    onLocationChange
+    onLanguageChange
 }: MobileHeaderProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [showPromoBar, setShowPromoBar] = useState(true);
     const [scrolled, setScrolled] = useState(false);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
 
     // Handle scroll effect
     useEffect(() => {
@@ -128,7 +125,7 @@ export default function MobileHeader({
                     backdropFilter: scrolled ? 'blur(10px)' : 'none'
                 }}
                 className={cn(
-                    "sticky top-0 z-40 border-b border-border transition-all duration-200 md:hidden",
+                    "fixed top-0 left-0 right-0 z-40 border-b border-border transition-all duration-300 md:hidden",
                     scrolled ? "shadow-lg" : "shadow-sm"
                 )}
             >
@@ -158,18 +155,22 @@ export default function MobileHeader({
                         </Link>
 
                         {/* Right Actions */}
-                        <div className="flex items-center gap-2">
-                            {/* Location */}
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={onLocationChange}
-                                className="flex items-center gap-1 text-xs px-2 h-8"
-                            >
-                                <MapPin className="h-3 w-3 text-feature-products" />
-                                <span className="max-w-[60px] truncate">{currentLocation}</span>
-                                <ChevronDown className="h-3 w-3" />
-                            </Button>
+                        <div className="flex items-center gap-1">
+                            {/* Cart */}
+                            <Link href="/cart">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-10 h-10 p-0 relative"
+                                >
+                                    <ShoppingBag className="h-5 w-5" />
+                                    {cartCount > 0 && (
+                                        <Badge className="absolute -top-1 -right-1 bg-feature-commerce text-white text-xs min-w-[18px] h-[18px] rounded-full flex items-center justify-center p-0 font-bold">
+                                            {cartCount > 99 ? '99+' : cartCount}
+                                        </Badge>
+                                    )}
+                                </Button>
+                            </Link>
 
                             {/* Notifications */}
                             <Button
@@ -187,10 +188,7 @@ export default function MobileHeader({
                         </div>
                     </div>
 
-                    {/* Search Bar */}
-                    <div className="pb-3">
-                        <MobileSearchBar onSearch={handleSearch} />
-                    </div>
+                    {/* Search is now in drawer - removed from fixed header */}
                 </div>
             </motion.header>
 
@@ -338,12 +336,19 @@ export default function MobileHeader({
 
             {/* Bottom Navigation */}
             <MobileBottomNav
-                cartCount={cartCount}
                 wishlistCount={wishlistCount}
                 isLoggedIn={isLoggedIn}
                 supportEnabled={supportEnabled}
                 whatsappNumber={whatsappNumber}
                 userId={userId}
+                onSearchOpen={() => setIsSearchOpen(true)}
+            />
+
+            {/* Search Drawer */}
+            <MobileSearchDrawer
+                isOpen={isSearchOpen}
+                onClose={() => setIsSearchOpen(false)}
+                onSearch={handleSearch}
             />
         </>
     );

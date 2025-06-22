@@ -44,8 +44,13 @@ This is a comprehensive e-commerce platform built with Next.js 15.2.1, supportin
 ### High Priority
 1. **Fix TypeScript Errors**: Resolve all module resolution issues
 2. **Standardize Folder Structure**: Ensure all routes follow the same pattern
-3. **Testing Implementation**: Add Jest/React Testing Library setup
-4. **Performance Optimization**: Bundle analysis and optimization
+3. **Conditional Order Tracking**: Implement smart order tracking in mobile navigation
+   - **Show only if**: User is logged in AND has active orders
+   - **Features**: Real-time order status, estimated delivery time, driver location
+   - **Implementation**: Add to MobileBottomNav with conditional rendering logic
+   - **Priority**: High (UX Enhancement for logged-in users with orders)
+4. **Testing Implementation**: Add Jest/React Testing Library setup
+5. **Performance Optimization**: Bundle analysis and optimization
 
 ### Medium Priority
 1. **Code Deduplication**: Remove duplicate cloudinary implementations

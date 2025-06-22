@@ -290,6 +290,63 @@ const MobileNavFeatures = {
 - [ ] **Recently viewed** products in mobile menu
 - [ ] **One-handed operation** optimization
 
+#### **🚛 CONDITIONAL ORDER TRACKING ENHANCEMENT** 
+**Priority: HIGH** - **Status: PENDING IMPLEMENTATION**
+
+##### **Smart Order Tracking Integration**
+```tsx
+// Conditional Order Tracking Logic
+const OrderTrackingFeatures = {
+  showConditions: {
+    userLoggedIn: true,
+    hasActiveOrders: true,
+    minimumOrderAge: "within 30 days"
+  },
+  features: {
+    realTimeStatus: true,
+    estimatedDelivery: true,
+    driverLocation: true,
+    pushNotifications: true
+  },
+  placement: "MobileBottomNav Quick Actions"
+}
+```
+
+**Implementation Requirements:**
+- [ ] **Conditional Display Logic**
+  - Show only if user is authenticated
+  - Show only if user has active orders (status: pending, processing, shipped)
+  - Hide for users with no recent orders (>30 days)
+- [ ] **Real-Time Order Tracking**
+  - Live order status updates
+  - Estimated delivery time
+  - Driver location mapping
+  - Delivery progress timeline
+- [ ] **Quick Actions Integration**
+  - Add to MobileBottomNav quick action buttons
+  - Display with order count badge
+  - Smooth animation on status changes
+- [ ] **Performance Considerations**
+  - Lazy load tracking data
+  - Cache order status to minimize API calls
+  - Efficient database queries for active orders
+- [ ] **UX Enhancements**
+  - Pulsing animation for urgent updates
+  - Color-coded status indicators
+  - One-tap access to detailed tracking
+
+**Files to Modify:**
+- `components/ecomm/Header/MobileBottomNav.tsx` - Add conditional tracking button
+- `app/api/orders/active/route.ts` - Create active orders endpoint
+- `hooks/use-active-orders.ts` - Custom hook for order tracking
+- `components/order/OrderTrackingModal.tsx` - Detailed tracking interface
+
+**Expected Impact:**
+- **Enhanced UX** for users with active orders
+- **Reduced support queries** about order status
+- **Increased customer satisfaction** with real-time updates
+- **Clean interface** for users without orders
+
 #### **3. INTELLIGENT SEARCH ENHANCEMENT**
 ```tsx
 // Smart Search Implementation
