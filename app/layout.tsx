@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { cairo } from './font';
 
 import { Directions } from '../constant/enums';
+import NextAuthSessionProvider from '../provider/session-provider';
 import { ThemeProvider } from '../provider/theme-provider';
 import WebVitalsCollector from '@/components/seo/WebVitalsCollector';
 
@@ -29,17 +30,19 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang={locale} dir={dir} suppressHydrationWarning>
       {/* <head>{head()}</head> */}
       <body className={`${cairo.className} min-h-screen bg-background antialiased`}>
-        <WebVitalsCollector />
-        <ThemeProvider
-          attribute='class'
-          defaultTheme='system'
-          enableSystem
-          disableTransitionOnChange
-        >
-          <NextTopLoader />
-          <main className='min-h-screen'>{children}</main>
-          <Toaster position='top-center' />
-        </ThemeProvider>
+        <NextAuthSessionProvider>
+          <WebVitalsCollector />
+          <ThemeProvider
+            attribute='class'
+            defaultTheme='system'
+            enableSystem
+            disableTransitionOnChange
+          >
+            <NextTopLoader />
+            <main className='min-h-screen'>{children}</main>
+            <Toaster position='top-center' />
+          </ThemeProvider>
+        </NextAuthSessionProvider>
         {/* </NotificationsProvider> */}
       </body>
     </html>

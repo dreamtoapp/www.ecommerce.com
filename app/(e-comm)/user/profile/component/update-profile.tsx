@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTheme } from 'next-themes';
+import { useSession } from 'next-auth/react';
 import {
   User,
   Mail,
@@ -37,6 +39,8 @@ import { UserFormData, UserSchema } from '../helper/userZodAndInputs';
 // Profile Header Component (65 lines)
 function ProfileHeader({ userData }: { userData: UserFormData }) {
   const completionPercentage = calculateProfileCompletion(userData);
+  const router = useRouter();
+  const { update } = useSession();
 
   return (
     <div className="space-y-6">
@@ -58,8 +62,12 @@ function ProfileHeader({ userData }: { userData: UserFormData }) {
                   alt={`${userData.name}'s profile`}
                   recordId={userData.id}
                   table="user"
-                  tableField='image'
-                  onUploadComplete={() => toast.success("تم رفع الصورة بنجاح")}
+                  tableField="image"
+                  onUploadComplete={() => {
+                    toast.success('تم رفع الصورة بنجاح');
+                    update();
+                    router.refresh();
+                  }}
                 />
               </div>
               <div className="absolute -bottom-1 -right-1 bg-feature-users text-white rounded-full p-1">
@@ -544,6 +552,8 @@ function calculateProfileCompletion(userData: UserFormData): number {
 
 // Main Profile Component
 export default function UserProfileForm({ userData }: { userData: UserFormData }) {
+  const router = useRouter();
+  const { update } = useSession();
   const {
     register,
     handleSubmit,
@@ -572,8 +582,8 @@ export default function UserProfileForm({ userData }: { userData: UserFormData }
 
       if (result.ok) {
         toast.success(result.msg || 'تم تحديث المعلومات بنجاح');
-        reset();
-        setTimeout(() => window.location.reload(), 1200);
+        await update();
+        router.refresh();
       } else {
         toast.error(result.msg || 'حدث خطأ يرجى المحاولة لاحقاً');
       }
@@ -584,8 +594,8 @@ export default function UserProfileForm({ userData }: { userData: UserFormData }
   };
 
   const handleReset = () => {
-    reset();
-    toast.info('تم إعادة تعيين النموذج');
+    reset(userData);
+    toast.info('تمت إعادة تعيين الحقول إلى قيمها الأصلية.');
   };
 
   return (

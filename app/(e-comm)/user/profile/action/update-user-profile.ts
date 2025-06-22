@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import db from '@/lib/prisma';
 import { UserFormData, UserSchema } from '../helper/userZodAndInputs';
 
@@ -54,6 +55,8 @@ export async function updateUserProfile(formData: UserFormData) {
       where: { id: existingUser.id },
       data: updateData,
     });
+
+    revalidatePath('/user/profile');
 
     return {
       ok: true,

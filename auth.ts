@@ -25,7 +25,18 @@ export const {
   ...authConfig,
   callbacks: {
     async jwt({ token, trigger }) {
-      if (trigger === 'update' && token.email) {
+      if (trigger === 'update' && token.sub) {
+        const existingUser = await getUserById(token.sub);
+        if (existingUser) {
+          token.name = existingUser.name;
+          token.email = existingUser.email;
+          token.image = existingUser.image;
+          token.address = existingUser.address;
+          token.phone = existingUser.phone;
+          token.latitude = existingUser.latitude;
+          token.longitude = existingUser.longitude;
+          token.role = existingUser.role;
+        }
         return token;
       }
 
