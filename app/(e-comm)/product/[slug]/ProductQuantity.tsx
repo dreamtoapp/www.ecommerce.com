@@ -3,9 +3,9 @@
 import { useState } from 'react';
 
 import QuantityControls
-  from '@/app/(e-comm)/homepage/component/QuantityControls';
+  from '@/components/product/cards/QuantityControls';
 import StoreAddToCartButton from '@/components/cart/StoreAddToCartButton';
-import WishlistButton from '@/components/wishlist/WishlistButton';
+import WishlistButton from '@/components/product/cards/WishlistButton';
 import { Product } from '@prisma/client';
 
 export default function ProductQuantity({ product }: { product: Product }) {

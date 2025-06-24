@@ -5,7 +5,9 @@ import Image from 'next/image';
 import { Session } from 'next-auth';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
+
+import dynamic from 'next/dynamic';
+import { UserRole } from '@/constant/enums';
 
 // Define general links for the mobile menu
 const generalMobileLinks = [
@@ -14,6 +16,8 @@ const generalMobileLinks = [
     { name: 'سياسة الخصوصية', href: '/privacy-policy' },
     { name: 'الشروط والأحكام', href: '/terms-conditions' },
 ];
+
+const UserMenu = dynamic(() => import('./UserMenu'), { ssr: false });
 
 interface MobileMenuProps {
     isOpen: boolean;
@@ -68,68 +72,28 @@ export default function MobileMenu({ isOpen, onClose, session }: MobileMenuProps
                                 </Button>
                             </div>
 
-                            {/* User Info */}
-                            {session && (
-                                <div className="border-b p-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                            <span className="text-sm font-medium text-primary">
-                                                {session.user?.name?.charAt(0) || 'م'}
-                                            </span>
-                                        </div>
-                                        <div>
-                                            <p className="font-medium">
-                                                مرحباً، {session.user?.name || 'المستخدم'}
-                                            </p>
-                                            <p className="text-sm text-muted-foreground">عضو مميز</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
+                            {/* Enhanced UserMenu for Mobile */}
+                            <div className="border-b p-0">
+                                <UserMenu
+                                    user={
+                                        session?.user
+                                            ? {
+                                                id: session.user.id || '',
+                                                name: session.user.name,
+                                                email: session.user.email,
+                                                image: session.user.image,
+                                                role: session.user.role as UserRole,
+                                            }
+                                            : null
+                                    }
+                                    alerts={[]}
+                                    aria-label="User account menu (mobile)"
+                                />
+                            </div>
 
                             {/* Content */}
                             <div className='flex-1 overflow-y-auto p-4'>
                                 <div className='space-y-6'>
-                                    {/* Account Links */}
-                                    {session ? (
-                                        <div className='space-y-4'>
-                                            <h3 className='text-sm font-semibold text-muted-foreground uppercase'>
-                                                حسابي
-                                            </h3>
-                                            <nav className='space-y-2'>
-                                                <Link
-                                                    href="/user/profile"
-                                                    onClick={onClose}
-                                                    className='flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors'
-                                                >
-                                                    <span>الملف الشخصي</span>
-                                                </Link>
-                                                <Link
-                                                    href="/user/wishlist"
-                                                    onClick={onClose}
-                                                    className='flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors'
-                                                >
-                                                    <span>المفضلة</span>
-                                                </Link>
-                                            </nav>
-                                            <Separator />
-                                        </div>
-                                    ) : (
-                                        <div className='space-y-4'>
-                                            <h3 className='text-sm font-semibold text-muted-foreground uppercase'>
-                                                الحساب
-                                            </h3>
-                                            <Link
-                                                href="/auth/login"
-                                                onClick={onClose}
-                                                className='flex items-center justify-between p-3 rounded-lg bg-primary/5 text-primary hover:bg-primary/10 transition-colors'
-                                            >
-                                                <span>تسجيل الدخول</span>
-                                            </Link>
-                                            <Separator />
-                                        </div>
-                                    )}
-
                                     {/* General Links */}
                                     <div className='space-y-4'>
                                         <h3 className='text-sm font-semibold text-muted-foreground uppercase'>

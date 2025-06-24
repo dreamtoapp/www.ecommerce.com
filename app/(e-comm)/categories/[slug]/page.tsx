@@ -2,18 +2,12 @@ import { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-
-import { Button } from '@/components/ui/button';
+import { getCategoryBySlug, getProductsByCategorySlug } from '../action/actions';
 import { Separator } from '@/components/ui/separator';
 
 import { getCategories } from '../../homepage/actions/getCategories';
-import {
-  getCategoryBySlug,
-  getProductsByCategorySlug,
-} from '../action/actions';
-import EnhancedProductCardAdapter
-  from '../components/EnhancedProductCardAdapter';
 import { PageProps } from '@/types/commonTypes';
+import { ProductsSection } from '@/components/product/cards';
 
 export async function generateMetadata({ params }: PageProps<{ slug: string }>): Promise<Metadata> {
   const { slug } = await params;
@@ -61,12 +55,11 @@ export default async function CategoryPage({ params, searchParams }: PageProps<{
   // Fetch products for the current category
   const productsResult = await getProductsByCategorySlug(slug, currentPage, pageSize);
 
+  // Handle products result with enhanced type safety
   if (!productsResult.success) {
-    console.error("Error fetching products for category:", productsResult.error);
+    console.error('Error fetching products:', productsResult.error);
+    return notFound();
   }
-
-  const products = productsResult.success ? productsResult.products || [] : [];
-  const totalPages = productsResult.success ? productsResult.totalPages || 1 : 1;
 
   // Get related categories (excluding current one)
   const relatedCategories = allCategories
@@ -123,64 +116,11 @@ export default async function CategoryPage({ params, searchParams }: PageProps<{
       </header>
 
       {/* Products grid */}
-      {products.length > 0 ? (
-        <>
-          <h2 className="mb-6 text-2xl font-bold">منتجات {category.name}</h2>
-          <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
-            {products.map((product) => (
-              <EnhancedProductCardAdapter
-                key={product.id}
-                product={product}
-                variant="category"
-                showQuantityControls={false}
-              />
-            ))}
-          </div>
+      <h2 className="mb-6 text-2xl font-bold">منتجات {category.name}</h2>
+      <ProductsSection slug={slug} />
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
-              {currentPage > 1 && (
-                <Button asChild variant="outline">
-                  <Link href={`/categories/${slug}?page=${currentPage - 1}`}>
-                    <span className="ml-2">←</span> الصفحة السابقة
-                  </Link>
-                </Button>
-              )}
-
-              <div className="text-sm text-muted-foreground">
-                صفحة {currentPage} من {totalPages}
-              </div>
-
-              {currentPage < totalPages && (
-                <Button asChild variant="outline">
-                  <Link href={`/categories/${slug}?page=${currentPage + 1}`}>
-                    الصفحة التالية <span className="mr-2">→</span>
-                  </Link>
-                </Button>
-              )}
-            </div>
-          )}
-        </>
-      ) : (
-        <div className="rounded-xl bg-muted/20 py-12 text-center">
-          <div className="mx-auto mb-6 h-24 w-24 rounded-full bg-muted p-6">
-            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-              <circle cx="12" cy="10" r="3"></circle>
-            </svg>
-          </div>
-          <h3 className="text-xl font-semibold text-foreground">
-            لا توجد منتجات في هذا الصنف حاليًا
-          </h3>
-          <p className="mt-2 text-muted-foreground">
-            يرجى التحقق مرة أخرى لاحقًا أو استكشاف أصناف أخرى
-          </p>
-          <Button asChild className="mt-6">
-            <Link href="/categories">استكشاف فئات أخرى</Link>
-          </Button>
-        </div>
-      )}
+      {/* Pagination */}
+      {/* Pagination logic can be handled inside ProductsSection if needed */}
 
       {/* Related Categories Section */}
       {relatedCategories.length > 0 && (

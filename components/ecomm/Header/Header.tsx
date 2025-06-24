@@ -1,5 +1,3 @@
-import { Session } from 'next-auth';
-
 // import NavLinks from './NavLinks'; 
 import HeaderClient from './HeaderClient';
 // Header.tsx (Server Component)
@@ -10,9 +8,10 @@ interface HeaderProps {
   logo: string;
   logoAlt: string;
   user: any; // Using 'any' for now to match layout, will be properly typed in child components
+  alerts: any[];
 }
 
-export default function Header({ user, logo, logoAlt }: HeaderProps) {
+export default function Header({ user, logo, logoAlt, alerts }: HeaderProps) {
   return (
     <header className='sticky top-0 z-50 bg-background/95 shadow-md backdrop-blur-md supports-[backdrop-filter]:bg-background/80 dark:shadow-lg dark:shadow-gray-800/50'>
       {/* Main Header Bar */}
@@ -35,7 +34,7 @@ export default function Header({ user, logo, logoAlt }: HeaderProps) {
 
           {/* Actions: Cart, User, etc. - grouped with spacing */}
           <div className='flex items-center gap-2 md:gap-3'>
-            <HeaderClient user={user} />
+            <HeaderClient user={user} alerts={alerts} />
           </div>
         </nav>
       </div>

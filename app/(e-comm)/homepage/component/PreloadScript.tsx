@@ -273,10 +273,8 @@ export default function PreloadScript() {
             // Use requestIdleCallback for non-critical tasks
             if ('requestIdleCallback' in window) {
               requestIdleCallback(() => {
-                // Load non-critical analytics scripts
-                import('/js/analytics.js').catch(() => {
-                  console.log('Analytics script not found');
-                });
+                // Analytics now handled by official Next.js GoogleAnalytics component
+                console.log('Analytics handled by @next/third-parties/google');
               });
             }
             

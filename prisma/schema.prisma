@@ -99,6 +99,7 @@ model Product {
   // Wishlist relation
   wishlistedBy WishlistItem[] // Users who have wishlisted this product
 
+  cartItems  CartItem[]  // A product can be in many cart items
   orderItems OrderItem[] // A product can belong to multiple order items
   // categories Category[]  // Old implicit relation removed
   categoryAssignments CategoryProduct[] // Explicit relation via join table
@@ -149,6 +150,7 @@ model User {
   otpCode       String? @default("")
   reviews       Review[] // User's product reviews
   wishlist      WishlistItem[] // User's wishlist items
+  cart          Cart?          // User's cart
   Notification  Notification[]
 
   // Driver-specific fields
@@ -476,20 +478,19 @@ model Review {
 model WishlistItem {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   productId String   @db.ObjectId
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
-  product   Product  @relation(fields: [productId], references: [id])
 
-  // Ensure a user can only wishlist a product once
   @@unique([userId, productId])
 }
 
 // Category Model
 model Category {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  name        String    @unique // Category name, should be unique
-  slug        String    @unique // URL-friendly slug, should be unique
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  slug        String   @unique
   description String?   // Optional description
   imageUrl    String?   // Optional image URL for the category
   productAssignments CategoryProduct[] // Explicit relation via join table
@@ -563,6 +564,8 @@ model Offer {
   displayOrder       Int       @default(0)
   hasDiscount        Boolean   @default(false)
   discountPercentage Float?    // Only if hasDiscount is true
+  header             String?   // Custom header for frontend
+  subheader          String?   // Custom subheader for frontend
   
   // Product relationships via join table
   productAssignments OfferProduct[] // Explicit relation via join table
@@ -580,4 +583,27 @@ model OfferProduct {
   assignedAt  DateTime @default(now())
 
   @@unique([offerId, productId])
+}
+
+// Cart models for the new server-side cart implementation
+model Cart {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String?    @unique @db.ObjectId
+  user      User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  cartId    String   @db.ObjectId
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId String   @db.ObjectId
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([cartId, productId])
 }

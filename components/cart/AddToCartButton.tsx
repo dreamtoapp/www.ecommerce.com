@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { Check, ShoppingCart } from 'lucide-react'; // Import directly
 import { iconVariants } from '@/lib/utils'; // Import CVA variants
 
-import { addToCart } from '@/app/(e-comm)/cart/action/cart';
+import { addItem } from '@/app/(e-comm)/cart/actions/cartServerActions';
 // Removed Icon import: import { Icon } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -14,8 +14,6 @@ import { cn } from '@/lib/utils';
 interface AddToCartButtonProps {
   productId: string;
   name: string;
-  price: number;
-  image: string;
   inStock?: boolean;
   variant?: 'default' | 'outline' | 'ghost';
   size?: 'default' | 'sm' | 'lg' | 'icon';
@@ -25,8 +23,6 @@ interface AddToCartButtonProps {
 export default function AddToCartButton({
   productId,
   name,
-  price,
-  image,
   inStock = true,
   variant = 'default',
   size = 'default',
@@ -42,29 +38,20 @@ export default function AddToCartButton({
       setIsLoading(true);
 
       // Call the server action to add to cart
-      const result = await addToCart({
-        productId,
-        name,
-        price,
-        image,
+      await addItem(productId, 1);
+
+      // Show success state
+      setIsAdded(true);
+
+      // Show toast
+      toast.success('تمت الإضافة إلى السلة', {
+        description: name,
       });
 
-      if (result.success) {
-        // Show success state
-        setIsAdded(true);
-
-        // Show toast
-        toast.success(result.message, {
-          description: name,
-        });
-
-        // Reset success state after a delay
-        setTimeout(() => {
-          setIsAdded(false);
-        }, 2000);
-      } else {
-        toast.error(result.message);
-      }
+      // Reset success state after a delay
+      setTimeout(() => {
+        setIsAdded(false);
+      }, 2000);
     } catch (error) {
       console.error('Error adding to cart:', error);
       toast.error('حدث خطأ أثناء الإضافة إلى السلة');

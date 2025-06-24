@@ -21,7 +21,6 @@ import {
   Settings,
   LogOut
 } from 'lucide-react';
-import { User as UserData } from '@prisma/client';
 
 import BackButton from '@/components/BackButton';
 import AddImage from '@/components/AddImage';

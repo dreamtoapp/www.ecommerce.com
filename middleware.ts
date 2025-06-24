@@ -28,7 +28,7 @@ export function middleware(_request: NextRequest) {
   // Add resource hints for critical resources
   response.headers.set(
     'Link',
-    '</fonts/cairo-v28-arabic-regular.woff2>; rel=preload; as=font; crossorigin=anonymous',
+    '</fonts/cairo.ttf>; rel=preload; as=font; crossorigin=anonymous',
   );
 
   return response;

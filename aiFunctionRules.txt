@@ -1,4 +1,17 @@
+# 🚨 Very Important: Safe Component Removal & Backup Rule
 
+Whenever a component or file is no longer needed but might be required for future reference:
+
+- **DO NOT delete the file immediately.**
+- **Instead, rename the file extension from `.tsx` (or `.ts`, `.js`, etc.) to `.txt`.**
+  - Example: `ComponentName.tsx` → `ComponentName.txt`
+- This disables the file as a component but keeps a backup in the codebase for easy restoration or review.
+- Only delete the `.txt` backup after a thorough review and confirmation that it is no longer needed.
+
+**This ensures:**
+- No accidental loss of important code.
+- Easy rollback if a feature or logic is needed again.
+- Clear traceability and safer refactoring.
 
 1. **Function Structure**  
    ✅ Split into focused functions (1 task = 1 function)  

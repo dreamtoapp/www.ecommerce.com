@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import NextTopLoader from 'nextjs-toploader';
 import { Toaster } from '@/components/ui/sonner';
 import { cairo } from './font';
+import { GoogleAnalytics } from '@next/third-parties/google';
 
 import { Directions } from '../constant/enums';
 import NextAuthSessionProvider from '../provider/session-provider';
@@ -42,6 +43,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <main className='min-h-screen'>{children}</main>
             <Toaster position='top-center' />
           </ThemeProvider>
+          <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID || ''} />
         </NextAuthSessionProvider>
         {/* </NotificationsProvider> */}
       </body>

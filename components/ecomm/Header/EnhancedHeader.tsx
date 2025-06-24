@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Search, ShoppingBag, User, Heart, Globe, Menu } from 'lucide-react';
+import { Search, ShoppingBag, User, Heart, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import MegaMenu from './MegaMenu';
-import MobileMenu from './MobileMenu';
 import { Session } from 'next-auth';
+import dynamic from 'next/dynamic';
+import { UserRole } from '@/constant/enums';
 
 interface NavCategory {
     id: string;
@@ -37,11 +38,12 @@ interface EnhancedHeaderProps {
     logoAlt?: string;
 }
 
+const UserMenu = dynamic(() => import('./UserMenu'), { ssr: false });
+
 export default function EnhancedHeader({ session, logo, logoAlt }: EnhancedHeaderProps) {
     const [searchQuery, setSearchQuery] = useState('');
     const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [cartItemsCount, _setCartItemsCount] = useState(0); // TODO: Connect to cart context
     const [wishlistCount, _setWishlistCount] = useState(0); // TODO: Connect to wishlist context
 
@@ -88,16 +90,23 @@ export default function EnhancedHeader({ session, logo, logoAlt }: EnhancedHeade
             {/* Main header */}
             <div className="container mx-auto px-4">
                 <div className="flex items-center justify-between h-16">
-                    {/* Mobile menu button */}
+                    {/* Mobile UserMenu trigger (new) */}
                     <div className="md:hidden">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setIsMobileMenuOpen(true)}
-                            className="p-2"
-                        >
-                            <Menu className="h-6 w-6" />
-                        </Button>
+                        <UserMenu
+                            user={
+                                session?.user
+                                    ? {
+                                        id: session.user.id || '',
+                                        name: session.user.name,
+                                        email: session.user.email,
+                                        image: session.user.image,
+                                        role: session.user.role as UserRole,
+                                    }
+                                    : null
+                            }
+                            alerts={[]}
+                            aria-label="User account menu (mobile)"
+                        />
                     </div>
 
                     {/* Logo */}
@@ -217,13 +226,6 @@ export default function EnhancedHeader({ session, logo, logoAlt }: EnhancedHeade
                     setIsMegaMenuOpen(false);
                     setActiveCategory(null);
                 }}
-            />
-
-            {/* Mobile Menu */}
-            <MobileMenu
-                isOpen={isMobileMenuOpen}
-                onClose={() => setIsMobileMenuOpen(false)}
-                session={session}
             />
         </header>
     );

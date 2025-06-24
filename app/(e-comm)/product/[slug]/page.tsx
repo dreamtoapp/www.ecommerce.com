@@ -9,8 +9,8 @@ import { notFound } from 'next/navigation';
 
 import { auth } from '@/auth';
 // Removed Icon import: import { Icon } from '@/components/icons';
-import ProductImageGallery from '@/components/product/ProductImageGallery';
-import RelatedProducts from '@/components/product/RelatedProducts';
+import ProductImageGallery from '@/components/product/gallery/ProductImageGallery';
+import RelatedProducts from '@/components/product/related/RelatedProducts';
 import RateProductButton from '@/components/rating/RateProductButton';
 import RatingDisplay from '@/components/rating/RatingDisplay';
 import { Badge } from '@/components/ui/badge';

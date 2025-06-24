@@ -1,5 +1,5 @@
 import { Product } from '@/types/databaseTypes';
-import CartItem from './CartItem';
+import FullCartItem from './FullCartItem';
 
 
 // Define types for cart structure
@@ -37,7 +37,7 @@ const CartItemsList = ({ cart, isLoading }: { cart: CartState; isLoading: boolea
             details: product.details ?? null,
           };
           return (
-            <CartItem
+            <FullCartItem
               key={product.id}
               product={safeProduct}
               quantity={quantity}

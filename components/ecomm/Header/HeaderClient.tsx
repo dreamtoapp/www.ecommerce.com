@@ -7,12 +7,14 @@ import {
 } from 'react';
 import { usePathname } from 'next/navigation';
 import BackButton from './BackButton';
-import { Menu } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 
-import { Session } from 'next-auth';
 import dynamic from 'next/dynamic';
+import { useMediaQuery } from '@/hooks/use-media-query';
+import { NotificationDropdown } from '@/components/notifications/NotificationDropdown';
+import { Bell } from 'lucide-react';
 
 const CartIcon = dynamic(() => import('./CartIcon'), {
   ssr: false,
@@ -29,19 +31,15 @@ const UserMenu = dynamic(() => import('./UserMenu'), {
   ),
 });
 
-const MobileMenu = dynamic(() => import('./MobileMenu'), {
-  ssr: false,
-  loading: () => <Skeleton className='h-9 w-9 rounded-lg md:hidden' />,
-});
-
 interface HeaderClientProps {
   user: any; // Using 'any' for now, will be properly typed in child components
+  alerts: any[];
 }
 
-export default function HeaderClient({ user }: HeaderClientProps) {
+export default function HeaderClient({ user, alerts }: HeaderClientProps) {
   const [isMounted, setIsMounted] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const isMobile = useMediaQuery('(max-width: 640px)');
 
   useEffect(() => {
     setIsMounted(true);
@@ -56,34 +54,26 @@ export default function HeaderClient({ user }: HeaderClientProps) {
   return (
     <>
       <div className='flex items-center gap-4 md:gap-6'>
-        {/* Burger menu for mobile only (first action) */}
-        <span className="md:hidden">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsMobileMenuOpen(true)}
-            aria-label="القائمة الرئيسية"
-            className="p-2"
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
-        </span>
-        {/* Back button for sub-routes only (not homepage) */}
-        {showBackButton && (
-          <span>
-            <BackButton />
-          </span>
+        {/* On mobile, show only UserMenu trigger; on desktop, show full header */}
+        {isMobile ? (
+          <UserMenu user={user} alerts={alerts} aria-label="User account menu (mobile)" />
+        ) : (
+          <>
+            {showBackButton && (
+              <span>
+                <BackButton />
+              </span>
+            )}
+            <CartIcon />
+            <NotificationDropdown alerts={alerts}>
+              <Button variant="ghost" size="icon" className="relative">
+                <Bell className="h-6 w-6" />
+              </Button>
+            </NotificationDropdown>
+            <UserMenu user={user} alerts={alerts} aria-label="User account menu" />
+          </>
         )}
-        <CartIcon aria-label='Cart' />
-        <UserMenu user={user} aria-label="User account menu" />
       </div>
-
-      {/* Mobile Menu */}
-      <MobileMenu
-        isOpen={isMobileMenuOpen}
-        onClose={() => setIsMobileMenuOpen(false)}
-        user={user}
-      />
     </>
   );
 }

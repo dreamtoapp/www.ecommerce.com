@@ -23,8 +23,6 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCheckIsLogin } from '@/hooks/use-check-islogin';
-import { useCartStore } from '@/store/cartStore';
-
 import { CreateOrderInDb } from './actions/creatOrder';
 import MiniCartSummary from './components/MiniCartSummary';
 import { ShiftSelector } from './components/ShiftSelector';
@@ -36,14 +34,24 @@ const CheckOutPage = () => {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [selectedShiftId, setSelectedShiftId] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { cart, getTotalPrice, getTotalItems } = useCartStore();
   const [formErrors, setFormErrors] = useState<string[]>([]);
+  const [cart, setCart] = useState<any>(null);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.push('/auth/login?redirect=/checkout');
     }
   }, [isLoading, isAuthenticated, router]);
+
+  useEffect(() => {
+    fetch('/api/cart')
+      .then((res) => res.json())
+      .then((data) => setCart(data));
+  }, []);
+
+  const items = cart?.items || [];
+  const totalAmount = items.reduce((sum: number, item: any) => sum + (item.product?.price || 0) * (item.quantity || 1), 0);
+  const totalItems = items.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0);
 
   const validateForm = () => {
     const errors = [];
@@ -58,10 +66,10 @@ const CheckOutPage = () => {
 
     setIsSubmitting(true);
     try {
-      const formattedCart = Object.values(cart).map((item) => ({
-        productId: item.product.id,
-        name: item.product.name,
-        price: item.product.price,
+      const formattedCart = items.map((item: any) => ({
+        productId: item.product?.id,
+        name: item.product?.name,
+        price: item.product?.price,
         quantity: item.quantity,
       }));
 
@@ -73,8 +81,8 @@ const CheckOutPage = () => {
         lat: session!.latitude ?? '',
         lng: session!.longitude ?? '',
         cart: formattedCart,
-        totalAmount: getTotalPrice(),
-        totalItems: getTotalItems(),
+        totalAmount,
+        totalItems,
         shiftId: selectedShiftId,
       };
 

@@ -1,41 +1,27 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronDown, ChevronUp, DollarSign, Package, ShoppingCart, Tag } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-
 import { Button } from '@/components/ui/button';
-import { useCartStore } from '@/store/cartStore';
-
 import { formatCurrency } from '../../../../lib/formatCurrency';
 
-const MiniCartSummary = () => {
+export default function MiniCartSummary() {
   const [showItems, setShowItems] = useState(false);
-  const [isMounted, setIsMounted] = useState(false); // Add mount state
-  const { cart, getTotalPrice, getTotalUniqueItems } = useCartStore();
+  const [cart, setCart] = useState<any>(null);
   const router = useRouter();
 
   useEffect(() => {
-    setIsMounted(true); // Set mount state after hydration
+    fetch('/api/cart')
+      .then((res) => res.json())
+      .then((data) => setCart(data));
   }, []);
 
-  // Memoize calculations with safe defaults
-  const totalPrice = useMemo(() => (isMounted ? getTotalPrice() : 0), [getTotalPrice, isMounted]);
-  const totalWithTax = useMemo(() => totalPrice * 1.15, [totalPrice]);
-  const totalUniqueItems = useMemo(
-    () => (isMounted ? getTotalUniqueItems() : 0),
-    [getTotalUniqueItems, isMounted],
-  );
-
-  const handleContinueShopping = useCallback(() => {
-    router.push('/');
-  }, [router]);
-
-  const toggleShowItems = useCallback(() => {
-    setShowItems((prev) => !prev);
-  }, []);
+  const items = cart?.items || [];
+  const totalPrice = items.reduce((sum: number, item: any) => sum + (item.product?.price || 0) * (item.quantity || 1), 0);
+  const totalWithTax = totalPrice * 1.15;
+  const totalUniqueItems = items.length;
 
   return (
     <motion.div
@@ -51,11 +37,11 @@ const MiniCartSummary = () => {
           <ShoppingCart className='mr-2 h-5 w-5 text-primary' />
         </h2>
         <div className='rounded-full bg-primary/10 px-3 py-1 text-sm text-primary'>
-          {isMounted ? totalUniqueItems : 0} منتج
+          {totalUniqueItems} منتج
         </div>
       </div>
 
-      {/* Summary Items - Always rendered but with safe values */}
+      {/* Summary Items */}
       <div className='space-y-4'>
         {/* Subtotal */}
         <div className='flex flex-row-reverse items-center justify-between'>
@@ -63,7 +49,7 @@ const MiniCartSummary = () => {
             <Tag className='h-4 w-4' />
             <span>الإجمالي الفرعي</span>
           </div>
-          <span className='font-medium'>{formatCurrency(isMounted ? totalPrice : 0)}</span>
+          <span className='font-medium'>{formatCurrency(totalPrice)}</span>
         </div>
 
         {/* Tax */}
@@ -73,7 +59,7 @@ const MiniCartSummary = () => {
             <span>الضريبة (15%)</span>
           </div>
           <span className='font-medium'>
-            {formatCurrency(isMounted ? totalWithTax - totalPrice : 0)}
+            {formatCurrency(totalWithTax - totalPrice)}
           </span>
         </div>
 
@@ -84,7 +70,7 @@ const MiniCartSummary = () => {
             <span className='font-semibold'>الإجمالي النهائي</span>
           </div>
           <span className='text-xl font-bold text-primary'>
-            {formatCurrency(isMounted ? totalWithTax : 0)}
+            {formatCurrency(totalWithTax)}
           </span>
         </div>
 
@@ -92,7 +78,7 @@ const MiniCartSummary = () => {
         <Button
           className='mt-4 h-10 w-full bg-primary/10 text-sm font-semibold text-primary transition-all duration-200 hover:bg-primary/20'
           size='sm'
-          onClick={toggleShowItems}
+          onClick={() => setShowItems((prev) => !prev)}
         >
           {showItems ? 'إخفاء العناصر' : 'عرض العناصر'}
           {showItems ? (
@@ -102,20 +88,20 @@ const MiniCartSummary = () => {
           )}
         </Button>
 
-        {/* Cart Items - Only render when mounted */}
-        {isMounted && showItems && (
+        {/* Cart Items */}
+        {showItems && (
           <div className='mt-4 space-y-2'>
-            {Object.values(cart).map((item) => (
+            {items.map((item: any) => (
               <div
-                key={item.product.id}
+                key={item.id}
                 className='flex flex-row-reverse items-center justify-between'
               >
                 <div className='flex items-center gap-2'>
-                  <span>{item.product.name}</span>
+                  <span>{item.product?.name}</span>
                   <span className='text-sm text-muted-foreground'>x{item.quantity}</span>
                 </div>
                 <span className='text-sm font-medium'>
-                  {formatCurrency(item.product.price * item.quantity)}
+                  {formatCurrency((item.product?.price || 0) * (item.quantity || 1))}
                 </span>
               </div>
             ))}
@@ -126,13 +112,11 @@ const MiniCartSummary = () => {
         <Button
           className='mt-6 h-12 w-full bg-primary text-lg font-semibold transition-all duration-200 hover:bg-primary/90'
           size='lg'
-          onClick={handleContinueShopping}
+          onClick={() => router.push('/')}
         >
           متابعة التسوق
         </Button>
       </div>
     </motion.div>
   );
-};
-
-export default MiniCartSummary;
+}

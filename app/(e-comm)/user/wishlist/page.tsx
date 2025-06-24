@@ -5,7 +5,7 @@ import { getUserWishlist } from '@/app/(e-comm)/product/actions/wishlist';
 import { auth } from '@/auth';
 import Link from '@/components/link';
 // Removed Icon import: import { Icon } from '@/components/icons';
-import ProductCard from '@/components/product/ProductCard';
+import { ProductCardAdapter } from '@/components/product/cards';
 import { iconVariants } from '@/lib/utils'; // Import CVA variants
 
 export const metadata = {
@@ -52,7 +52,7 @@ export default async function WishlistPage() {
         <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
           {wishlistProducts.map((product) => (
             <div key={product.id} className='relative'>
-              <ProductCard product={{ ...product, details: product.details ?? null, size: product.size ?? null }} />
+              <ProductCardAdapter product={{ ...product, details: product.details ?? null, size: product.size ?? null }} />
             </div>
           ))}
         </div>

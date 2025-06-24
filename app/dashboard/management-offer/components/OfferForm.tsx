@@ -32,6 +32,8 @@ interface OfferFormProps {
                 price: number;
             };
         }>;
+        header?: string | null;
+        subheader?: string | null;
     };
     mode?: 'create' | 'edit';
 }
@@ -89,6 +91,27 @@ export function OfferForm({ initialData, mode = 'create' }: OfferFormProps) {
                         placeholder="أدخل وصف المجموعة"
                         defaultValue={initialData?.description || ''}
                         className="border-feature-commerce/30 focus:border-feature-commerce focus:ring-feature-commerce/20 min-h-[100px]"
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <Label htmlFor="header" className="text-foreground font-medium">العنوان الرئيسي (Header)</Label>
+                    <Input
+                        id="header"
+                        name="header"
+                        placeholder="أدخل العنوان الرئيسي للعرض"
+                        defaultValue={initialData?.header || ''}
+                        className="border-feature-commerce/30 focus:border-feature-commerce focus:ring-feature-commerce/20"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="subheader" className="text-foreground font-medium">العنوان الفرعي (Subheader)</Label>
+                    <Input
+                        id="subheader"
+                        name="subheader"
+                        placeholder="أدخل العنوان الفرعي للعرض"
+                        defaultValue={initialData?.subheader || ''}
+                        className="border-feature-commerce/30 focus:border-feature-commerce focus:ring-feature-commerce/20"
                     />
                 </div>
             </div>

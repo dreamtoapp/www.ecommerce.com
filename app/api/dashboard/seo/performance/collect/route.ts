@@ -1,37 +1,56 @@
-import { NextRequest } from 'next/server';
-import db from '@/lib/prisma';
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/auth';
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    let metric;
-    try {
-      // Defensive: handle empty body (req.body is always defined in Next.js, but body may be empty)
-      const text = await req.text();
-      if (!text) {
-        return new Response('No body', { status: 400 });
-      }
-      metric = JSON.parse(text);
-    } catch (e) {
-      return new Response('Invalid JSON', { status: 400 });
+    // Check authentication
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
     }
-    // Store the metric in the database
-    await db.webVital.create({
-      data: {
-        name: metric.name,
-        value: Number(metric.value),
-        page: metric.page,
-        userAgent: metric.userAgent,
-        timestamp: new Date(metric.timestamp),
-        device: metric.device,
-        browser: metric.browser,
-        city: metric.city,
-        country: metric.country,
-        additional: metric.additional ?? undefined,
-      },
+
+    const body = await request.json();
+    const { url, metrics, timestamp } = body;
+
+    // Validate required fields
+    if (!url || !metrics) {
+      return NextResponse.json(
+        { error: 'Missing required fields: url, metrics' },
+        { status: 400 }
+      );
+    }
+
+    // Here you would typically save the performance data to your database
+    // For now, we'll just log it and return success
+    console.log('SEO Performance Data Collected:', {
+      url,
+      metrics,
+      timestamp: timestamp || new Date().toISOString(),
+      userId: session.user.id,
     });
-    return new Response('ok');
-  } catch (e) {
-    console.error('Web Vitals Collect Error:', e);
-    return new Response('error', { status: 500 });
+
+    // You can extend this to save to database:
+    // await db.seoPerformance.create({
+    //   data: {
+    //     url,
+    //     metrics: JSON.stringify(metrics),
+    //     timestamp: timestamp || new Date(),
+    //     userId: session.user.id,
+    //   },
+    // });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Performance data collected successfully',
+    });
+  } catch (error) {
+    console.error('Error collecting SEO performance data:', error);
+    return NextResponse.json(
+      { error: 'Failed to collect performance data' },
+      { status: 500 }
+    );
   }
 }

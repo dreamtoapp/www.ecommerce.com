@@ -71,6 +71,12 @@ const OfferInfo = ({ offer }: { offer: Offer }) => (
     <div className="space-y-4">
         <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
+                {offer.header && (
+                    <h3 className="font-bold text-lg text-feature-commerce mb-1 line-clamp-1 leading-tight">{offer.header}</h3>
+                )}
+                {offer.subheader && (
+                    <div className="text-sm text-feature-commerce/80 mb-1 line-clamp-1 leading-tight">{offer.subheader}</div>
+                )}
                 <h3 className="font-bold text-xl text-foreground mb-2 line-clamp-2 leading-tight">{offer.name}</h3>
                 {offer.description && (
                     <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">

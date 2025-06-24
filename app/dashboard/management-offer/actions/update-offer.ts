@@ -28,6 +28,8 @@ export async function updateOffer(_prevState: prevState, formData: FormData) {
     const isActive = formData.get('isActive') !== 'false'; // Default to true
     const displayOrder = parseInt(formData.get('displayOrder') as string) || 0;
     const selectedProductIds = formData.getAll('selectedProducts') as string[];
+    const header = formData.get('header') as string || undefined;
+    const subheader = formData.get('subheader') as string || undefined;
 
     // Validate required fields
     if (!offerId) {
@@ -72,6 +74,8 @@ export async function updateOffer(_prevState: prevState, formData: FormData) {
         discountPercentage: validatedData.discountPercentage,
         isActive: validatedData.isActive,
         displayOrder: validatedData.displayOrder,
+        header,
+        subheader,
       },
     });
 
