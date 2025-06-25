@@ -1,5 +1,5 @@
 import Fotter from '../../components/ecomm/Fotter/Fotter';
-import Header from '../../components/ecomm/Header/Header';
+import Header from '../../components/ecomm/Header/DesktopHeader';
 import MobileBottomNav from '../../components/ecomm/Header/MobileBottomNav';
 import MobileHeader from '../../components/ecomm/Header/MobileHeader';
 // app/(ecommerce)/layout.tsx
@@ -53,6 +53,9 @@ export default async function EcommerceLayout({ children }: { children: React.Re
           <div className="hidden md:block">
             <Header
               user={fullUser}
+              userId={user?.id}
+              unreadCount={notificationCount}
+              defaultAlerts={alerts}
               logo={companyData?.logo || ''}
               logoAlt={companyData?.fullName || 'Dream to app'}
             />

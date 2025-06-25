@@ -3,16 +3,29 @@
 import Logo from './Logo';
 import SearchBar from './SearchBar';
 import UserMenuTrigger from './UserMenuTrigger';
+import { NotificationDropdown } from '@/components/notifications/NotificationDropdown';
+import NotificationBell from '@/components/ui/NotificationBell';
+import CartIconClient from './CartIconClient';
 
 interface HeaderProps {
   logo: string;
   logoAlt: string;
-  user: any; // Using 'any' for now to match layout, will be properly typed in child components
+  user: any;
+  userId?: string;
+  unreadCount?: number;
+  defaultAlerts?: any[];
 }
 
-export default function Header({ user, logo, logoAlt }: HeaderProps) {
+export default function Header({ user, logo, logoAlt, userId, unreadCount = 0, defaultAlerts = [] }: HeaderProps) {
+  const totalCount = (unreadCount ?? 0) + (defaultAlerts?.length ?? 0);
+
   return (
-    <header className='sticky top-0 z-50 bg-background/95 backdrop-blur-xl supports-[backdrop-filter]:bg-background/90 border-b border-border/50 shadow-lg shadow-black/5 dark:shadow-black/20'>
+    <header data-dev-header="desktop" className='sticky top-0 z-50 bg-background/95 backdrop-blur-xl supports-[backdrop-filter]:bg-background/90 border-b border-border/50 shadow-lg shadow-black/5 dark:shadow-black/20 relative'>
+      {process.env.NODE_ENV !== 'production' && (
+        <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-orange-600 text-orange-50 text-[10px] px-2 py-0.5 rounded-t-md shadow-md select-none">
+          DESKTOP HEADER
+        </span>
+      )}
       {/* Subtle gradient overlay for depth */}
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent opacity-50" />
 
@@ -37,29 +50,29 @@ export default function Header({ user, logo, logoAlt }: HeaderProps) {
             </div>
           </div>
 
-          {/* Actions: Enhanced user menu */}
-          <div className='flex items-center gap-2 md:gap-3'>
+          {/* Actions: Cart, Notification bell, user menu */}
+          <div className='flex items-center gap-4 md:gap-6'>
+            {/* Cart icon */}
+            <CartIconClient />
+            {/* Notification bell */}
+            {userId && (
+              <NotificationDropdown
+                userId={userId}
+                defaultAlerts={defaultAlerts}
+              >
+                <NotificationBell count={totalCount} showNumber />
+              </NotificationDropdown>
+            )}
+
+            {/* User menu */}
             <div className="relative">
               <UserMenuTrigger user={user} />
-              {/* Subtle background glow on hover */}
               <div className="absolute inset-0 bg-feature-users/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none -z-10 blur-sm" />
             </div>
           </div>
         </nav>
       </div>
 
-      {/* Navigation Bar for Categories (Desktop) - Enhanced for future use */}
-      {/* <div className='hidden border-b border-border/30 bg-gradient-to-r from-background via-accent/5 to-background shadow-sm md:block'>
-        <nav
-          className='mx-auto flex max-w-7xl items-center justify-center px-4 py-3 sm:px-6 lg:px-8'
-          aria-label='Product categories'
-        >
-          <div className="relative">
-            <CategoryNav />
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent rounded-lg opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-          </div>
-        </nav>
-      </div> */}
 
       {/* Subtle bottom border with gradient */}
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
