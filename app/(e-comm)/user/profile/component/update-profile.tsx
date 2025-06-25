@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -21,9 +21,8 @@ import {
   Settings,
   LogOut
 } from 'lucide-react';
+import Image from 'next/image';
 
-import BackButton from '@/components/BackButton';
-import AddImage from '@/components/AddImage';
 import FormError from '@/components/form-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,6 +36,107 @@ import { updateUserProfile } from '../action/update-user-profile';
 import { handleLogout } from '../action/logout';
 import { UserFormData, UserSchema } from '../helper/userZodAndInputs';
 
+// Circular Profile Image Component
+function CircularProfileImage({
+  userData,
+  onUploadComplete
+}: {
+  userData: UserFormData;
+  onUploadComplete: () => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [preview, setPreview] = useState<string | undefined>(userData.image);
+  const [loading, setLoading] = useState(false);
+
+  const handleImageClick = () => {
+    inputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0];
+    if (!selected) return;
+
+    setLoading(true);
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreview(reader.result as string);
+    };
+    reader.readAsDataURL(selected);
+
+    // Upload to server
+    const formData = new FormData();
+    formData.append('file', selected);
+    formData.append('recordId', userData.id);
+    formData.append('table', 'user');
+    formData.append('tableField', 'image');
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/images`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.imageUrl) {
+        setPreview(data.imageUrl);
+        onUploadComplete();
+      } else {
+        throw new Error(data.error || 'Upload failed');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('فشل في رفع الصورة');
+      setPreview(userData.image); // Revert to original
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="relative">
+      <div
+        className="h-16 w-16 sm:h-18 sm:w-18 rounded-full overflow-hidden bg-feature-users/10 border-4 border-feature-users/20 cursor-pointer group"
+        onClick={handleImageClick}
+      >
+        {preview ? (
+          <Image
+            src={preview}
+            alt={`${userData.name}'s profile`}
+            width={64}
+            height={64}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <User className="h-6 w-6 sm:h-8 sm:w-8 text-feature-users/50" />
+          </div>
+        )}
+
+        {loading && (
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-full">
+            <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></div>
+          </div>
+        )}
+      </div>
+
+      <div className="absolute -bottom-1 -right-1 bg-feature-users text-white rounded-full p-1">
+        <Camera className="h-3 w-3" />
+      </div>
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFileChange}
+      />
+    </div>
+  );
+}
+
 // Profile Header Component (65 lines)
 function ProfileHeader({ userData }: { userData: UserFormData }) {
   const completionPercentage = calculateProfileCompletion(userData);
@@ -44,85 +144,72 @@ function ProfileHeader({ userData }: { userData: UserFormData }) {
   const { update } = useSession();
 
   return (
-    <div className="space-y-6">
-      <BackButton variant="minimal" />
+    <Card className="shadow-lg border-l-4 border-l-feature-users card-hover-effect">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+          <User className="h-4 w-4 sm:h-5 sm:w-5 text-feature-users icon-enhanced" />
+          الملف الشخصي
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-2 sm:space-y-3">
+        <div className="flex flex-col md:flex-row items-center gap-2 sm:gap-3">
+          <div className="relative">
+            <CircularProfileImage
+              userData={userData}
+              onUploadComplete={() => {
+                toast.success('تم رفع الصورة بنجاح');
+                update();
+                router.refresh();
+              }}
+            />
+          </div>
 
-      <Card className="shadow-lg border-l-4 border-l-feature-users card-hover-effect">
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2 text-xl">
-            <User className="h-5 w-5 text-feature-users icon-enhanced" />
-            الملف الشخصي
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex flex-col md:flex-row items-center gap-6">
-            <div className="relative">
-              <div className="h-24 w-24 rounded-full overflow-hidden bg-feature-users/10 border-4 border-feature-users/20">
-                <AddImage
-                  url={userData.image}
-                  alt={`${userData.name}'s profile`}
-                  recordId={userData.id}
-                  table="user"
-                  tableField="image"
-                  onUploadComplete={() => {
-                    toast.success('تم رفع الصورة بنجاح');
-                    update();
-                    router.refresh();
-                  }}
-                />
-              </div>
-              <div className="absolute -bottom-1 -right-1 bg-feature-users text-white rounded-full p-1">
-                <Camera className="h-4 w-4" />
-              </div>
+          <div className="flex-1 text-center md:text-right space-y-1">
+            <div>
+              <h2 className="text-base sm:text-lg font-bold text-foreground">{userData.name || 'مستخدم جديد'}</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground">{userData.email}</p>
             </div>
 
-            <div className="flex-1 text-center md:text-right space-y-3">
-              <div>
-                <h2 className="text-2xl font-bold text-foreground">{userData.name || 'مستخدم جديد'}</h2>
-                <p className="text-muted-foreground">{userData.email}</p>
-              </div>
-
-              <div className="flex flex-wrap justify-center md:justify-start gap-2">
-                <Badge className="bg-feature-users/10 text-feature-users border-feature-users/20">
-                  <Shield className="h-3 w-3 ml-1" />
-                  حساب محقق
-                </Badge>
-                <Badge className="bg-feature-products/10 text-feature-products border-feature-products/20">
-                  <Award className="h-3 w-3 ml-1" />
-                  عضو ذهبي
-                </Badge>
-              </div>
-            </div>
-
-            <div className="text-center space-y-3">
-              <div className="relative w-20 h-20">
-                <svg className="w-20 h-20 transform -rotate-90" viewBox="0 0 36 36">
-                  <path
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    className="text-muted/30"
-                  />
-                  <path
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeDasharray={`${completionPercentage}, 100`}
-                    className="text-feature-users"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-sm font-bold text-feature-users">{completionPercentage}%</span>
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground">اكتمال الملف</p>
+            <div className="flex flex-wrap justify-center md:justify-start gap-1">
+              <Badge className="bg-feature-users/10 text-feature-users border-feature-users/20 text-xs">
+                <Shield className="h-3 w-3 ml-1" />
+                حساب محقق
+              </Badge>
+              <Badge className="bg-feature-products/10 text-feature-products border-feature-products/20 text-xs">
+                <Award className="h-3 w-3 ml-1" />
+                عضو ذهبي
+              </Badge>
             </div>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+
+          <div className="text-center space-y-1">
+            <div className="relative w-12 h-12 sm:w-14 sm:h-14">
+              <svg className="w-12 h-12 sm:w-14 sm:h-14 transform -rotate-90" viewBox="0 0 36 36">
+                <path
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="text-muted/30"
+                />
+                <path
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeDasharray={`${completionPercentage}, 100`}
+                  className="text-feature-users"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-xs font-bold text-feature-users">{completionPercentage}%</span>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">اكتمال الملف</p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -134,29 +221,29 @@ function PersonalInfoCard({ register, errors, isSubmitting }: {
 }) {
   return (
     <Card className="shadow-lg border-l-4 border-l-feature-products card-hover-effect">
-      <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-2 text-xl">
-          <User className="h-5 w-5 text-feature-products icon-enhanced" />
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+          <User className="h-4 w-4 sm:h-5 sm:w-5 text-feature-products icon-enhanced" />
           المعلومات الشخصية
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid md:grid-cols-2 gap-4">
-          <div className="space-y-2">
+      <CardContent className="space-y-2 sm:space-y-3">
+        <div className="grid sm:grid-cols-2 gap-2 sm:gap-3">
+          <div className="space-y-1 sm:space-y-2">
             <label className="text-sm font-medium text-foreground">الاسم الكامل</label>
             <div className="relative">
               <Input
                 {...register('name')}
                 placeholder="أدخل اسمك الكامل"
                 disabled={isSubmitting}
-                className="pl-10 h-12 border-2 focus:border-feature-products transition-colors"
+                className="pl-10 h-10 sm:h-11 border-2 focus:border-feature-products transition-colors"
               />
               <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             </div>
             <FormError message={errors.name?.message} />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1 sm:space-y-2">
             <label className="text-sm font-medium text-foreground">رقم الهاتف</label>
             <div className="relative">
               <Input
@@ -164,14 +251,14 @@ function PersonalInfoCard({ register, errors, isSubmitting }: {
                 placeholder="05XXXXXXXX"
                 disabled={isSubmitting}
                 maxLength={10}
-                className="pl-10 h-12 border-2 focus:border-feature-products transition-colors"
+                className="pl-10 h-10 sm:h-11 border-2 focus:border-feature-products transition-colors"
               />
               <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             </div>
             <FormError message={errors.phone?.message} />
           </div>
 
-          <div className="md:col-span-2 space-y-2">
+          <div className="sm:col-span-2 space-y-1 sm:space-y-2">
             <label className="text-sm font-medium text-foreground">البريد الإلكتروني</label>
             <div className="relative">
               <Input
@@ -179,7 +266,7 @@ function PersonalInfoCard({ register, errors, isSubmitting }: {
                 type="email"
                 placeholder="example@email.com"
                 disabled={isSubmitting}
-                className="pl-10 h-12 border-2 focus:border-feature-products transition-colors"
+                className="pl-10 h-10 sm:h-11 border-2 focus:border-feature-products transition-colors"
               />
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             </div>
@@ -318,14 +405,14 @@ function LocationCard({ register, errors, isSubmitting, setValue }: {
           )}
         </div>
 
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">خط العرض</label>
             <Input
               {...register('latitude')}
               placeholder="24.7136"
               disabled={isSubmitting}
-              className="h-12 border-2 focus:border-feature-suppliers transition-colors"
+              className="h-11 sm:h-12 border-2 focus:border-feature-suppliers transition-colors"
             />
             <FormError message={errors.latitude?.message} />
           </div>
@@ -335,7 +422,7 @@ function LocationCard({ register, errors, isSubmitting, setValue }: {
               {...register('longitude')}
               placeholder="46.6753"
               disabled={isSubmitting}
-              className="h-12 border-2 focus:border-feature-suppliers transition-colors"
+              className="h-11 sm:h-12 border-2 focus:border-feature-suppliers transition-colors"
             />
             <FormError message={errors.longitude?.message} />
           </div>
@@ -408,7 +495,7 @@ function PreferencesCard() {
       <CardContent className="space-y-6">
         <div className="space-y-3">
           <label className="text-sm font-medium text-foreground">المظهر</label>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
             {[
               { value: 'light', label: 'فاتح', icon: '☀️' },
               { value: 'dark', label: 'داكن', icon: '🌙' },
@@ -418,13 +505,13 @@ function PreferencesCard() {
                 key={item.value}
                 type="button"
                 onClick={() => setTheme(item.value)}
-                className={`p-3 rounded-lg border-2 transition-all duration-200 hover:scale-105 ${theme === item.value
+                className={`p-2 sm:p-3 rounded-lg border-2 transition-all duration-200 hover:scale-105 ${theme === item.value
                   ? 'border-feature-analytics bg-feature-analytics/10 ring-2 ring-feature-analytics/20'
                   : 'border-border hover:border-feature-analytics/50'
                   }`}
               >
                 <div className="text-center space-y-1">
-                  <div className="text-lg">{item.icon}</div>
+                  <div className="text-base sm:text-lg">{item.icon}</div>
                   <div className="text-xs font-medium">{item.label}</div>
                 </div>
               </button>
@@ -433,7 +520,7 @@ function PreferencesCard() {
         </div>
         <div className="space-y-3">
           <label className="text-sm font-medium text-foreground">اللغة</label>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
             {[
               { value: 'ar', label: 'العربية', flag: '🇸🇦', available: true },
               { value: 'en', label: 'English', flag: '🇺🇸', available: false }
@@ -443,7 +530,7 @@ function PreferencesCard() {
                 type="button"
                 onClick={() => handleLanguageChange(lang.value)}
                 disabled={!lang.available}
-                className={`p-3 rounded-lg border-2 transition-all duration-200 ${selectedLanguage === lang.value
+                className={`p-2 sm:p-3 rounded-lg border-2 transition-all duration-200 ${selectedLanguage === lang.value
                   ? 'border-feature-analytics bg-feature-analytics/10 ring-2 ring-feature-analytics/20'
                   : lang.available
                     ? 'border-border hover:border-feature-analytics/50 hover:scale-105'
@@ -451,7 +538,7 @@ function PreferencesCard() {
                   }`}
               >
                 <div className="flex items-center justify-center gap-2">
-                  <span className="text-lg">{lang.flag}</span>
+                  <span className="text-base sm:text-lg">{lang.flag}</span>
                   <span className="text-sm font-medium">{lang.label}</span>
                   {!lang.available && (
                     <span className="text-xs text-muted-foreground">(قريباً)</span>
@@ -628,12 +715,12 @@ export default function UserProfileForm({
   };
 
   return (
-    <div className="min-h-screen bg-muted/30 py-6">
-      <div className="container mx-auto px-4 max-w-4xl space-y-6">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <div className="min-h-screen bg-muted/30 py-1 sm:py-2">
+      <div className="container mx-auto px-2 sm:px-3 max-w-4xl space-y-2 sm:space-y-3">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-2 sm:space-y-3">
           <ProfileHeader userData={userData} />
 
-          <div className='space-y-4'>
+          <div className='space-y-2'>
             {!isOtp && (
               <ActionAlert
                 variant='destructive'
@@ -654,8 +741,8 @@ export default function UserProfileForm({
             )}
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-6">
-            <div className="space-y-6">
+          <div className="grid lg:grid-cols-2 gap-2 sm:gap-3">
+            <div className="space-y-2 sm:space-y-3">
               <PersonalInfoCard
                 register={register}
                 errors={errors}
@@ -668,7 +755,7 @@ export default function UserProfileForm({
               />
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-2 sm:space-y-3">
               <LocationCard
                 register={register}
                 errors={errors}

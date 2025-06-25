@@ -151,7 +151,10 @@ model User {
   reviews       Review[] // User's product reviews
   wishlist      WishlistItem[] // User's wishlist items
   cart          Cart?          // User's cart
-  Notification  Notification[]
+  UserNotification  UserNotification[]
+
+  // Loyalty points (manual management)
+  loyaltyPoints Int @default(0)
 
   // Driver-specific fields
   vehicleType       VehicleType? // Type of vehicle for drivers
@@ -387,15 +390,28 @@ enum EntityType {
   BLOG_CATEGORY
 }
 
-model Notification {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId // MongoDB ObjectId
-  message     String   @default("") // The notification message
-  type        String   @default("order") // Type of notification (e.g., info, success, error)
-  status      String   @default("unread") // Status of the notification (e.g., unread, read)
-  userId      String?  @db.ObjectId // Optional reference to the user receiving the notification
-  user        User?    @relation(fields: [userId], references: [id]) // Relation to the User model
-  createdAt   DateTime @default(now()) // Timestamp of creation
-  updatedAt   DateTime @updatedAt // Timestamp of last update
+enum NotificationType {
+  WARNING
+  DESTRUCTIVE
+  INFO
+  SUCCESS
+  ORDER
+  PROMO
+  SYSTEM
+}
+
+model UserNotification {
+  id        String           @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String?          @db.ObjectId
+  user      User?            @relation(fields: [userId], references: [id])
+  title     String
+  body      String
+  type      NotificationType // <--- now uses enum!
+  read      Boolean          @default(false)
+  actionUrl String?
+  icon      String?
+  channel   String           @default("in-app")
+  createdAt DateTime         @default(now())
 }
 
 model Comment {

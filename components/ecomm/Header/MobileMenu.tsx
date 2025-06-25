@@ -76,9 +76,9 @@ export default function MobileMenu({ isOpen, onClose, session }: MobileMenuProps
                             <div className="border-b p-0">
                                 <UserMenu
                                     user={
-                                        session?.user
+                                        session?.user?.id
                                             ? {
-                                                id: session.user.id || '',
+                                                id: session.user.id,
                                                 name: session.user.name,
                                                 email: session.user.email,
                                                 image: session.user.image,
@@ -86,8 +86,6 @@ export default function MobileMenu({ isOpen, onClose, session }: MobileMenuProps
                                             }
                                             : null
                                     }
-                                    alerts={[]}
-                                    aria-label="User account menu (mobile)"
                                 />
                             </div>
 

@@ -59,15 +59,16 @@ export async function CreateOrderInDb(orderData: {
       type: 'order',
     };
 
-    // Save the notification to the database
-    await db.notification.create({
-      data: {
-        message: notificationMessage,
-        type: 'order',
-        status: 'unread',
-        userId: userId, // Associate the notification with the authenticated user
-      },
-    });
+          // Save the notification to the database
+      await db.userNotification.create({
+        data: {
+          title: 'طلب جديد',
+          body: notificationMessage,
+          type: 'ORDER',
+          read: false,
+          userId: userId, // Associate the notification with the authenticated user
+        },
+      });
 
     // إرسال الإشعار عبر Pusher
     await pusherServer.trigger('admin', 'new-order', {

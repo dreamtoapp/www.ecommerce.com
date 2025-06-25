@@ -8,6 +8,7 @@ import getSession from '../../lib/getSession';
 import { CartProvider } from '../../providers/cart-provider';
 import { companyInfo } from './homepage/actions/companyDetail';
 import { userProfile } from './user/profile/action/action';
+import { getUnreadNotificationCount } from './user/notifications/actions/getUserNotifications';
 
 export default async function EcommerceLayout({ children }: { children: React.ReactNode }) {
   const companyData = await companyInfo();
@@ -15,8 +16,11 @@ export default async function EcommerceLayout({ children }: { children: React.Re
   const user = session?.user;
 
   let fullUser = null;
+  let notificationCount = 0;
+
   if (user?.id) {
     fullUser = await userProfile(user.id);
+    notificationCount = await getUnreadNotificationCount(user.id);
   }
 
   const alerts = [];
@@ -51,7 +55,6 @@ export default async function EcommerceLayout({ children }: { children: React.Re
               user={fullUser}
               logo={companyData?.logo || ''}
               logoAlt={companyData?.fullName || 'Dream to app'}
-              alerts={alerts}
             />
           </div>
 
@@ -70,11 +73,13 @@ export default async function EcommerceLayout({ children }: { children: React.Re
               logoAlt={companyData?.fullName || 'Dream to app'}
               isLoggedIn={!!session}
               alerts={alerts}
+              unreadCount={notificationCount}
             />
           </div>
           <MobileBottomNav
             isLoggedIn={!!session}
             userImage={fullUser?.image}
+            userName={fullUser?.name}
             whatsappNumber={companyData?.whatsappNumber}
             userId={user?.id}
           />

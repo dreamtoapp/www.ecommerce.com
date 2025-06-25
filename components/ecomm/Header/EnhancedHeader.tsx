@@ -94,9 +94,9 @@ export default function EnhancedHeader({ session, logo, logoAlt }: EnhancedHeade
                     <div className="md:hidden">
                         <UserMenu
                             user={
-                                session?.user
+                                session?.user?.id
                                     ? {
-                                        id: session.user.id || '',
+                                        id: session.user.id,
                                         name: session.user.name,
                                         email: session.user.email,
                                         image: session.user.image,
@@ -104,8 +104,6 @@ export default function EnhancedHeader({ session, logo, logoAlt }: EnhancedHeade
                                     }
                                     : null
                             }
-                            alerts={[]}
-                            aria-label="User account menu (mobile)"
                         />
                     </div>
 

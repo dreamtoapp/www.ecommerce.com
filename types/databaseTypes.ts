@@ -11,7 +11,7 @@ import {
   GlobalSEO as PrismaGlobalSEO,
   LocationHistory as PrismaLocationHistory,
   NewLetter as PrismaNewLetter,
-  Notification as PrismaNotification,
+  UserNotification as PrismaUserNotification,
   OrderItem as PrismaOrderItem,
   Prisma,
   Product as PrismaProduct,
@@ -42,7 +42,7 @@ export type Expense = PrismaExpense;
 export type GlobalSEO = PrismaGlobalSEO;
 export type LocationHistory = PrismaLocationHistory;
 export type NewLetter = PrismaNewLetter;
-export type Notification = PrismaNotification;
+export type UserNotification = PrismaUserNotification;
 // export type Order = PrismaOrder;
 // export type OrderInWay = PrismaOrderInWay;
 export type OrderItem = PrismaOrderItem;

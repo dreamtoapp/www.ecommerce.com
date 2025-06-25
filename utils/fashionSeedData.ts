@@ -8,6 +8,7 @@ import {
   UserRole,
   Shift,
   OrderStatus,
+  NotificationType,
 } from '@prisma/client';
 
 import {
@@ -1325,6 +1326,118 @@ async function createWishlistItems(users: User[], products: Product[]) {
   return wishlistItems;
 }
 
+// --- NotificationType enum values for reference ---
+const notificationTypes = [
+  'WARNING', 'DESTRUCTIVE', 'INFO', 'SUCCESS', 'ORDER', 'PROMO', 'SYSTEM'
+];
+
+// Step X: Create UserNotifications for real users (with all types)
+async function createUserNotifications(users: User[]) {
+  if (!users.length) {
+    log('No users for notifications. Skipping.');
+    return [];
+  }
+  const notifications = [];
+  for (const user of users) {
+    // لكل مستخدم، أنشئ إشعارات من كل نوع لاختبار الواجهة
+    for (const type of notificationTypes) {
+      const notif = await db.userNotification.create({
+        data: {
+          userId: user.id,
+          title: faker.helpers.arrayElement([
+            'طلب جديد',
+            'تم تحديث حالة الطلب',
+            'عرض خاص',
+            'تنبيه أمني',
+            'تمت إضافة منتج جديد',
+            'نجاح العملية',
+            'رسالة من الإدارة',
+          ]),
+          body: faker.lorem.sentence(),
+          type: type as NotificationType,
+          read: faker.datatype.boolean(),
+          actionUrl: faker.helpers.arrayElement([
+            '/user/orders',
+            '/offers',
+            '/user/profile',
+            '/dashboard',
+            '/products',
+          ]),
+          icon: undefined, // now handled by type
+          channel: 'in-app',
+          createdAt: faker.date.recent({ days: 30 }),
+        },
+      });
+      notifications.push(notif);
+    }
+  }
+  log(`Created ${notifications.length} user notifications (all types)`);
+  return notifications;
+}
+
+// Step Y: Create Offers and assign products
+async function createOffersWithProducts(products: Product[]) {
+  if (!products.length) {
+    log('No products for offers. Skipping.');
+    return [];
+  }
+  const offersData = [
+    {
+      name: 'عرض الصيف الكبير',
+      slug: 'summer-sale',
+      description: 'خصومات تصل إلى 50% على جميع المنتجات الصيفية.',
+      bannerImage: '/fallback/product-fallback.avif',
+      isActive: true,
+      displayOrder: 1,
+      hasDiscount: true,
+      discountPercentage: 50,
+      header: 'تخفيضات الصيف',
+      subheader: 'لا تفوت الفرصة',
+    },
+    {
+      name: 'عرض العودة للمدارس',
+      slug: 'back-to-school',
+      description: 'عروض خاصة على ملابس وأحذية المدارس.',
+      bannerImage: '/fallback/product-fallback.avif',
+      isActive: true,
+      displayOrder: 2,
+      hasDiscount: true,
+      discountPercentage: 30,
+      header: 'العودة للمدارس',
+      subheader: 'جهز أطفالك بأفضل الأسعار',
+    },
+    {
+      name: 'عرض نهاية الأسبوع',
+      slug: 'weekend-offer',
+      description: 'خصومات حصرية في نهاية كل أسبوع.',
+      bannerImage: '/fallback/product-fallback.avif',
+      isActive: false,
+      displayOrder: 3,
+      hasDiscount: false,
+      discountPercentage: null,
+      header: 'عروض نهاية الأسبوع',
+      subheader: 'كل جمعة وسبت',
+    },
+  ];
+  const createdOffers = [];
+  for (const offer of offersData) {
+    const created = await db.offer.create({ data: offer });
+    // Assign 5 random products to each offer
+    const offerProducts = faker.helpers.arrayElements(products, 5);
+    for (const product of offerProducts) {
+      await db.offerProduct.create({
+        data: {
+          offerId: created.id,
+          productId: product.id,
+        },
+      });
+    }
+    createdOffers.push(created);
+  }
+  log(`Created ${createdOffers.length} offers and assigned products`);
+  return createdOffers;
+}
+
 // Utility: Clear all old data before seeding
 async function clearAllData() {
   log('Clearing all old data...');
@@ -1334,7 +1447,7 @@ async function clearAllData() {
   await db.order.deleteMany({});
   await db.review.deleteMany({});
   await db.wishlistItem.deleteMany({});
-  await db.notification.deleteMany({});
+  await db.userNotification.deleteMany({});
   await db.account.deleteMany({});
   await db.locationHistory.deleteMany({});
   await db.offerProduct.deleteMany({});
@@ -1365,6 +1478,9 @@ async function seedDatabase() {
     // Step 2: Users
     const users = await createUsers();
 
+    // Step X: UserNotifications (all types)
+    await createUserNotifications(users);
+
     // Create suppliers
     await createFashionSuppliers();
 
@@ -1376,6 +1492,9 @@ async function seedDatabase() {
 
     // Generate products
     const products = await generateFashionProducts(getArgValue('productCount', 100), '');
+
+    // Step Y: Offers with products
+    await createOffersWithProducts(products);
 
     // Step 3: WishlistItems (after products and users)
     await createWishlistItems(users, products);

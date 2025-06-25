@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Bell, MapPinOff, ShieldAlert } from 'lucide-react';
+import { Bell, ShieldAlert, Info, CheckCircle2, Truck, Gift, Server, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 
 import {
@@ -12,7 +12,7 @@ import {
 
 type Alert = {
     id: string;
-    type: 'warning' | 'destructive';
+    type: 'warning' | 'destructive' | 'info' | 'success' | 'order' | 'promo' | 'system';
     title: string;
     description: string;
     href: string;
@@ -24,14 +24,27 @@ interface NotificationDropdownProps {
 }
 
 const iconMap = {
-    warning: MapPinOff,
+    warning: AlertTriangle,
     destructive: ShieldAlert,
+    info: Info,
+    success: CheckCircle2,
+    order: Truck,
+    promo: Gift,
+    system: Server,
 };
 
 const colorMap = {
     warning: 'text-yellow-500',
-    destructive: 'text-destructive',
+    destructive: 'text-red-500',
+    info: 'text-blue-500',
+    success: 'text-green-500',
+    order: 'text-feature-commerce',
+    promo: 'text-pink-500',
+    system: 'text-slate-500',
 };
+
+const fallbackIcon = Info;
+const fallbackColor = 'text-muted-foreground';
 
 export function NotificationDropdown({
     alerts,
@@ -58,10 +71,11 @@ export function NotificationDropdown({
                     <h4 className='text-lg font-medium leading-none'>الإشعارات</h4>
                 </div>
                 {hasAlerts ? (
-                    <div className='border-t border-border'>
+                    <div className='border-t border-border max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-muted/60 scrollbar-track-transparent'>
                         {alerts.map((alert) => {
-                            const Icon = iconMap[alert.type];
-                            const textColor = colorMap[alert.type];
+                            const typeKey = (alert.type || '').toLowerCase();
+                            const Icon = iconMap[typeKey as keyof typeof iconMap] || fallbackIcon;
+                            const textColor = colorMap[typeKey as keyof typeof colorMap] || fallbackColor;
                             return (
                                 <Link key={alert.id} href={alert.href} legacyBehavior>
                                     <a className='block p-4 hover:bg-muted/50 transition-colors' onClick={() => setIsOpen(false)}>

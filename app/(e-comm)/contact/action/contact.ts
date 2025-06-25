@@ -40,15 +40,16 @@ export async function submitContactForm(
       message: `رسالة جديدة  ${subject}`,
       type: 'contact',
     };
-    // Save the notification to the database
-    await db.notification.create({
-      data: {
-        message: notificationMessage,
-        type: 'contact',
-        status: 'unread',
-        userId: userId, // Associate the notification with the authenticated user
-      },
-    });
+          // Save the notification to the database
+      await db.userNotification.create({
+        data: {
+          title: 'رسالة تواصل جديدة',
+          body: notificationMessage,
+          type: 'INFO',
+          read: false,
+          userId: userId, // Associate the notification with the authenticated user
+        },
+      });
     // إرسال الإشعار عبر Pusher
     await pusherServer.trigger('admin', 'new-order', {
       message: notificationMessage, // Send the message as a string

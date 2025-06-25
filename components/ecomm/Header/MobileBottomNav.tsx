@@ -4,23 +4,16 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    Home,
-    Grid3X3,
-    Search,
-    Heart,
-    User,
-    Sparkles,
-    TrendingUp,
-    Zap,
-} from 'lucide-react';
-import Image from 'next/image';
+import { Home, Grid3X3, Search, Heart, User, TrendingUp, Sparkles, Zap } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { pingAdminAction } from '@/app/pingAdminAction';
 
+import Image from 'next/image';
+
+// Types
 interface BottomNavItem {
     id: string;
     label: string;
@@ -29,12 +22,14 @@ interface BottomNavItem {
     badge?: number;
     color: string;
     userImage?: string | null;
+    userName?: string;
 }
 
 interface MobileBottomNavProps {
     wishlistCount?: number;
     isLoggedIn?: boolean;
     userImage?: string | null;
+    userName?: string | null;
     supportEnabled?: boolean;
     whatsappNumber?: string;
     userId?: string;
@@ -58,20 +53,35 @@ function NavigationItem({
     const content = (
         <>
             <div className="relative flex items-center justify-center h-7 w-7">
-                {item.id === 'account' && item.userImage ? (
-                    <div className={cn(
-                        "relative h-6 w-6 rounded-full transition-all duration-300",
-                        isActive
-                            ? `ring-2 ring-offset-1 ${item.color.replace('text-', 'ring-')} ring-offset-background`
-                            : "ring-1 ring-muted/50"
-                    )}>
-                        <Image
-                            src={item.userImage}
-                            alt="User Profile"
-                            fill
-                            className="rounded-full object-cover"
-                        />
-                    </div>
+                {item.id === 'account' ? (
+                    item.userImage && !item.userImage.includes('/fallback/') ? (
+                        <div className={cn(
+                            "relative h-6 w-6 rounded-full transition-all duration-300",
+                            isActive
+                                ? `ring-2 ring-offset-1 ${item.color.replace('text-', 'ring-')} ring-offset-background`
+                                : "ring-1 ring-muted/50"
+                        )}>
+                            <Image
+                                src={item.userImage}
+                                alt="User Profile"
+                                fill
+                                className="rounded-full object-cover"
+                            />
+                        </div>
+                    ) : (
+                        <div className={cn(
+                            "h-6 w-6 rounded-full flex items-center justify-center bg-feature-users text-white font-bold text-xs select-none",
+                            isActive
+                                ? `ring-2 ring-offset-1 ${item.color.replace('text-', 'ring-')} ring-offset-background`
+                                : "ring-1 ring-muted/50"
+                        )}>
+                            {item.userName && item.userName.length > 0 ? (
+                                <span className="uppercase">{item.userName[0]}</span>
+                            ) : (
+                                <User className="h-4 w-4" />
+                            )}
+                        </div>
+                    )
                 ) : (
                     <Icon className={cn(
                         "h-5 w-5 transition-all duration-300",
@@ -81,7 +91,7 @@ function NavigationItem({
                     )} />
                 )}
 
-                {isActive && !item.userImage && (
+                {isActive && item.id === 'account' && !item.userImage && (
                     <motion.div
                         layoutId="activeTab"
                         className={cn(
@@ -300,6 +310,7 @@ export default function MobileBottomNav({
     wishlistCount = 0,
     isLoggedIn = false,
     userImage,
+    userName,
     supportEnabled = true,
     whatsappNumber,
     userId = 'guest',
@@ -330,7 +341,8 @@ export default function MobileBottomNav({
             icon: User,
             href: isLoggedIn ? '/user/profile' : '/auth/login',
             color: 'text-feature-settings',
-            userImage: isLoggedIn ? userImage : null
+            userImage: isLoggedIn ? userImage : null,
+            userName: isLoggedIn ? userName || undefined : undefined
         },
     ];
 

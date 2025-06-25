@@ -2,9 +2,9 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
-    LogIn,
+
     ShoppingCart,
-    Bell,
+
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,7 +18,7 @@ import { NotificationDropdown } from '@/components/notifications/NotificationDro
 import { UserRole } from '@/constant/enums';
 import Logo from './Logo';
 import { useCartStore } from '@/store/cartStore';
-import dynamic from 'next/dynamic';
+import UserMenuTrigger from './UserMenuTrigger';
 
 interface UserWithRole {
     id: string;
@@ -47,17 +47,16 @@ interface MobileHeaderProps {
     logoAlt: string;
     isLoggedIn: boolean;
     alerts: Alert[];
+    unreadCount?: number;
 }
-
-const UserMenu = dynamic(() => import('./UserMenu'), { ssr: false });
 
 const MobileHeader = ({
     user,
     logo,
     logoAlt,
     isLoggedIn,
-
     alerts,
+    unreadCount,
 }: MobileHeaderProps) => {
 
     const { getTotalUniqueItems } = useCartStore();
@@ -65,13 +64,12 @@ const MobileHeader = ({
     const [mounted, setMounted] = useState(false);
     useEffect(() => { setMounted(true); }, []);
 
-
-
     return (
         <>
             <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b bg-background/80 px-4 backdrop-blur-md sm:px-6">
+                {/* 1. UserMenu (left) */}
                 <div className="flex items-center gap-2">
-                    <UserMenu
+                    <UserMenuTrigger
                         user={user ? {
                             id: user.id,
                             name: user.name,
@@ -80,26 +78,33 @@ const MobileHeader = ({
                             role: user.role as UserRole,
                         } : null}
                         alerts={alerts}
+                        isMobile={true}
                         aria-label="User account menu (mobile)"
                     />
                 </div>
+                {/* 2. Logo (center) */}
                 <div className="flex-1 flex justify-center">
                     <Logo logo={logo} logoAlt={logoAlt} />
                 </div>
-                <div className="flex items-center gap-2">
-                    {isLoggedIn && user ? (
-                        <NotificationDropdown alerts={alerts}>
-                            <Button variant="ghost" size="icon">
-                                <Bell className="h-5 w-5" />
-                            </Button>
+                {/* 3. Notification bell and Cart (right) */}
+                <div className="flex items-center gap-4">
+                    {/* Notification bell */}
+                    {isLoggedIn && (
+                        <NotificationDropdown alerts={alerts || []}>
+                            <div className="relative cursor-pointer">
+                                <svg className="h-6 w-6 text-feature-analytics icon-enhanced" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                                {/* Only show badge if unreadCount > 0 */}
+                                {typeof unreadCount === 'number' && unreadCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white shadow z-10">
+                                        {unreadCount}
+                                    </span>
+                                )}
+                            </div>
                         </NotificationDropdown>
-                    ) : (
-                        <Button variant="ghost" size="icon" asChild>
-                            <Link href="/auth/login">
-                                <LogIn className="h-5 w-5" />
-                            </Link>
-                        </Button>
                     )}
+                    {/* Cart icon */}
                     <Sheet>
                         <SheetTrigger asChild>
                             <Button variant="ghost" size="icon" className="relative">

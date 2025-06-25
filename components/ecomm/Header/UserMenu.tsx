@@ -5,12 +5,14 @@ import {
 } from 'react';
 
 import {
-  LogIn,
+
   Menu,
+  User,
+  X,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
-import dynamic from 'next/dynamic';
+import { useMediaQuery } from '@/hooks/use-media-query';
 
 
 import {
@@ -37,16 +39,14 @@ import { UserRole } from '@/constant/enums';
 
 
 
-import { useMediaQuery } from '@/hooks/use-media-query';
-
 // Define the shape of a single alert
-type Alert = {
+/* type Alert = {
   id: string;
   type: 'warning' | 'destructive';
   title: string;
   description: string;
   href: string;
-};
+}; */
 
 interface UserMenuProps {
   user: {
@@ -56,26 +56,19 @@ interface UserMenuProps {
     image?: string | null;
     role?: UserRole;
   } | null;
-  alerts: Alert[]; // Add alerts prop
-  'aria-label'?: string;
+  children?: React.ReactNode;
 }
 
 
 
-const UserMenuSheetContent = dynamic(() => import('./UserMenuSheetContent'), {
-  ssr: false,
-  loading: () => null,
-});
-
-export default function UserMenu({ user, alerts }: UserMenuProps) {
+export default function UserMenu({ user, children }: UserMenuProps) {
   const { data: session, status } = useSession();
 
 
 
   const isMobile = useMediaQuery('(max-width: 640px)');
   const [isOpen, setIsOpen] = useState(false);
-  const [isMenuLoading, setIsMenuLoading] = useState(false);
-  const [menuLoaded, setMenuLoaded] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(true);
 
   if (status === 'loading') {
     return (
@@ -84,13 +77,23 @@ export default function UserMenu({ user, alerts }: UserMenuProps) {
   }
 
   if (!session || !user) {
+    if (!showWelcome) return null;
     return (
-      <Button asChild variant="outline" size="sm">
-        <Link href="/auth/login" className="flex items-center gap-2">
-          <LogIn className="h-4 w-4" />
-          <span>تسجيل الدخول</span>
-        </Link>
-      </Button>
+      <div className="flex items-center gap-2 bg-feature-users-soft text-feature-users px-2 py-1 rounded-md relative">
+        <User className="h-5 w-5 icon-enhanced" />
+        <span className="font-medium text-sm">مرحباً بك!</span>
+        <Button asChild className="btn-add h-7 px-3 py-1 text-sm rounded">
+          <Link href="/auth/register">تسجيل حساب جديد</Link>
+        </Button>
+        <button
+          type="button"
+          className="absolute -top-2 -left-2 p-1 rounded-full hover:bg-feature-users/20 transition"
+          aria-label="إغلاق"
+          onClick={() => setShowWelcome(false)}
+        >
+          <X className="h-4 w-4 text-feature-users" />
+        </button>
+      </div>
     );
   }
 
@@ -98,27 +101,7 @@ export default function UserMenu({ user, alerts }: UserMenuProps) {
 
 
 
-  // Preload UserMenuSheetContent on hover/focus for better UX
-  const handleTriggerMouseEnter = () => {
-    if (!menuLoaded && !isMenuLoading) {
-      setIsMenuLoading(true);
-      import('./UserMenuSheetContent').then(() => {
-        setMenuLoaded(true);
-        setIsMenuLoading(false);
-      });
-    }
-  };
-
   const handleOpenChange = (open: boolean) => {
-    if (open && !menuLoaded) {
-      setIsMenuLoading(true);
-      import('./UserMenuSheetContent').then(() => {
-        setMenuLoaded(true);
-        setIsMenuLoading(false);
-        setIsOpen(true);
-      });
-      return;
-    }
     setIsOpen(open);
   };
 
@@ -127,50 +110,32 @@ export default function UserMenu({ user, alerts }: UserMenuProps) {
       <Sheet open={isOpen} onOpenChange={handleOpenChange}>
         <SheetTrigger asChild>
           {isMobile ? (
-            isMenuLoading ? (
-              <Skeleton className="h-10 w-10 rounded-full" />
-            ) : (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="p-2"
-                onMouseEnter={handleTriggerMouseEnter}
-                onFocus={handleTriggerMouseEnter}
-              >
-                <Menu className="h-7 w-7" />
-              </Button>
-            )
+            <Button
+              variant="ghost"
+              size="icon"
+              className="p-2"
+            >
+              <Menu className="h-7 w-7" />
+            </Button>
           ) : (
-            isMenuLoading ? (
-              <Skeleton className="h-10 w-10 rounded-full" />
-            ) : (
-              <Button
-                variant="ghost"
-                className="p-0 focus:outline-none bg-transparent hover:bg-transparent active:bg-transparent"
-                onMouseEnter={handleTriggerMouseEnter}
-                onFocus={handleTriggerMouseEnter}
-              >
-                <Avatar className="h-10 w-10 border-2 border-border shadow-md bg-transparent">
-                  <AvatarImage
-                    src={image || "/default-avatar.png"}
-                    alt={name || "User"}
-                    className="object-cover"
-                  />
-                  <AvatarFallback className="bg-muted text-muted-foreground font-bold text-xl">
-                    {name?.[0]?.toUpperCase() || "?"}
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
-            )
+            <Button
+              variant="ghost"
+              className="p-0 focus:outline-none bg-transparent hover:bg-transparent active:bg-transparent"
+            >
+              <Avatar className="h-10 w-10 border-2 border-border shadow-md bg-transparent">
+                <AvatarImage
+                  src={image || "/default-avatar.png"}
+                  alt={name || "User"}
+                  className="object-cover"
+                />
+                <AvatarFallback className="bg-muted text-muted-foreground font-bold text-xl">
+                  {name?.[0]?.toUpperCase() || "?"}
+                </AvatarFallback>
+              </Avatar>
+            </Button>
           )}
         </SheetTrigger>
-        {isOpen && menuLoaded && (
-          <UserMenuSheetContent
-            user={user}
-            alerts={alerts}
-            isMobile={isMobile}
-          />
-        )}
+        {isOpen && children}
       </Sheet>
     </div>
   )

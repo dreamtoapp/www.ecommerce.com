@@ -5,7 +5,8 @@ import { getAllNotifications, markAllNotificationsRead } from '@/lib/notificatio
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Bell, Mail, Package, Newspaper } from 'lucide-react';
+import { Bell, Package, Newspaper } from 'lucide-react';
+import { UserNotification } from '@/types/databaseTypes';
 
 export default async function AlertsPage({
   searchParams,
@@ -21,11 +22,11 @@ export default async function AlertsPage({
     userId: session.user.id,
     type: type || undefined,
   });
-  const unreadCount = notifications.filter((n) => n.status === 'unread').length;
+  const unreadCount = notifications.filter((n: UserNotification) => !n.read).length;
   const hasUnread = unreadCount > 0;
 
   // List of unique types for filter
-  const types = Array.from(new Set(notifications.map((n) => n.type).filter(Boolean)));
+  const types = Array.from(new Set(notifications.map((n: UserNotification) => n.type).filter(Boolean)));
 
   // Mark all as read (server action)
   async function handleMarkAllRead() {
@@ -54,41 +55,48 @@ export default async function AlertsPage({
         >
           الكل
         </a>
-        {types.map((type) => (
+        {types.map((filterType) => (
           <a
-            key={type}
-            href={`/dashboard/alerts?type=${type}`}
-            className={`rounded px-3 py-1 ${type === type ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700'}`}
+            key={String(filterType)}
+            href={`/dashboard/alerts?type=${filterType}`}
+            className={`rounded px-3 py-1 ${type === filterType ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700'}`}
           >
-            {type === 'order' && 'الطلبات'}
-            {type === 'support' && 'الدعم'}
-            {type === 'contact' && 'اتصل بنا'}
-            {type === 'news' && 'الأخبار'}
-            {!['order', 'support', 'contact', 'news'].includes(type) && type}
+            {filterType === 'ORDER' && 'الطلبات'}
+            {filterType === 'INFO' && 'معلومات'}
+            {filterType === 'SUCCESS' && 'نجح'}
+            {filterType === 'WARNING' && 'تحذير'}
+            {filterType === 'DESTRUCTIVE' && 'خطأ'}
+            {filterType === 'PROMO' && 'عروض'}
+            {filterType === 'SYSTEM' && 'النظام'}
+            {!['ORDER', 'INFO', 'SUCCESS', 'WARNING', 'DESTRUCTIVE', 'PROMO', 'SYSTEM'].includes(String(filterType)) && String(filterType)}
           </a>
         ))}
       </div>
       {notifications.length === 0 ? (
         <div className='py-12 text-center text-gray-400'>لا توجد إشعارات بعد</div>
       ) : (
-        notifications.map((notif) => (
+        notifications.map((notif: UserNotification) => (
           <Card
             key={notif.id}
-            className={`flex items-center gap-4 ${notif.status === 'unread' ? '' : 'opacity-60'}`}
+            className={`flex items-center gap-4 ${!notif.read ? '' : 'opacity-60'}`}
           >
             <CardContent className='flex w-full items-center gap-4'>
               {/* Icon by type */}
-              {notif.type === 'order' && <Package className='text-green-500' />}
-              {notif.type === 'support' && <Bell className='text-blue-400' />}
-              {notif.type === 'contact' && <Mail className='text-blue-500' />}
-              {notif.type === 'news' && <Newspaper className='text-yellow-500' />}
+              {notif.type === 'ORDER' && <Package className='text-green-500' />}
+              {notif.type === 'INFO' && <Bell className='text-blue-400' />}
+              {notif.type === 'SUCCESS' && <Bell className='text-green-500' />}
+              {notif.type === 'WARNING' && <Bell className='text-yellow-500' />}
+              {notif.type === 'DESTRUCTIVE' && <Bell className='text-red-500' />}
+              {notif.type === 'PROMO' && <Newspaper className='text-purple-500' />}
+              {notif.type === 'SYSTEM' && <Bell className='text-gray-500' />}
               <div className='flex-1'>
-                <div className='font-medium'>{notif.message}</div>
+                <div className='font-medium'>{notif.title}</div>
+                <div className='text-sm text-gray-600'>{notif.body}</div>
                 <div className='text-xs text-gray-400'>
                   {new Date(notif.createdAt).toLocaleString('ar-EG')}
                 </div>
               </div>
-              {notif.status === 'unread' && <Badge variant='destructive'>جديد</Badge>}
+              {!notif.read && <Badge variant='destructive'>جديد</Badge>}
             </CardContent>
           </Card>
         ))
