@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react'; // Keep only one import
+import { useRouter } from 'next/navigation';
 
 import { toast } from 'sonner';
 import { Check, ShoppingCart } from 'lucide-react'; // Import directly
@@ -30,6 +31,7 @@ export default function AddToCartButton({
 }: AddToCartButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
+  const router = useRouter();
 
   const handleAddToCart = async () => {
     if (!inStock) return;
@@ -39,6 +41,15 @@ export default function AddToCartButton({
 
       // Call the server action to add to cart
       await addItem(productId, 1);
+
+      // Notify all listeners to re-fetch cart
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('cart-changed'));
+        localStorage.setItem('cart-updated', Date.now().toString());
+      }
+
+      // Refresh server components (badge count, cart popover, etc.)
+      router.refresh();
 
       // Show success state
       setIsAdded(true);
@@ -67,7 +78,7 @@ export default function AddToCartButton({
       onClick={handleAddToCart}
       disabled={isLoading || !inStock || isAdded}
       className={cn(
-        isAdded && 'bg-green-600 hover:bg-green-700',
+        isAdded && 'btn-add',
         !inStock && 'cursor-not-allowed opacity-50',
         className,
       )}

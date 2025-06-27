@@ -1,250 +1,46 @@
-'use client';
-import {
-  useEffect,
-  useState,
-} from 'react';
+import { getCart } from "@/app/(e-comm)/cart/actions/cartServerActions";
+import { redirect } from "next/navigation";
+import CheckoutForm from "./components/CheckoutForm";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { ShoppingCart } from "lucide-react";
 
-import { Pencil } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import {
-  FaInfoCircle,
-  FaSpinner,
-} from 'react-icons/fa';
-import { toast } from 'sonner';
+// Force dynamic rendering for checkout page since it uses cookies/session
+export const dynamic = 'force-dynamic';
 
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useCheckIsLogin } from '@/hooks/use-check-islogin';
-import { CreateOrderInDb } from './actions/creatOrder';
-import MiniCartSummary from './components/MiniCartSummary';
-import { ShiftSelector } from './components/ShiftSelector';
-import TermsDialog from './components/TermsDialog';
-
-const CheckOutPage = () => {
-  const router = useRouter();
-  const { session, isLoading, isAuthenticated } = useCheckIsLogin();
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
-  const [selectedShiftId, setSelectedShiftId] = useState<string>('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formErrors, setFormErrors] = useState<string[]>([]);
-  const [cart, setCart] = useState<any>(null);
-
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push('/auth/login?redirect=/checkout');
-    }
-  }, [isLoading, isAuthenticated, router]);
-
-  useEffect(() => {
-    fetch('/api/cart')
-      .then((res) => res.json())
-      .then((data) => setCart(data));
-  }, []);
-
-  const items = cart?.items || [];
-  const totalAmount = items.reduce((sum: number, item: any) => sum + (item.product?.price || 0) * (item.quantity || 1), 0);
-  const totalItems = items.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0);
-
-  const validateForm = () => {
-    const errors = [];
-    if (!selectedShiftId) errors.push('الرجاء اختيار موعد التسليم');
-    if (!agreedToTerms) errors.push('يجب الموافقة على الشروط والأحكام');
-    setFormErrors(errors);
-    return errors.length === 0;
-  };
-
-  const createOrder = async () => {
-    if (!validateForm()) return;
-
-    setIsSubmitting(true);
-    try {
-      const formattedCart = items.map((item: any) => ({
-        productId: item.product?.id,
-        name: item.product?.name,
-        price: item.product?.price,
-        quantity: item.quantity,
-      }));
-
-      const orderData = {
-        userId: session!.id,
-        phone: session!.phone ?? '',
-        name: session!.name ?? '',
-        address: session!.address ?? '',
-        lat: session!.latitude ?? '',
-        lng: session!.longitude ?? '',
-        cart: formattedCart,
-        totalAmount,
-        totalItems,
-        shiftId: selectedShiftId,
-      };
-
-      const orderResult = await CreateOrderInDb(orderData);
-      if (orderResult) {
-        toast('تم إنشاء الطلب بنجاح');
-        router.push(`/happyorder?orderid=${orderResult}`);
-      }
-    } catch {
-      toast('فشل في إتمام العملية، يرجى المحاولة لاحقاً');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className='flex min-h-screen flex-col items-center justify-center gap-4 bg-background p-4 md:flex-row md:items-start'>
-        <div className='w-full max-w-md space-y-4'>
-          <Skeleton className='h-12 w-full' />
-          <Skeleton className='h-32 w-full' />
-          <Skeleton className='h-10 w-full' />
-        </div>
-        <Skeleton className='h-64 w-full md:w-1/3' />
-      </div>
-    );
+export default async function CheckoutPage() {
+  const cart = await getCart();
+  if (!cart || !cart.items || cart.items.length === 0) {
+    redirect("/cart");
   }
-  const clienAddress = session?.address;
-
+  const total = cart.items.reduce(
+    (sum, item) => sum + (item.product?.price || 0) * (item.quantity || 1),
+    0
+  );
   return (
-    <div className='flex min-h-screen flex-col items-center justify-center gap-6 p-4 md:flex-row md:items-start'>
-      <div className='w-full max-w-2xl rounded-xl border border-muted p-6 shadow-lg'>
-        <Card className='mx-auto w-full rounded-lg bg-secondary p-4 text-foreground shadow-sm'>
-          <CardHeader>
-            <CardTitle className='flex items-center gap-2 text-2xl font-bold'>
-              تأكيد الطلب
-              <FaInfoCircle className='text-lg text-muted-foreground' />
-            </CardTitle>
-          </CardHeader>
-
-          <CardContent className='space-y-6'>
-            <div className='space-y-4'>
-              {/* User Info Section */}
-              <div className='grid grid-cols-1 gap-4 rounded-lg bg-muted/10 p-4 md:grid-cols-2'>
-                <div className='space-y-1'>
-                  <p className='text-sm text-muted-foreground'>رقم الهاتف</p>
-                  <p className='font-medium'>{session?.phone}</p>
-                </div>
-                <div className='space-y-1'>
-                  <p className='text-sm text-muted-foreground'>الاسم</p>
-                  <p className='font-medium'>{session?.name}</p>
-                </div>
-                <div className='space-y-1'>
-                  <p className='text-sm text-muted-foreground'>العنوان</p>
-                  {clienAddress ? (
-                    <p className='font-medium'>{session?.address}</p>
-                  ) : (
-                    <div className='flex items-center gap-2'>
-                      <p className='font-medium text-destructive'>اضف عنوانك من فضلك</p>
-                      <Button
-                        variant='outline'
-                        onClick={() => router.push(`/user/profile?id=${session?.id}`)}
-                      >
-                        <Pencil />
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Delivery Time */}
-              <div className='space-y-2'>
-                <p className='text-sm font-medium'>موعد التسليم</p>
-                <ShiftSelector
-                  selectedShiftId={selectedShiftId}
-                  onShiftSelect={setSelectedShiftId}
-                />
-                {formErrors.includes('الرجاء اختيار موعد التسليم') && (
-                  <p className='flex items-center gap-2 text-sm text-destructive'>
-                    <FaInfoCircle />
-                    الرجاء اختيار موعد التسليم
-                  </p>
-                )}
-              </div>
+    <div className="max-w-4xl mx-auto py-8 flex flex-col gap-6">
+      <Card className="shadow-lg border-l-4 border-feature-commerce">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <ShoppingCart className="h-5 w-5 text-feature-commerce" />
+            مراجعة الطلب
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {cart.items.map((item) => (
+            <div key={item.id} className="flex justify-between">
+              <span>{item.product?.name}</span>
+              <span>
+                {(item.product?.price || 0).toLocaleString()} × {item.quantity}
+              </span>
             </div>
-          </CardContent>
-
-          <CardFooter className='flex flex-col gap-4'>
-            {/* Terms Agreement */}
-            <div className='flex w-full items-center gap-2'>
-              <Checkbox
-                id='terms'
-                checked={agreedToTerms}
-                onCheckedChange={(checked) => {
-                  setAgreedToTerms(checked === true);
-                  setFormErrors((errors) =>
-                    errors.filter((e) => e !== 'يجب الموافقة على الشروط والأحكام'),
-                  );
-                }}
-                className={`border-primary data-[state=checked]:bg-primary ${formErrors.includes('يجب الموافقة على الشروط والأحكام') ? 'ring-2 ring-destructive' : ''}`}
-              />
-              <div className='flex items-center gap-1'>
-                <label htmlFor='terms' className='text-sm text-muted-foreground'>
-                  أوافق على
-                </label>
-                <TermsDialog />
-                {formErrors.includes('يجب الموافقة على الشروط والأحكام') && (
-                  <span className='flex items-center gap-1 text-sm text-destructive'>
-                    <FaInfoCircle />
-                    مطلوب
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Form Errors */}
-            {formErrors.length > 0 && (
-              <div className='w-full rounded-lg border border-destructive bg-destructive/10 p-3'>
-                <p className='flex items-center gap-2 text-destructive'>
-                  <FaInfoCircle />
-                  يرجى إكمال جميع الحقول المطلوبة
-                </p>
-              </div>
-            )}
-
-            {/* Submit Button */}
-            <Button
-              onClick={createOrder}
-              className='h-12 w-full bg-primary text-primary-foreground transition-all hover:bg-primary/90'
-              disabled={
-                isSubmitting ||
-                !session ||
-                formErrors.length > 0 ||
-                !selectedShiftId ||
-                !agreedToTerms
-              }
-            >
-              {isSubmitting ? (
-                <div className='flex items-center gap-2'>
-                  <FaSpinner className='animate-spin' />
-                  جاري تأكيد الطلب
-                </div>
-              ) : (
-                <span className='text-lg'>تأكيد الطلب</span>
-              )}
-            </Button>
-          </CardFooter>
-        </Card>
-      </div>
-
-      {/* Cart Summary */}
-      <div className='sticky top-4 w-full md:w-1/3 lg:w-1/4'>
-        <MiniCartSummary />
-        <div className='mt-4 rounded-lg border border-muted bg-muted/10 p-4'>
-          <h3 className='mb-2 font-medium'>معلومات مهمة</h3>
-          <p className='text-sm text-muted-foreground'>
-            سيتم تأكيد طلبك خلال 24 ساعة عبر الرسائل النصية
-          </p>
-        </div>
-      </div>
+          ))}
+          <div className="flex justify-between font-bold border-t pt-4">
+            <span>الإجمالي</span>
+            <span>{total.toLocaleString()} ر.س</span>
+          </div>
+        </CardContent>
+      </Card>
+      <CheckoutForm />
     </div>
   );
-};
-
-export default CheckOutPage;
+}

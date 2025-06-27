@@ -6,6 +6,8 @@ import MobileHeader from '../../components/ecomm/Header/MobileHeader';
 import { TooltipProvider } from '../../components/ui/tooltip';
 import getSession from '../../lib/getSession';
 import { CartProvider } from '../../providers/cart-provider';
+import { WishlistProvider } from '@/providers/wishlist-provider';
+import db from '@/lib/prisma';
 import { companyInfo } from './homepage/actions/companyDetail';
 import { userProfile } from './user/profile/action/action';
 import { getUnreadNotificationCount } from './user/notifications/actions/getUserNotifications';
@@ -17,10 +19,13 @@ export default async function EcommerceLayout({ children }: { children: React.Re
 
   let fullUser = null;
   let notificationCount = 0;
+  let wishlistIds: string[] = [];
 
   if (user?.id) {
     fullUser = await userProfile(user.id);
     notificationCount = await getUnreadNotificationCount(user.id);
+    const items = await db.wishlistItem.findMany({ where: { userId: user.id }, select: { productId: true } });
+    wishlistIds = items.map((i) => i.productId);
   }
 
   const alerts = [];
@@ -47,65 +52,67 @@ export default async function EcommerceLayout({ children }: { children: React.Re
 
   return (
     <TooltipProvider>
-      <CartProvider>
-        <div className="flex flex-col min-h-screen">
-          {/* Desktop Header */}
-          <div className="hidden md:block">
-            <Header
-              user={fullUser}
-              userId={user?.id}
-              unreadCount={notificationCount}
-              defaultAlerts={alerts}
-              logo={companyData?.logo || ''}
-              logoAlt={companyData?.fullName || 'Dream to app'}
-            />
-          </div>
-
-          {/* Mobile Header */}
-          <div className="md:hidden">
-            <MobileHeader
-              user={fullUser ? {
-                id: fullUser.id,
-                name: fullUser.name,
-                email: fullUser.email,
-                image: fullUser.image,
-                role: fullUser.role as any,
-                emailVerified: fullUser.emailVerified,
-              } : null}
-              logo={companyData?.logo || ''}
-              logoAlt={companyData?.fullName || 'Dream to app'}
-              isLoggedIn={!!session}
-              alerts={alerts}
-              unreadCount={notificationCount}
-            />
-          </div>
-          <MobileBottomNav
-            isLoggedIn={!!session}
-            userImage={fullUser?.image}
-            userName={fullUser?.name}
-            whatsappNumber={companyData?.whatsappNumber}
-            userId={user?.id}
-          />
-
-          {/* Mobile-First Main Content */}
-          <main className='flex-grow'>
-            <div className='container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6'>
-              {children}
+      <WishlistProvider initialIds={wishlistIds}>
+        <CartProvider>
+          <div className="flex flex-col min-h-screen">
+            {/* Desktop Header */}
+            <div className="hidden md:block">
+              <Header
+                user={fullUser}
+                userId={user?.id}
+                unreadCount={notificationCount}
+                defaultAlerts={alerts}
+                logo={companyData?.logo || ''}
+                logoAlt={companyData?.fullName || 'Dream to app'}
+              />
             </div>
-          </main>
-          <Fotter
-            companyName={companyData?.fullName}
-            aboutus={companyData?.bio}
-            email={companyData?.email}
-            phone={companyData?.phoneNumber}
-            address={companyData?.address}
-            facebook={companyData?.facebook}
-            instagram={companyData?.instagram}
-            twitter={companyData?.twitter}
-            linkedin={companyData?.linkedin}
-          />
-        </div>
-      </CartProvider>
+
+            {/* Mobile Header */}
+            <div className="md:hidden">
+              <MobileHeader
+                user={fullUser ? {
+                  id: fullUser.id,
+                  name: fullUser.name,
+                  email: fullUser.email,
+                  image: fullUser.image,
+                  role: fullUser.role as any,
+                  emailVerified: fullUser.emailVerified,
+                } : null}
+                logo={companyData?.logo || ''}
+                logoAlt={companyData?.fullName || 'Dream to app'}
+                isLoggedIn={!!session}
+                alerts={alerts}
+                unreadCount={notificationCount}
+              />
+            </div>
+            <MobileBottomNav
+              isLoggedIn={!!session}
+              userImage={fullUser?.image}
+              userName={fullUser?.name}
+              whatsappNumber={companyData?.whatsappNumber}
+              userId={user?.id}
+            />
+
+            {/* Mobile-First Main Content */}
+            <main className='flex-grow'>
+              <div className='container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6'>
+                {children}
+              </div>
+            </main>
+            <Fotter
+              companyName={companyData?.fullName}
+              aboutus={companyData?.bio}
+              email={companyData?.email}
+              phone={companyData?.phoneNumber}
+              address={companyData?.address}
+              facebook={companyData?.facebook}
+              instagram={companyData?.instagram}
+              twitter={companyData?.twitter}
+              linkedin={companyData?.linkedin}
+            />
+          </div>
+        </CartProvider>
+      </WishlistProvider>
     </TooltipProvider>
   );
 }

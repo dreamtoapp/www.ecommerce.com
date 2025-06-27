@@ -1,58 +1,43 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useOptimisticCart } from '@/lib/hooks/useOptimisticCart';
+import { onCartChanged } from '@/lib/cart-events';
 import { ProductCard } from '@/components/product/cards';
-import { useCartContext } from '@/providers/cart-provider';
 import { Product } from '@/types/databaseTypes';
+import React from 'react';
 
 interface ProductCardAdapterProps {
     product: Product;
     className?: string;
     index?: number;
     discountPercentage?: number; // Optional global discount
+    quantity?: number; // <-- allow parent to control quantity
 }
 
-export default function ProductCardAdapter({ product, className, discountPercentage }: ProductCardAdapterProps) {
-    const { addToCart, updateQuantity: updateCartQuantity, removeFromCart, isInCart, cart } = useCartContext();
-    const [quantity, setQuantity] = useState(1);
+const ProductCardAdapter = React.memo(function ProductCardAdapter({ product, className, discountPercentage, quantity }: ProductCardAdapterProps) {
+    const router = useRouter();
+    const { add, remove, quantityOf } = useOptimisticCart();
 
-    // Update local quantity if product is in cart
-    useEffect(() => {
-        const cartItem = cart.find(item => item.product.id === product.id);
-        if (cartItem) {
-            setQuantity(cartItem.quantity);
-        } else {
-            setQuantity(1); // Reset to 1 if not in cart
-        }
-    }, [cart, product.id]);
+    const optimisticRef = useRef<Set<string>>(new Set());
 
-    const handleQuantityChange = (_productId: string, delta: number) => {
-        setQuantity((prev) => Math.max(1, prev + delta));
-    };
+    const cartQty = quantityOf(product.id, 0);
+    const inCart = cartQty > 0 || optimisticRef.current.has(product.id);
 
-    const handleAddToCart = async (productId: string, qty: number, product: Product) => {
-        try {
-            if (isInCart(productId)) {
-                // Update existing cart item quantity
-                updateCartQuantity(productId, qty);
-            } else {
-                // Add new item to cart
-                addToCart(product, qty);
-            }
-        } catch (error) {
-            console.error('Error adding/updating cart:', error);
-            throw error; // Re-throw to let ProductCard handle the error
-        }
+    // Use the passed quantity if provided, otherwise fallback to local
+    const displayQty = typeof quantity === 'number' ? quantity : cartQty;
+
+    const handleAddToCart = async (productId: string, qty: number, _product: Product) => {
+        // console.log('[ProductCardAdapter] Quantity BEFORE add:', quantityOf(productId, 0)); // Uncomment for debugging if needed
+        optimisticRef.current.add(productId);
+        await add(productId, Math.max(1, qty));
+        // console.log('[ProductCardAdapter] Quantity AFTER add:', quantityOf(productId, 0)); // Uncomment for debugging if needed
+        router.refresh();
     };
 
     const handleRemoveFromCart = async (productId: string) => {
-        try {
-            removeFromCart(productId);
-            setQuantity(1); // Reset quantity when removed
-        } catch (error) {
-            console.error('Error removing from cart:', error);
-            throw error; // Re-throw to let ProductCard handle the error
-        }
+        await remove(productId);
     };
 
     // Discount logic: globally adapt product if discountPercentage is provided
@@ -65,15 +50,23 @@ export default function ProductCardAdapter({ product, className, discountPercent
         };
     }
 
+    // When cart changes globally, clear optimistic flags and reset display if needed
+    useEffect(() =>
+        onCartChanged(() => {
+            optimisticRef.current.clear();
+        })
+        , []);
+
     return (
         <ProductCard
             product={adaptedProduct}
             className={className}
-            quantity={quantity}
-            onQuantityChange={handleQuantityChange}
+            quantity={displayQty}
             onAddToCart={handleAddToCart}
             onRemoveFromCart={handleRemoveFromCart}
-            isInCart={isInCart(product.id)}
+            isInCart={inCart}
         />
     );
-} 
+});
+
+export default ProductCardAdapter; 

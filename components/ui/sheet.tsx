@@ -17,13 +17,39 @@ const SheetClose = SheetPrimitive.Close;
 
 const SheetPortal = SheetPrimitive.Portal;
 
+/**
+ * SheetOverlay Component
+ * 
+ * Creates a backdrop overlay for sheet modals with modern blur effect.
+ * This overlay serves multiple purposes:
+ * 
+ * 🎯 UX Benefits:
+ * - Focuses user attention on the modal content
+ * - Indicates modal state (something is open)
+ * - Prevents interaction with background content
+ * 
+ * 🎨 Visual Effects:
+ * - backdrop-blur-sm: Creates modern glass-morphism effect
+ * - bg-black/60: Semi-transparent dark overlay (60% opacity)
+ * - Maintains visual hierarchy and depth
+ * 
+ * ♿ Accessibility:
+ * - Helps screen readers identify modal boundaries
+ * - Provides clear visual separation for users
+ * - Follows WCAG guidelines for modal overlays
+ * 
+ * 📱 Mobile Experience:
+ * - Especially important on mobile QuickView sheets
+ * - Prevents accidental taps on background content
+ * - Creates immersive shopping experience
+ */
 const SheetOverlay = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof SheetPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
   <SheetPrimitive.Overlay
     className={cn(
-      'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/80',
+      'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/60 backdrop-blur-sm',
       className,
     )}
     {...props}

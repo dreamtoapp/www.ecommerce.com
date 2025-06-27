@@ -6,6 +6,8 @@ import UserMenuTrigger from './UserMenuTrigger';
 import { NotificationDropdown } from '@/components/notifications/NotificationDropdown';
 import NotificationBell from '@/components/ui/NotificationBell';
 import CartIconClient from './CartIconClient';
+import dynamic from 'next/dynamic';
+import WishlistIconClient from './WishlistIconClient';
 
 interface HeaderProps {
   logo: string;
@@ -15,6 +17,11 @@ interface HeaderProps {
   unreadCount?: number;
   defaultAlerts?: any[];
 }
+
+// Lazy load the debug ClearCartButton only in development
+const ClearCartButton = process.env.NODE_ENV !== 'production'
+  ? dynamic(() => import('./ClearCartButton'))
+  : () => null;
 
 export default function Header({ user, logo, logoAlt, userId, unreadCount = 0, defaultAlerts = [] }: HeaderProps) {
   const totalCount = (unreadCount ?? 0) + (defaultAlerts?.length ?? 0);
@@ -50,10 +57,17 @@ export default function Header({ user, logo, logoAlt, userId, unreadCount = 0, d
             </div>
           </div>
 
-          {/* Actions: Cart, Notification bell, user menu */}
+          {/* Actions: Wishlist, Cart, Notification bell, user menu */}
           <div className='flex items-center gap-4 md:gap-6'>
+            {/* Wishlist icon */}
+            <WishlistIconClient />
+
             {/* Cart icon */}
             <CartIconClient />
+
+            {/* TEMP: Clear cart button (dev only) */}
+            {process.env.NODE_ENV !== 'production' && <ClearCartButton />}
+
             {/* Notification bell */}
             {userId && (
               <NotificationDropdown

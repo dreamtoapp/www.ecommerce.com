@@ -19,12 +19,12 @@ import { Button } from '../../../../components/ui/button';
 interface DeleteItemDialogProps {
   productId: string;
   productName: string;
-  removeItem: (productId: string) => void;
+  removeItem: () => void;
 }
 
 
-const DeleteItemDialog = ({ productId, productName, removeItem }:
-  DeleteItemDialogProps) => {
+const DeleteItemDialog = ({ productName, removeItem }:
+  Omit<DeleteItemDialogProps, 'productId'>) => {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -52,7 +52,13 @@ const DeleteItemDialog = ({ productId, productName, removeItem }:
             إلغاء
           </AlertDialogCancel>
           <AlertDialogAction
-            onClick={() => removeItem(productId)}
+            onClick={async () => {
+              await removeItem();
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new Event('cart-changed'));
+                localStorage.setItem('cart-updated', Date.now().toString());
+              }
+            }}
             className='bg-red-600 text-white hover:bg-red-700'
           >
             حذف

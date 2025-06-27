@@ -1,9 +1,7 @@
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 import BackToTopButton from '@/components/ecomm/BackToTopButton';
-import CategoryList from './homepage/component/category/CategoryList';
-import FeaturedPromotions from './homepage/component/offer/FeaturedPromotions';
-import HomepageHeroSection from './homepage/component/slider/HomepageHeroSection';
+
 import ProductsSection from '@/components/product/cards/ProductsSection';
 
 const CriticalCSS = dynamic(() => import('./homepage/component/CriticalCSS'), { ssr: true });
@@ -18,13 +16,13 @@ export default async function HomePage(props: { searchParams: Promise<{ slug?: s
       <CriticalCSS />
       <div className='container mx-auto flex flex-col gap-8 bg-background text-foreground px-4 sm:px-6 lg:px-8'>
         <PreloadScript />
-        <HomepageHeroSection />
-        <section className="space-y-6" aria-label="Product categories">
+        {/* <HomepageHeroSection /> */}
+        {/* <section className="space-y-6" aria-label="Product categories">
           <CategoryList />
         </section>
         <section className="space-y-6" aria-label="Featured promotions">
           <FeaturedPromotions />
-        </section>
+        </section> */}
         <section className="space-y-6" aria-label="Featured products">
           <Suspense
             fallback={

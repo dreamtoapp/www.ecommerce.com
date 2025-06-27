@@ -32,6 +32,19 @@ export default function CartIconClient() {
     useEffect(() => {
         setMounted(true);
         fetchCart();
+
+        const handleCartChanged = () => fetchCart();
+        window.addEventListener('cart-changed', handleCartChanged);
+        const handleStorage = (e: StorageEvent) => {
+            if (e.key === 'cart-updated') {
+                handleCartChanged();
+            }
+        };
+        window.addEventListener('storage', handleStorage);
+        return () => {
+            window.removeEventListener('cart-changed', handleCartChanged);
+            window.removeEventListener('storage', handleStorage);
+        };
     }, []);
 
     // Refresh cart when popover/sheet opens
@@ -41,7 +54,8 @@ export default function CartIconClient() {
         }
     }, [isOpen]);
 
-    const cartCount = cart?.items?.reduce((sum, item) => sum + (item.quantity ?? 0), 0) || 0;
+    // Show number of unique items (not total quantity)
+    const cartCount = cart?.items?.length ?? 0;
 
     // Close popover/sheet when navigating away
     const handleClose = () => setIsOpen(false);

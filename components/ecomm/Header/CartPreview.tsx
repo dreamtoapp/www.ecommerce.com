@@ -7,6 +7,8 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { CartWithItems } from '@/app/(e-comm)/cart/actions/cartServerActions';
+import QuantityControls from '@/components/cart/QuantityControls';
+import { useOptimisticCart } from '@/lib/hooks/useOptimisticCart';
 
 interface CartPreviewProps {
     cart: CartWithItems | null;
@@ -16,7 +18,16 @@ interface CartPreviewProps {
 
 export default function CartPreview({ cart, closePopover, hideHeader = false }: CartPreviewProps) {
     const items = cart?.items || [];
-    const total = items.reduce((sum, item) => sum + (item.product?.price || 0) * (item.quantity || 1), 0);
+
+    // Hook for optimistic updates
+    const { quantityOf, remove } = useOptimisticCart();
+
+    // Calculate total using optimistic quantities
+    const total = items.reduce((sum, item) => {
+        const qty = quantityOf(item.productId, item.quantity ?? 0);
+        return sum + (item.product?.price || 0) * qty;
+    }, 0);
+
     const isEmpty = items.length === 0;
 
     return (
@@ -47,45 +58,63 @@ export default function CartPreview({ cart, closePopover, hideHeader = false }: 
                 ) : (
                     <div className="flex flex-col gap-4">
                         <ScrollArea className="max-h-72">
-                            {items.map((item) => (
-                                <div key={item.id} className="flex items-center gap-4 py-3 rounded-lg hover:bg-muted/50 transition-colors duration-200">
-                                    <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border shadow-sm">
-                                        <Image
-                                            src={item.product?.imageUrl || '/fallback/product-fallback.avif'}
-                                            alt={item.product?.name || ''}
-                                            fill
-                                            className="object-cover"
-                                            sizes="64px"
-                                        />
-                                    </div>
-                                    <div className="flex-1 overflow-hidden">
-                                        <h4 className="truncate text-sm font-medium text-foreground">{item.product?.name}</h4>
-                                        <p className="text-xs text-muted-foreground">{item.product?.price?.toLocaleString()} ر.س</p>
-                                        <div className="mt-2 flex items-center gap-2">
-                                            <span className="w-5 text-center text-sm font-semibold">{item.quantity}</span>
+                            {items.map((item) => {
+                                const qty = quantityOf(item.productId, item.quantity ?? 0);
+                                const lineTotal = (item.product?.price || 0) * qty;
+                                return (
+                                    <div
+                                        key={item.id}
+                                        className="flex items-center gap-3 py-3 rounded-lg hover:bg-muted/50 transition-colors duration-200"
+                                    >
+                                        {/* Product Image */}
+                                        <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border shadow-sm">
+                                            <Image
+                                                src={item.product?.imageUrl || '/fallback/product-fallback.avif'}
+                                                alt={item.product?.name || ''}
+                                                fill
+                                                className="object-cover"
+                                                sizes="64px"
+                                            />
+                                        </div>
+
+                                        {/* Details: name + prices + qty controls */}
+                                        <div className="flex-1 overflow-hidden pr-1">
+                                            <h4 className="truncate text-sm font-medium text-foreground mb-1">
+                                                {item.product?.name}
+                                            </h4>
+                                            <p className="text-xs flex items-center justify-between mb-1">
+                                                <span className="text-muted-foreground">
+                                                    {item.product?.price?.toLocaleString()} ر.س
+                                                </span>
+                                                <span className="font-bold text-foreground whitespace-nowrap">
+                                                    {lineTotal.toLocaleString()} ر.س
+                                                </span>
+                                            </p>
+                                            {/* Quantity controls + delete */}
+                                            <div className="flex items-center gap-4 mt-2">
+                                                <QuantityControls productId={item.productId} serverQty={item.quantity ?? 0} size="sm" />
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-7 w-7 text-muted-foreground hover:text-destructive btn-delete"
+                                                    onClick={() => remove(item.productId)}
+                                                    aria-label="حذف المنتج من السلة"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="flex flex-col items-end gap-1">
-                                        <p className="text-sm font-semibold text-foreground">
-                                            {(item.product?.price && item.quantity) ? (item.product.price * item.quantity).toLocaleString() : 0} ر.س
-                                        </p>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-7 w-7 text-muted-foreground hover:text-destructive btn-delete"
-                                            // TODO: Wire up remove logic
-                                            disabled
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </ScrollArea>
                         <Separator className="my-2" />
-                        <div className="flex items-center justify-between text-base font-semibold">
-                            <span>المجموع الفرعي:</span>
-                            <span>{total.toLocaleString()} ر.س</span>
+                        {/* Sub-total */}
+                        <div className="flex items-center justify-between px-1 text-lg font-bold">
+                            <span>المجموع الفرعي</span>
+                            <span className="text-feature-commerce">
+                                {total.toLocaleString()} ر.س
+                            </span>
                         </div>
                         <p className="text-xs text-muted-foreground">الشحن والضرائب تحسب عند إتمام الطلب.</p>
                         <div className="flex gap-3">

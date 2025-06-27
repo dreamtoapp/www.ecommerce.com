@@ -12,6 +12,7 @@ import { Card } from '@/components/ui/card';
 
 import { formatCurrency } from '../../../../lib/formatCurrency';
 import { useCartStore } from '../../../../store/cartStore';
+import { updateItemQuantityByProduct, removeItemByProduct } from '@/app/(e-comm)/cart/actions/cartServerActions';
 import DeleteItemDialog from './DeleteItem';
 
 interface CartItemProps {
@@ -32,6 +33,43 @@ const FullCartItem = ({ product, quantity }: CartItemProps) => {
 
   // Check if the product is an offer
   const isOffer = product.type === 'offer';
+
+  const broadcast = () => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('cart-changed'));
+      localStorage.setItem('cart-updated', Date.now().toString());
+    }
+  };
+
+  const handleDelta = async (delta: number) => {
+    // Removed console.logs for cleaner build output
+    // Calculate new quantity
+    const newQty = quantity + delta;
+
+    if (newQty < 1) {
+      await handleRemove();
+      return;
+    }
+
+    // Optimistically update local store using delta
+    updateQuantity(product.id, delta);
+
+    // Local store updated
+
+    // Persist to DB (delta approach)
+    await updateItemQuantityByProduct(product.id, delta);
+
+    // Server action finished
+
+    broadcast();
+  };
+
+  const handleRemove = async () => {
+    // Removed console.log for cleaner build output
+    removeItem(product.id);
+    await removeItemByProduct(product.id);
+    broadcast();
+  };
 
   return (
     <Card
@@ -101,7 +139,7 @@ const FullCartItem = ({ product, quantity }: CartItemProps) => {
                 variant='ghost'
                 size='sm'
                 className={`h-8 w-8 rounded-r-none px-0 ${isOffer ? 'hover:bg-primary/20' : 'hover:bg-primary/10'}`}
-                onClick={() => updateQuantity(product.id, -1)}
+                onClick={() => handleDelta(-1)}
                 disabled={quantity <= 1}
               >
                 −
@@ -113,7 +151,7 @@ const FullCartItem = ({ product, quantity }: CartItemProps) => {
                 variant='ghost'
                 size='sm'
                 className={`h-8 w-8 rounded-l-none px-0 ${isOffer ? 'hover:bg-primary/20' : 'hover:bg-primary/10'}`}
-                onClick={() => updateQuantity(product.id, 1)}
+                onClick={() => handleDelta(1)}
               >
                 +
               </Button>
@@ -127,9 +165,8 @@ const FullCartItem = ({ product, quantity }: CartItemProps) => {
             {/* Delete Button */}
             <div className='flex flex-1 items-center justify-end'>
               <DeleteItemDialog
-                productId={product.id}
                 productName={product.name}
-                removeItem={removeItem}
+                removeItem={() => handleRemove()}
               />
             </div>
           </div>

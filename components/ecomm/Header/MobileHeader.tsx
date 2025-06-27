@@ -68,7 +68,7 @@ const MobileHeader = ({
                 <div className="flex-1 flex justify-center">
                     <Logo logo={logo} logoAlt={logoAlt} />
                 </div>
-                {/* 3. Notification bell and Cart (right) */}
+                {/* 3. Notification bell, wishlist and Cart */}
                 <div className="flex items-center gap-4">
                     {/* Notification bell */}
                     {isLoggedIn && (

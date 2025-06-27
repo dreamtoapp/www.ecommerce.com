@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 import {
   Check,
@@ -16,6 +17,7 @@ import {
 } from '@/lib/utils'; // Import CVA variants
 import { useCartStore } from '@/store/cartStore';
 import { Product } from '@prisma/client';
+import { addItem } from '@/app/(e-comm)/cart/actions/cartServerActions';
 
 interface StoreAddToCartButtonProps {
   product: Product;
@@ -36,14 +38,29 @@ export default function StoreAddToCartButton({
 }: StoreAddToCartButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
-  const { addItem } = useCartStore();
+  const { addItem: addItemLocal } = useCartStore();
+  const router = useRouter();
 
   const handleAddToCart = async () => {
     if (!inStock) return;
     try {
       setIsLoading(true);
-      // Add to cart using Zustand store
-      addItem(product as any, quantity); // Cast to any to avoid TS error if product.details is null
+      // Optimistic add to local store
+      addItemLocal(product as any, quantity);
+
+      // Persist to DB
+      // Removed console.log for cleaner build output
+      await addItem(product.id, quantity);
+
+      // Refresh components depending on cart count
+      router.refresh();
+
+      // Notify all listeners to re-fetch cart
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('cart-changed'));
+        localStorage.setItem('cart-updated', Date.now().toString());
+      }
+
       // Show success state
       setIsAdded(true);
       // Show toast
@@ -69,7 +86,7 @@ export default function StoreAddToCartButton({
       onClick={handleAddToCart}
       disabled={isLoading || !inStock || isAdded}
       className={cn(
-        isAdded && 'bg-green-600 hover:bg-green-700',
+        isAdded && 'btn-add',
         !inStock && 'cursor-not-allowed opacity-50',
         className,
       )}

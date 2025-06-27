@@ -1,9 +1,10 @@
 "use server";
 
 import db from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidateTag } from 'next/cache';
 import { cookies } from 'next/headers';
 import { checkIsLogin } from '@/lib/check-is-login';
+import { z } from 'zod';
 
 // Types for cart with items and products
 export type CartItemWithProduct = Awaited<ReturnType<typeof db.cartItem.findFirst>> & { product?: Awaited<ReturnType<typeof db.product.findFirst>> };
@@ -99,7 +100,8 @@ export async function getCart(): Promise<CartWithItems | null> {
         await clearCartIdCookie();
       }
     }
-    return userCart;
+    const result = userCart;
+    return result;
   }
 
   // Guest
@@ -112,11 +114,17 @@ export async function getCart(): Promise<CartWithItems | null> {
   return null;
 }
 
+// Schema for quantity validation
+const quantitySchema = z.number().int().min(1).max(99);
+
 // Add item to cart (guest or user)
 export async function addItem(productId: string, quantity: number = 1): Promise<void> {
+  console.log('[addItem] called with:', { productId, quantity });
   const user = await checkIsLogin();
   let cart: CartWithItems | null = null;
   let cartId: string | undefined = await getCartIdFromCookie();
+  console.log('[addItem] user:', user);
+  console.log('[addItem] cartId before:', cartId);
 
   if (user) {
     cart = await db.cart.findUnique({ where: { userId: user.id } });
@@ -135,6 +143,16 @@ export async function addItem(productId: string, quantity: number = 1): Promise<
     }
   }
 
+  console.log('[addItem] cartId after:', cartId);
+  // Log product quantity before add
+  let qtyBefore = 0;
+  if (cartId) {
+    const cartBefore = await db.cart.findUnique({ where: { id: cartId }, include: { items: true } });
+    const itemBefore = cartBefore?.items.find(i => i.productId === productId);
+    qtyBefore = itemBefore?.quantity || 0;
+    console.log(`[addItem] quantity before: ${qtyBefore}`);
+  }
+
   const existingItem = await db.cartItem.findFirst({
     where: { cartId: cartId, productId },
   });
@@ -149,30 +167,58 @@ export async function addItem(productId: string, quantity: number = 1): Promise<
       data: {
         cartId: cartId!,
         productId,
-        quantity,
+        quantity: quantity,
       },
     });
   }
-  revalidatePath('/cart');
+
+  // Log product quantity after add
+  let qtyAfter = 0;
+  if (cartId) {
+    const cartAfter = await db.cart.findUnique({ where: { id: cartId }, include: { items: true } });
+    const itemAfter = cartAfter?.items.find(i => i.productId === productId);
+    qtyAfter = itemAfter?.quantity || 0;
+    console.log(`[addItem] quantity after: ${qtyAfter}`);
+  }
+
+  revalidateTag('cart');
 }
 
 // Update quantity of a cart item
 export async function updateItemQuantity(itemId: string, quantity: number): Promise<void> {
-  if (quantity > 0) {
-    await db.cartItem.update({
-      where: { id: itemId },
-      data: { quantity },
-    });
-  } else {
-    await db.cartItem.delete({ where: { id: itemId } });
+  if (quantity <= 0) {
+    await removeItem(itemId);
+    return;
   }
-  revalidatePath('/cart');
+
+  const validQty = quantitySchema.parse(quantity);
+
+  await db.cartItem.update({
+    where: { id: itemId },
+    data: { quantity: validQty },
+  });
+
+  revalidateTag('cart');
 }
 
-// Remove item from cart
+// Remove item from cart (and delete the cart itself if it becomes empty)
 export async function removeItem(itemId: string): Promise<void> {
+  // Find the cartId first (needed after deletion)
+  const cartItem = await db.cartItem.findUnique({ where: { id: itemId } });
+  if (!cartItem) {
+    revalidateTag('cart');
+    return;
+  }
+
   await db.cartItem.delete({ where: { id: itemId } });
-  revalidatePath('/cart');
+
+  // Check if the cart has any remaining items; if none, delete the cart
+  const remaining = await db.cartItem.count({ where: { cartId: cartItem.cartId } });
+  if (remaining === 0) {
+    await db.cart.delete({ where: { id: cartItem.cartId } });
+  }
+
+  revalidateTag('cart');
 }
 
 // Merge guest cart into user cart on login
@@ -210,6 +256,7 @@ export async function mergeGuestCartOnLogin(guestCartId: string, userId: string)
     });
     await db.cart.delete({ where: { id: guestCartId } });
   }
+  revalidateTag('cart');
 }
 
 // Get the total number of items in the cart (for header badge)
@@ -217,4 +264,47 @@ export async function getCartCount(): Promise<number> {
   const cart = await getCart();
   if (!cart || !cart.items) return 0;
   return cart.items.reduce((sum, item) => sum + (item.quantity ?? 0), 0);
+}
+
+// Clear cart for logged-in user or guest cart (by cookie)
+export async function clearCart(): Promise<void> {
+  // Delete cart for logged-in user or guest cart (by cookie)
+  const user = await checkIsLogin();
+  const localCartId = await getCartIdFromCookie();
+
+  if (user) {
+    // Remove user cart completely
+    await db.cart.deleteMany({ where: { userId: user.id } });
+  }
+
+  if (localCartId) {
+    try {
+      await db.cart.delete({ where: { id: localCartId } });
+    } catch (e) {
+      // cart may not exist
+    }
+    await clearCartIdCookie();
+  }
+
+  revalidateTag('cart');
+}
+
+// Convenience: remove item using productId rather than itemId
+export async function removeItemByProduct(productId: string): Promise<void> {
+  const cart = await getCart();
+  if (!cart || !cart.items) return;
+  const item = cart.items.find((i) => i.productId === productId);
+  if (!item) return;
+  await removeItem(item.id);
+}
+
+// Update quantity using productId (positive or negative delta). If quantity <=0 after update, item is removed.
+export async function updateItemQuantityByProduct(productId: string, delta: number): Promise<void> {
+  const cart = await getCart();
+  // Removed console.logs for cleaner build output
+  if (!cart || !cart.items) return;
+  const item = cart.items.find((i) => i.productId === productId);
+  if (!item) return;
+  const newQty = (item.quantity ?? 0) + delta;
+  await updateItemQuantity(item.id, newQty);
 } 

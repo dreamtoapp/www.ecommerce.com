@@ -54,7 +54,6 @@ export function NotificationDropdown({
     children,
 }: NotificationDropdownProps) {
     const [isOpen, setIsOpen] = useState(false);
-    console.log('[NotificationDropdown] defaultAlerts len:', defaultAlerts.length);
     const [alerts, setAlerts] = useState<Alert[]>(defaultAlerts);
     const [isPending, startTransition] = useTransition();
 

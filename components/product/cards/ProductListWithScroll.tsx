@@ -4,10 +4,12 @@ import { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { Product } from '@/types/databaseTypes';
 import { fetchProductsPage } from '@/app/(e-comm)/homepage/actions/fetchProductsPage';
-import { ProductCardSkeleton } from '@/components/product/cards/ProductCardSkeleton';
+import ProductCardSkeleton from '@/components/product/cards/ProductCardSkeleton';
 import { ProductCardAdapter } from '@/components/product/cards';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, AlertCircle } from 'lucide-react';
+import { getCart } from '@/app/(e-comm)/cart/actions/cartServerActions';
+import { CartWithItems } from '@/app/(e-comm)/cart/actions/cartServerActions';
 
 interface ProductListWithScrollProps {
     firstPageProducts: Product[];
@@ -26,6 +28,7 @@ export default function ProductListWithScroll({
     const [hasMore, setHasMore] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [retryCount, setRetryCount] = useState(0);
+    const [cart, setCart] = useState<CartWithItems | null>(null);
 
     // Refs for performance optimization
     const abortControllerRef = useRef<AbortController | null>(null);
@@ -126,6 +129,17 @@ export default function ProductListWithScroll({
         }
     }, [inView, hasMore, loading, error, fetchMoreProducts]);
 
+    // Fetch cart from server and listen for cart-changed events
+    useEffect(() => {
+        async function fetchCart() {
+            const latestCart = await getCart();
+            setCart(latestCart);
+        }
+        fetchCart();
+        window.addEventListener('cart-changed', fetchCart);
+        return () => window.removeEventListener('cart-changed', fetchCart);
+    }, []);
+
     // Cleanup on unmount
     useEffect(() => {
         return () => {
@@ -157,6 +171,7 @@ export default function ProductListWithScroll({
                             product={product}
                             className="h-full w-full"
                             index={index}
+                            quantity={cart?.items?.find(item => item.productId === product.id)?.quantity ?? 0}
                         />
                     </div>
                 ))}

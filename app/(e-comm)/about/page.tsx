@@ -19,9 +19,7 @@ const AboutUsPage = async () => {
   const testimonials = await getFeaturedTestimonials();
 
   // Debug: Log the actual data received
-  console.log('🎭 AboutUsPage - Testimonials received:', testimonials.length);
-  console.log('🔍 AboutUsPage - Sample testimonial:', testimonials[0]);
-  console.log('🎯 AboutUsPage - All testimonial IDs:', testimonials.map(t => t.id));
+  // Removed console.logs for cleaner build output
 
   const features = [
     {

@@ -4,6 +4,7 @@ import {
   startTransition,
   useEffect,
   useState,
+  useContext,
 } from 'react';
 
 import { Heart } from 'lucide-react';
@@ -14,10 +15,12 @@ import {
   isProductInWishlist,
   removeFromWishlist,
 } from '@/app/(e-comm)/product/actions/actions';
+import { getCachedWishlist, setCachedWishlist } from '@/lib/cache/wishlist';
 import {
   cn,
   iconVariants,
 } from '@/lib/utils';
+import { WishlistContext } from '@/providers/wishlist-provider';
 
 interface WishlistButtonProps {
   productId: string;
@@ -32,9 +35,20 @@ export default function WishlistButton({
   size = 'md',
   showBackground = true,
 }: WishlistButtonProps) {
-  const [isInWishlist, setIsInWishlist] = useState(false);
+  const wishlistCtx = useContext(WishlistContext);
+
+  const cached = wishlistCtx ? undefined : getCachedWishlist(productId);
+  const [isInWishlist, setIsInWishlist] = useState<boolean>(
+    wishlistCtx ? wishlistCtx.isInWishlist(productId) : cached ?? false,
+  );
   const [isLoading, setIsLoading] = useState(false);
-  const [isInitializing, setIsInitializing] = useState(true);
+  const [isInitializing, setIsInitializing] = useState(
+    wishlistCtx ? false : cached === undefined,
+  );
+
+  // Track hydration only to avoid SSR mismatch, but still show icon immediately
+  const [hydrated, setHydrated] = useState(typeof window !== 'undefined');
+  useEffect(() => setHydrated(true), []);
 
   const bgSize = {
     sm: 'h-8 w-8',
@@ -43,10 +57,13 @@ export default function WishlistButton({
   }[size];
 
   useEffect(() => {
+    if (cached !== undefined) return; // already cached
+
     const checkWishlist = async () => {
       try {
         const result = await isProductInWishlist(productId);
         setIsInWishlist(result);
+        setCachedWishlist(productId, result);
       } catch (error) {
         console.error('Error checking wishlist:', error);
       } finally {
@@ -54,6 +71,7 @@ export default function WishlistButton({
       }
     };
     checkWishlist();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId]);
 
   const handleToggleWishlist = () => {
@@ -66,7 +84,13 @@ export default function WishlistButton({
       action(productId)
         .then((result) => {
           if (result.success) {
-            setIsInWishlist(!isInWishlist);
+            if (wishlistCtx) {
+              wishlistCtx.toggle(productId);
+              // local state will update on context change effect, skip
+            } else {
+              setIsInWishlist(!isInWishlist);
+              setCachedWishlist(productId, !isInWishlist);
+            }
           } else {
             toast.error(result.message || 'حدث خطأ');
           }
@@ -81,8 +105,20 @@ export default function WishlistButton({
     });
   };
 
+  // Sync with context changes
+  useEffect(() => {
+    if (!wishlistCtx) return;
+    setIsInWishlist(wishlistCtx.isInWishlist(productId));
+    // Not initializing because provider ensures ready
+  }, [wishlistCtx, productId]);
+
+  // Determine visual state: during initial fetch show outline (not filled)
+  const renderFilled = hydrated && isInWishlist;
+
   return (
     <button
+      data-analytics-id="wishlist-toggle"
+      data-analytics-product-id={productId}
       onClick={handleToggleWishlist}
       disabled={isLoading || isInitializing}
       className={cn(
@@ -105,14 +141,12 @@ export default function WishlistButton({
         <Heart
           className={iconVariants({
             size,
-            variant: isInWishlist ? 'destructive' : 'muted',
+            variant: 'secondary',
             animation: isLoading ? 'pulse' : undefined,
-            className: cn(
-              'transition-all duration-200',
-              isInWishlist && 'fill-red-500',
-            ),
+            className: cn('transition-all duration-200 text-feature-users', renderFilled && 'fill-current stroke-current'),
           })}
           aria-label={isInWishlist ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة'}
+          suppressHydrationWarning
         />
       </span>
     </button>

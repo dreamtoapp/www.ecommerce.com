@@ -119,26 +119,25 @@ export default function PreloadScript() {
     const measurePerformance = () => {
       if ('performance' in window) {
         // Try to load web-vitals library if available
-        import('web-vitals').then((webVitalsModule) => {
-          console.log('Web Vitals library loaded successfully');
+        import('web-vitals').then((_webVitalsModule) => {
+          // console.log('Web Vitals library loaded successfully');
           // Simple logging without complex type checking
-          console.log('Available methods:', Object.keys(webVitalsModule));
+          // console.log('Available methods:', Object.keys(webVitalsModule));
         }).catch(() => {
-          console.log('Web Vitals library not available, using fallback methods');
+          // console.log('Web Vitals library not available, using fallback methods');
         });
 
         // Manual Core Web Vitals monitoring using PerformanceObserver
         if ('PerformanceObserver' in window) {
           try {
             // Monitor Largest Contentful Paint (LCP)
-            const lcpObserver = new PerformanceObserver((list) => {
-              const entries = list.getEntries();
-              const lastEntry = entries[entries.length - 1];
-              console.log('LCP (Largest Contentful Paint):', lastEntry.startTime, 'ms');
+            const lcpObserver = new PerformanceObserver(() => {
+              // const entries = list.getEntries();
+              // console.log('LCP (Largest Contentful Paint):', entries[entries.length - 1]?.startTime, 'ms');
             });
             lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
           } catch (e) {
-            console.log('LCP observer not supported');
+            // console.log('LCP observer not supported');
           }
 
           try {
@@ -216,11 +215,11 @@ export default function PreloadScript() {
     // Service Worker registration for caching in production
     if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
       navigator.serviceWorker.register('/sw.js')
-        .then((registration) => {
-          console.log('Service Worker registered successfully:', registration.scope);
+        .then((_registration) => {
+          // console.log('Service Worker registered successfully:', registration.scope);
         })
-        .catch((error) => {
-          console.log('Service Worker registration failed:', error);
+        .catch((_error) => {
+          // console.log('Service Worker registration failed:', error);
         });
     }
 

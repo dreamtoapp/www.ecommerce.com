@@ -17,12 +17,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import {
-  Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from '@/components/ui/tabs';
 import { iconVariants } from '@/lib/utils'; // Import CVA variants
+import ReviewsTabsWrapper from '@/components/product/ReviewsTabsWrapper';
 
 import {
   getProductBySlug,
@@ -163,7 +163,7 @@ export default async function ProductPage({ params }: PageProps<{ slug: string }
 
       {/* Product Tabs */}
       <div className='mt-12'>
-        <Tabs defaultValue='details'>
+        <ReviewsTabsWrapper>
           <TabsList className='w-full justify-start'>
             <TabsTrigger value='details'>التفاصيل</TabsTrigger>
             <TabsTrigger value='reviews'>التقييمات ({reviews.length})</TabsTrigger>
@@ -211,7 +211,7 @@ export default async function ProductPage({ params }: PageProps<{ slug: string }
             </div>
           </TabsContent>
 
-          <TabsContent value='reviews' className='py-4'>
+          <TabsContent value='reviews' id='reviews' className='py-4'>
             <div className='space-y-6'>
               <div className='flex items-center justify-between'>
                 <h3 className='text-lg font-medium'>تقييمات المنتج</h3>
@@ -299,7 +299,7 @@ export default async function ProductPage({ params }: PageProps<{ slug: string }
               )}
             </div>
           </TabsContent>
-        </Tabs>
+        </ReviewsTabsWrapper>
       </div>
 
       {/* Related Products */}

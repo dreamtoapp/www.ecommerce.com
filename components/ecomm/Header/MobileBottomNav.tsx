@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useContext } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { pingAdminAction } from '@/app/pingAdminAction';
+import { WishlistContext } from '@/providers/wishlist-provider';
 
 import Image from 'next/image';
 
@@ -87,7 +88,7 @@ function NavigationItem({
                         "h-5 w-5 transition-all duration-300",
                         isActive ? `${item.color} scale-110` : "text-muted-foreground",
                         item.id === 'wishlist' && item.badge && item.badge > 0
-                            ? "text-feature-users animate-pulse fill-current" : ""
+                            ? "text-feature-users fill-current" : ""
                     )} />
                 )}
 
@@ -316,6 +317,9 @@ export default function MobileBottomNav({
     userId = 'guest',
     onSearchClick
 }: MobileBottomNavProps) {
+    const ctx = useContext(WishlistContext);
+    const derivedWishlistCount = ctx ? ctx.wishlistIds.size : wishlistCount;
+
     const pathname = usePathname();
     const [activeTab, setActiveTab] = useState('home');
     const [showFAB, setShowFAB] = useState(true);
@@ -334,7 +338,7 @@ export default function MobileBottomNav({
         { id: 'home', label: 'الرئيسية', icon: Home, href: '/', color: 'text-feature-commerce' },
         { id: 'categories', label: 'الأقسام', icon: Grid3X3, href: '/categories', color: 'text-feature-products' },
         { id: 'search', label: 'البحث', icon: Search, href: '#', color: 'text-feature-analytics' },
-        { id: 'wishlist', label: 'المفضلة', icon: Heart, href: '/user/wishlist', badge: wishlistCount, color: 'text-feature-users' },
+        { id: 'wishlist', label: 'المفضلة', icon: Heart, href: '/user/wishlist', badge: derivedWishlistCount, color: 'text-feature-users' },
         {
             id: 'account',
             label: isLoggedIn ? 'حسابي' : 'دخول',

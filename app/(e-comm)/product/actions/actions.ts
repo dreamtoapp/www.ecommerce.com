@@ -260,3 +260,40 @@ export async function removeFromWishlist(
     };
   }
 }
+
+/**
+ * Get all products in the user's wishlist (detailed info for wishlist page)
+ */
+export async function getUserWishlist() {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) return [];
+
+    const wishlistItems = await db.wishlistItem.findMany({
+      where: {
+        userId: session.user.id,
+      },
+      include: {
+        product: {
+          include: {
+            supplier: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return wishlistItems.map((item) => ({
+      ...item.product,
+      details: item.product.details ?? null,
+      size: item.product.size ?? null,
+      inStock: !item.product.outOfStock,
+      imageUrl: item.product.imageUrl || '/fallback/product-fallback.avif',
+    }));
+  } catch (error) {
+    console.error('Error fetching wishlist:', error);
+    return [];
+  }
+}

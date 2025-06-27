@@ -7,11 +7,11 @@ import { User } from '@/types/databaseTypes';
 export const checkIsLogin = async (): Promise<User | null> => {
   try {
     const session = await auth();
-    console.log('checkIsLogin: session', session);
+    // Removed console.log for cleaner build output
     if (!session?.user) return null;
     return session.user as User;
   } catch (error) {
-    console.error('Authentication check failed:', error);
+    // Removed console.error for cleaner build output
     return null;
   }
 };

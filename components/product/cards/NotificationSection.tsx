@@ -1,60 +1,125 @@
-import { memo } from 'react';
-import { Check, Trash2, X } from 'lucide-react';
-import { iconVariants } from '@/lib/utils';
+'use client';
+
+import { useEffect, useState, memo } from 'react';
+import { Check, X, ShoppingCart, Heart } from 'lucide-react';
 
 interface NotificationProps {
     show: boolean;
-    type?: 'add' | 'remove';
-    message?: string;
+    type: 'add' | 'remove' | 'wishlist-add' | 'wishlist-remove';
+    message: string;
+    duration?: number;
 }
 
-const Notification = ({ show, type = 'add', message }: NotificationProps) => {
-    console.log('Notification rendered. show:', show, 'type:', type);
-    if (!show) return null;
+const NotificationSection = memo(({
+    show,
+    type,
+    message,
+    duration = 3000
+}: NotificationProps) => {
+    const [isVisible, setIsVisible] = useState(false);
+    const [isExiting, setIsExiting] = useState(false);
 
-    const isAddType = type === 'add';
-    const isRemoveType = type === 'remove';
+    useEffect(() => {
+        if (show) {
+            setIsVisible(true);
+            setIsExiting(false);
 
-    const getNotificationStyles = () => {
-        if (isAddType) {
-            return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+            const timer = setTimeout(() => {
+                setIsExiting(true);
+                setTimeout(() => {
+                    setIsVisible(false);
+                }, 300); // Allow time for exit animation
+            }, duration);
+
+            return () => clearTimeout(timer);
         }
-        if (isRemoveType) {
-            return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+    }, [show, duration]);
+
+    if (!isVisible) return null;
+
+    const getNotificationConfig = () => {
+        switch (type) {
+            case 'add':
+                return {
+                    icon: <ShoppingCart className="h-4 w-4" />,
+                    bgColor: 'bg-green-500 dark:bg-green-600',
+                    textColor: 'text-white',
+                    borderColor: 'border-green-400 dark:border-green-500',
+                    ariaLabel: 'تمت إضافة المنتج إلى السلة'
+                };
+            case 'remove':
+                return {
+                    icon: <X className="h-4 w-4" />,
+                    bgColor: 'bg-red-500 dark:bg-red-600',
+                    textColor: 'text-white',
+                    borderColor: 'border-red-400 dark:border-red-500',
+                    ariaLabel: 'تمت إزالة المنتج من السلة'
+                };
+            case 'wishlist-add':
+                return {
+                    icon: <Heart className="h-4 w-4 fill-current" />,
+                    bgColor: 'bg-pink-500 dark:bg-pink-600',
+                    textColor: 'text-white',
+                    borderColor: 'border-pink-400 dark:border-pink-500',
+                    ariaLabel: 'تمت إضافة المنتج إلى المفضلة'
+                };
+            case 'wishlist-remove':
+                return {
+                    icon: <Heart className="h-4 w-4" />,
+                    bgColor: 'bg-gray-500 dark:bg-gray-600',
+                    textColor: 'text-white',
+                    borderColor: 'border-gray-400 dark:border-gray-500',
+                    ariaLabel: 'تمت إزالة المنتج من المفضلة'
+                };
+            default:
+                return {
+                    icon: <Check className="h-4 w-4" />,
+                    bgColor: 'bg-blue-500 dark:bg-blue-600',
+                    textColor: 'text-white',
+                    borderColor: 'border-blue-400 dark:border-blue-500',
+                    ariaLabel: 'تم تحديث المنتج'
+                };
         }
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
     };
 
-    const getIcon = () => {
-        if (isAddType) {
-            return <Check className={iconVariants({ size: 'xs', className: 'text-green-600 dark:text-green-400' })} />;
-        }
-        if (isRemoveType) {
-            return <Trash2 className={iconVariants({ size: 'xs', className: 'text-red-600 dark:text-red-400' })} />;
-        }
-        return <X className={iconVariants({ size: 'xs', className: 'text-blue-600 dark:text-blue-400' })} />;
-    };
-
-    const getMessage = () => {
-        if (message) return message;
-        if (isAddType) return 'تمت الإضافة!';
-        if (isRemoveType) return 'تمت الإزالة!';
-        return 'تم التنفيذ!';
-    };
+    const config = getNotificationConfig();
 
     return (
         <div
-            className={`absolute left-0 right-0 top-0 z-30 flex animate-slideUp items-center justify-between px-4 py-2 ${getNotificationStyles()}`}
-            style={{
-                willChange: 'transform, opacity',
-                contain: 'content',
-            }}
+            className={`absolute top-3 left-1/2 transform -translate-x-1/2 z-30 
+                       ${config.bgColor} ${config.textColor} 
+                       px-4 py-2 rounded-full shadow-xl border-2 ${config.borderColor}
+                       transition-all duration-300 ease-in-out
+                       ${isExiting
+                    ? 'opacity-0 scale-95 translate-y-[-8px]'
+                    : 'opacity-100 scale-100 translate-y-0'
+                }
+                       backdrop-blur-sm`}
+            role="status"
+            aria-live="polite"
+            aria-label={config.ariaLabel}
         >
-            <span className='text-sm font-medium'>{getMessage()}</span>
-            {getIcon()}
+            <div className="flex items-center gap-2">
+                {config.icon}
+                <span className="text-sm font-medium whitespace-nowrap">
+                    {message}
+                </span>
+            </div>
+
+            {/* Progress bar */}
+            <div className="absolute bottom-0 left-0 h-0.5 bg-white/30 rounded-full overflow-hidden w-full">
+                <div
+                    className="h-full bg-white/60 rounded-full animate-progress-fill"
+                    style={{
+                        animationDuration: `${duration}ms`,
+                        animationTimingFunction: 'linear'
+                    }}
+                />
+            </div>
         </div>
     );
-};
+});
 
-export default memo(Notification);
-Notification.displayName = 'Notification'; 
+NotificationSection.displayName = 'NotificationSection';
+
+export default NotificationSection; 
