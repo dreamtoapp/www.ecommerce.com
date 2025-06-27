@@ -178,10 +178,8 @@ const ProductCard = memo(({
             <Card
                 ref={cardRef}
                 className={`group relative overflow-hidden rounded-2xl bg-gradient-to-br from-card to-card/95 
-                           shadow-xl hover:shadow-2xl border-none min-h-[420px] sm:min-h-[520px] w-full max-w-sm mx-auto 
-                           flex flex-col transition-all duration-300 ease-out hover:scale-[1.02] cursor-pointer
-                           hover:ring-2 hover:ring-primary/20 focus-visible:ring-2 focus-visible:ring-primary/30 
-                           focus-visible:outline-none card-hover-effect ${className || ''}`}
+                           shadow-lg border border-card transition-all duration-300 ease-out cursor-pointer
+                           hover:shadow-[0_0_0_2px_var(--feature-products)] focus-visible:shadow-[0_0_0_2px_var(--feature-products)] card-hover-effect flex flex-col h-full ${className || ''}`}
                 tabIndex={0}
                 role="article"
                 aria-labelledby={`product-${product.id}-title`}
@@ -235,153 +233,154 @@ const ProductCard = memo(({
                     stockQuantity={product.stockQuantity}
                 />
 
-                {/* Enhanced Color Swatches */}
-                {(() => {
-                    const colors = (product as any).colors as string[] | undefined;
-                    return Array.isArray(colors) && colors.length > 0 ? (
-                        <div className="px-3 sm:px-5 pt-2">
-                            <ColorSwatches colors={colors} />
-                        </div>
-                    ) : null;
-                })()}
-
-                {/* Enhanced Content Section */}
-                <div className="flex-1 flex flex-col p-3 sm:p-5 gap-3">
-                    {/* Enhanced Product Name & Type */}
-                    <div className="space-y-2">
-                        <h3 className="text-lg sm:text-xl font-bold text-foreground line-clamp-2 leading-tight group-hover:text-primary transition-colors duration-200"
-                            title={product.name}>
-                            {product.name}
-                        </h3>
-
-                        {/* Enhanced product type with better visibility */}
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-feature-products-soft text-feature-products border border-feature-products/20">
-                                {product.type === 'accessories' ? 'إكسسوارات' : product.type}
-                            </span>
-
-                            {/* Enhanced "view details" call-to-action */}
-                            <Link
-                                href={`/product/${product.slug}`}
-                                className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors duration-200 font-medium focus:outline-none focus:ring-1 focus:ring-primary/50 rounded px-1"
-                                onClick={(e) => e.stopPropagation()}
-                                aria-label={`عرض تفاصيل ${product.name}`}
-                            >
-                                <span>عرض التفاصيل</span>
-                                <ArrowLeft className="h-3 w-3" />
-                            </Link>
-                        </div>
-
-                        {/* Enhanced description with better readability */}
-                        <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
-                            {product.details}
-                        </p>
-                    </div>
-
-                    {/* Enhanced Rating Display */}
-                    {product.rating && product.rating > 0 && (
-                        <div className="flex items-center gap-2">
-                            <div className="flex items-center gap-1">
-                                {[...Array(5)].map((_, i) => (
-                                    <Star
-                                        key={i}
-                                        className={`h-4 w-4 ${i < Math.floor(product.rating!)
-                                            ? 'fill-yellow-400 text-yellow-400'
-                                            : i < product.rating!
-                                                ? 'fill-yellow-400/50 text-yellow-400'
-                                                : 'text-gray-300'
-                                            }`}
-                                        aria-hidden="true"
-                                    />
-                                ))}
+                <div className="flex-1 flex flex-col min-h-0">
+                    {/* Enhanced Color Swatches */}
+                    {(() => {
+                        const colors = (product as any).colors as string[] | undefined;
+                        return Array.isArray(colors) && colors.length > 0 ? (
+                            <div className="px-3 sm:px-5 pt-2">
+                                <ColorSwatches colors={colors} />
                             </div>
-                            <span className="text-sm font-medium text-foreground">
-                                {product.rating.toFixed(1)}
-                            </span>
-                            {(product as any).reviewCount && (
-                                <span className="text-xs text-muted-foreground">
-                                    ({(product as any).reviewCount} تقييم)
-                                </span>
-                            )}
-                        </div>
-                    )}
+                        ) : null;
+                    })()}
 
-                    {/* Enhanced Stock Indicators */}
-                    <div className="space-y-2">
-                        {/* Stock status with visual indicators */}
-                        {!stockInfo.isOutOfStock && product.manageInventory && (
+                    {/* Enhanced Content Section */}
+                    <div className="flex-1 flex flex-col p-3 sm:p-5 gap-3 min-h-0">
+                        {/* Enhanced Product Name & Type */}
+                        <div className="space-y-2">
+                            <h3 className="text-lg sm:text-xl font-bold text-foreground line-clamp-2 leading-tight group-hover:text-primary transition-colors duration-200"
+                                title={product.name}>
+                                {product.name}
+                            </h3>
+
+                            {/* Enhanced product type with better visibility */}
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-feature-products-soft text-feature-products border border-feature-products/20">
+                                    {product.type === 'accessories' ? 'إكسسوارات' : product.type}
+                                </span>
+
+                                {/* Enhanced "view details" call-to-action */}
+                                <Link
+                                    href={`/product/${product.slug}`}
+                                    className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors duration-200 font-medium focus:outline-none focus:ring-1 focus:ring-primary/50 rounded px-1"
+                                    onClick={(e) => e.stopPropagation()}
+                                    aria-label={`عرض تفاصيل ${product.name}`}
+                                >
+                                    <span>عرض التفاصيل</span>
+                                    <ArrowLeft className="h-3 w-3" />
+                                </Link>
+                            </div>
+
+                            {/* Enhanced description with better readability */}
+                            <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
+                                {product.details}
+                            </p>
+                        </div>
+
+                        {/* Enhanced Rating Display */}
+                        {product.rating && product.rating > 0 && (
                             <div className="flex items-center gap-2">
-                                <div className={`w-2 h-2 rounded-full ${stockInfo.lowStock ? 'bg-orange-500' : 'bg-green-500'
-                                    }`} aria-hidden="true" />
-                                <span className={`text-xs font-medium ${stockInfo.lowStock ? 'text-orange-600 dark:text-orange-400' : 'text-green-600 dark:text-green-400'
-                                    }`}>
-                                    {stockInfo.lowStock
-                                        ? `متبقي ${product.stockQuantity} فقط - اطلب الآن!`
-                                        : 'متوفر في المخزون'
-                                    }
+                                <div className="flex items-center gap-1">
+                                    {[...Array(5)].map((_, i) => (
+                                        <Star
+                                            key={i}
+                                            className={`h-4 w-4 ${i < Math.floor(product.rating!)
+                                                ? 'fill-yellow-400 text-yellow-400'
+                                                : i < product.rating!
+                                                    ? 'fill-yellow-400/50 text-yellow-400'
+                                                    : 'text-gray-300'
+                                                }`}
+                                            aria-hidden="true"
+                                        />
+                                    ))}
+                                </div>
+                                <span className="text-sm font-medium text-foreground">
+                                    {product.rating.toFixed(1)}
                                 </span>
-                            </div>
-                        )}
-
-                        {/* Shipping information */}
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <Truck className="h-3 w-3" aria-hidden="true" />
-                            <span>شحن مجاني للطلبات فوق $50</span>
-                        </div>
-                    </div>
-
-                    {/* Enhanced Pricing Section */}
-                    <div className="space-y-3">
-                        {/* Discount badge for deals */}
-                        {pricingInfo.hasDiscount && (
-                            <div className="flex items-center gap-2 flex-wrap">
-                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400">
-                                    وفّر {pricingInfo.discountPercentage}%
-                                </span>
-                                <span className="text-xs text-green-600 dark:text-green-400 font-medium">
-                                    خصم محدود الوقت
-                                </span>
-                            </div>
-                        )}
-
-                        {/* Enhanced price display */}
-                        <div className="flex items-center justify-between gap-2">
-                            <div className="flex flex-col items-start gap-1">
-                                {pricingInfo.hasDiscount ? (
-                                    <>
-                                        <span className="text-sm text-muted-foreground line-through" aria-label={`السعر الأصلي ${product.compareAtPrice} دولار`}>
-                                            ${product.compareAtPrice!.toFixed(2)}
-                                        </span>
-                                        <span className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400" aria-label={`السعر المخفض ${product.price} دولار`}>
-                                            ${product.price.toFixed(2)}
-                                        </span>
-                                    </>
-                                ) : (
-                                    <span className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400" aria-label={`السعر ${product.price} دولار`}>
-                                        ${product.price.toFixed(2)}
-                                    </span>
-                                )}
-
-                                {/* Price per unit if applicable */}
-                                {(product as any).unit && (
+                                {(product as any).reviewCount && (
                                     <span className="text-xs text-muted-foreground">
-                                        (${(product.price / ((product as any).unitQuantity || 1)).toFixed(2)} / {(product as any).unit})
+                                        ({(product as any).reviewCount} تقييم)
                                     </span>
                                 )}
                             </div>
+                        )}
 
-                            {quantity > 1 && (
-                                <div className="flex items-center gap-1 bg-green-50 dark:bg-green-950/20 px-3 py-1.5 rounded-full border border-green-200 dark:border-green-800">
-                                    <span className="text-xs text-green-600 dark:text-green-400">الإجمالي:</span>
-                                    <span className="text-sm font-bold text-green-700 dark:text-green-300">
-                                        ${(quantity * product.price).toFixed(2)}
+                        {/* Enhanced Stock Indicators */}
+                        <div className="space-y-2">
+                            {/* Stock status with visual indicators */}
+                            {!stockInfo.isOutOfStock && product.manageInventory && (
+                                <div className="flex items-center gap-2">
+                                    <div className={`w-2 h-2 rounded-full ${stockInfo.lowStock ? 'bg-orange-500' : 'bg-green-500'
+                                        }`} aria-hidden="true" />
+                                    <span className={`text-xs font-medium ${stockInfo.lowStock ? 'text-orange-600 dark:text-orange-400' : 'text-green-600 dark:text-green-400'
+                                        }`}>
+                                        {stockInfo.lowStock
+                                            ? `متبقي ${product.stockQuantity} فقط - اطلب الآن!`
+                                            : 'متوفر في المخزون'
+                                        }
                                     </span>
                                 </div>
                             )}
+
+                            {/* Shipping information */}
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <Truck className="h-3 w-3" aria-hidden="true" />
+                                <span>شحن مجاني للطلبات فوق $50</span>
+                            </div>
+                        </div>
+
+                        {/* Enhanced Pricing Section */}
+                        <div className="space-y-3">
+                            {/* Discount badge for deals */}
+                            {pricingInfo.hasDiscount && (
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400">
+                                        وفّر {pricingInfo.discountPercentage}%
+                                    </span>
+                                    <span className="text-xs text-green-600 dark:text-green-400 font-medium">
+                                        خصم محدود الوقت
+                                    </span>
+                                </div>
+                            )}
+
+                            {/* Enhanced price display */}
+                            <div className="flex items-center justify-between gap-2">
+                                <div className="flex flex-col items-start gap-1">
+                                    {pricingInfo.hasDiscount ? (
+                                        <>
+                                            <span className="text-sm text-muted-foreground line-through" aria-label={`السعر الأصلي ${product.compareAtPrice} دولار`}>
+                                                ${product.compareAtPrice!.toFixed(2)}
+                                            </span>
+                                            <span className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400" aria-label={`السعر المخفض ${product.price} دولار`}>
+                                                ${product.price.toFixed(2)}
+                                            </span>
+                                        </>
+                                    ) : (
+                                        <span className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400" aria-label={`السعر ${product.price} دولار`}>
+                                            ${product.price.toFixed(2)}
+                                        </span>
+                                    )}
+
+                                    {/* Price per unit if applicable */}
+                                    {(product as any).unit && (
+                                        <span className="text-xs text-muted-foreground">
+                                            (${(product.price / ((product as any).unitQuantity || 1)).toFixed(2)} / {(product as any).unit})
+                                        </span>
+                                    )}
+                                </div>
+
+                                {quantity > 1 && (
+                                    <div className="flex items-center gap-1 bg-green-50 dark:bg-green-950/20 px-3 py-1.5 rounded-full border border-green-200 dark:border-green-800">
+                                        <span className="text-xs text-green-600 dark:text-green-400">الإجمالي:</span>
+                                        <span className="text-sm font-bold text-green-700 dark:text-green-300">
+                                            ${(quantity * product.price).toFixed(2)}
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
-
                 {/* Actions Section */}
                 <div className="p-3 sm:p-5 pt-0" onClick={(e) => e.stopPropagation()}>
                     <ProductCardActions

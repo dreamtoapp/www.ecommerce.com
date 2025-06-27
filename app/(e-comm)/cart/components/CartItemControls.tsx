@@ -2,8 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Minus, Plus, X } from "lucide-react";
-import { useState, useTransition } from "react";
+import { Minus, Plus, X, Loader2 } from "lucide-react";
+import { useState, useTransition, useOptimistic } from "react";
 import { updateItemQuantity, removeItem } from "@/app/(e-comm)/cart/actions/cartServerActions";
 import { toast } from "sonner";
 
@@ -18,31 +18,52 @@ export default function CartItemControls({
     currentQuantity,
     productName
 }: CartItemControlsProps) {
-    const [quantity, setQuantity] = useState(currentQuantity);
     const [isPending, startTransition] = useTransition();
+    const [isRemoving, setIsRemoving] = useState(false);
+
+    // Optimistic updates for better UX
+    const [optimisticQuantity, updateOptimisticQuantity] = useOptimistic(
+        currentQuantity,
+        (_: number, newQuantity: number) => newQuantity
+    );
 
     const handleQuantityUpdate = (newQuantity: number) => {
-        if (newQuantity < 1) return;
+        if (newQuantity < 1 || newQuantity > 99) return;
 
-        setQuantity(newQuantity);
+        // Optimistic update
+        updateOptimisticQuantity(newQuantity);
+
         startTransition(async () => {
             try {
                 await updateItemQuantity(itemId, newQuantity);
-                toast.success(`تم تحديث كمية ${productName}`);
+                toast.success(`تم تحديث كمية ${productName}`, {
+                    duration: 2000,
+                });
             } catch (error) {
-                toast.error("فشل في تحديث الكمية");
-                setQuantity(currentQuantity); // Revert on error
+                // Revert optimistic update on error
+                updateOptimisticQuantity(currentQuantity);
+                toast.error("فشل في تحديث الكمية، حاول مرة أخرى");
             }
         });
     };
 
     const handleRemove = () => {
+        setIsRemoving(true);
         startTransition(async () => {
             try {
                 await removeItem(itemId);
-                toast.success(`تم حذف ${productName} من السلة`);
+                toast.success(`تم حذف ${productName} من السلة`, {
+                    duration: 3000,
+                    action: {
+                        label: "تراجع",
+                        onClick: () => {
+                            toast.info("ميزة التراجع قريباً");
+                        },
+                    },
+                });
             } catch (error) {
-                toast.error("فشل في حذف المنتج");
+                setIsRemoving(false);
+                toast.error("فشل في حذف المنتج، حاول مرة أخرى");
             }
         });
     };
@@ -54,40 +75,59 @@ export default function CartItemControls({
         }
     };
 
+    // Show loading state during removal
+    if (isRemoving) {
+        return (
+            <div className="flex items-center gap-2 opacity-50">
+                <Loader2 className="h-4 w-4 animate-spin text-feature-commerce" />
+                <span className="text-sm text-muted-foreground">جاري الحذف...</span>
+            </div>
+        );
+    }
+
     return (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
             {/* Quantity Controls */}
-            <div className="flex items-center gap-1 border border-feature-commerce/30 rounded-lg">
+            <div className="flex items-center border border-feature-commerce/30 rounded-lg bg-feature-commerce-soft/20 backdrop-blur-sm overflow-hidden">
                 <Button
                     size="icon"
                     variant="ghost"
-                    className="h-8 w-8 hover:bg-feature-commerce/10"
-                    onClick={() => handleQuantityUpdate(quantity - 1)}
-                    disabled={isPending || quantity <= 1}
+                    className="h-11 w-11 sm:h-9 sm:w-9 hover:bg-feature-commerce/20 rounded-none border-r border-feature-commerce/20 active:scale-95 transition-all text-feature-commerce"
+                    onClick={() => handleQuantityUpdate(optimisticQuantity - 1)}
+                    disabled={isPending || optimisticQuantity <= 1}
                     aria-label="تقليل الكمية"
                 >
-                    <Minus className="h-3 w-3" />
+                    {isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                        <Minus className="h-4 w-4" />
+                    )}
                 </Button>
 
                 <Input
                     type="number"
-                    value={quantity}
+                    value={optimisticQuantity}
                     onChange={handleInputChange}
-                    className="w-12 h-8 text-center border-0 focus-visible:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    className="w-14 h-11 sm:h-9 text-center border-0 focus-visible:ring-0 bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none font-medium text-sm text-feature-commerce"
                     min="1"
                     max="99"
                     disabled={isPending}
+                    aria-label={`الكمية: ${optimisticQuantity}`}
                 />
 
                 <Button
                     size="icon"
                     variant="ghost"
-                    className="h-8 w-8 hover:bg-feature-commerce/10"
-                    onClick={() => handleQuantityUpdate(quantity + 1)}
-                    disabled={isPending || quantity >= 99}
+                    className="h-11 w-11 sm:h-9 sm:w-9 hover:bg-feature-commerce/20 rounded-none border-l border-feature-commerce/20 active:scale-95 transition-all text-feature-commerce"
+                    onClick={() => handleQuantityUpdate(optimisticQuantity + 1)}
+                    disabled={isPending || optimisticQuantity >= 99}
                     aria-label="زيادة الكمية"
                 >
-                    <Plus className="h-3 w-3" />
+                    {isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                        <Plus className="h-4 w-4" />
+                    )}
                 </Button>
             </div>
 
@@ -95,12 +135,17 @@ export default function CartItemControls({
             <Button
                 size="icon"
                 variant="ghost"
-                className="h-8 w-8 btn-delete hover:bg-red-50 hover:text-red-600"
+                className="h-11 w-11 sm:h-9 sm:w-9 text-destructive hover:bg-destructive/10 hover:text-destructive rounded-lg border border-destructive/20 active:scale-95 transition-all"
                 onClick={handleRemove}
-                disabled={isPending}
-                aria-label={`حذف ${productName}`}
+                disabled={isPending || isRemoving}
+                aria-label={`حذف ${productName} من السلة`}
+                title="حذف من السلة"
             >
-                <X className="h-4 w-4" />
+                {isRemoving ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                    <X className="h-5 w-5" />
+                )}
             </Button>
         </div>
     );

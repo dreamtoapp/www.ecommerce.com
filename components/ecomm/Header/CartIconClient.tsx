@@ -3,10 +3,10 @@ import { ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { iconVariants } from '@/lib/utils';
 import CartPreview from './CartPreview';
 import { useState, useEffect, useTransition } from 'react';
 import { useMediaQuery } from '@/hooks/use-media-query';
+import { motion, AnimatePresence } from "framer-motion";
 
 import type { CartWithItems } from '@/app/(e-comm)/cart/actions/cartServerActions';
 import { getCart } from '@/app/(e-comm)/cart/actions/cartServerActions';
@@ -65,18 +65,29 @@ export default function CartIconClient() {
         <Button
             aria-label="عرض السلة"
             variant="ghost"
-            className="relative flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 transition-all duration-300 hover:scale-105 hover:bg-primary/20"
+            className="relative flex items-center justify-center gap-2 rounded-full bg-feature-commerce-soft card-hover-effect transition-all duration-300 hover:scale-105 hover:bg-feature-commerce/20 w-12 h-12 shadow-lg"
             disabled={isPending}
         >
+            <span className="absolute inset-0 rounded-full bg-feature-commerce/30 blur-md opacity-70 pointer-events-none animate-pulse" />
             <ShoppingCart
-                className={iconVariants({ size: 'sm', variant: 'primary' })}
+                className="relative z-10 h-7 w-7 text-feature-commerce-bright icon-enhanced drop-shadow-[0_2px_8px_rgba(80,120,255,0.45)] transition-transform duration-200 group-hover:scale-110"
                 aria-label="عرض السلة"
             />
-            {mounted && cartCount > 0 && (
-                <span className="absolute -right-2 -top-2 flex h-4 w-4 animate-bounce items-center justify-center rounded-full bg-red-500 text-xs font-semibold text-white shadow-md">
-                    {cartCount}
-                </span>
-            )}
+            <AnimatePresence>
+                {mounted && cartCount > 0 && (
+                    <motion.span
+                        key={cartCount}
+                        initial={{ scale: 0.7, opacity: 0 }}
+                        animate={{ scale: 1.1, opacity: 1 }}
+                        exit={{ scale: 0.7, opacity: 0 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                        className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-feature-commerce text-white text-[10px] font-bold shadow-lg ring-2 ring-white dark:ring-gray-900 border-2 border-feature-commerce animate-in fade-in zoom-in"
+                        aria-live="polite"
+                    >
+                        {cartCount}
+                    </motion.span>
+                )}
+            </AnimatePresence>
         </Button>
     );
 
