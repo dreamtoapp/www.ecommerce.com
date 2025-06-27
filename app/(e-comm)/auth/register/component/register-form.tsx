@@ -8,6 +8,10 @@ import { Input } from '@/components/ui/input';
 
 import { registerUser } from '../action/actions';
 
+interface RegisterFormProps {
+  redirect?: string;
+}
+
 // Reusable Loading Spinner Component
 const LoadingSpinner = () => (
   <div className='flex items-center justify-center'>
@@ -87,7 +91,7 @@ const AuthLink = ({ href, text }: { href: string; text: string }) => (
   </p>
 );
 
-export default function RegisterForm() {
+export default function RegisterForm({ redirect = '/' }: RegisterFormProps) {
   const [state, addAction, isPending] = useActionState(registerUser, { success: false, message: '' });
 
   return (
@@ -99,6 +103,9 @@ export default function RegisterForm() {
         </header>
 
         <form className='space-y-6' action={addAction}>
+          {/* Hidden input for redirect */}
+          <input type="hidden" name="redirect" value={redirect} />
+
           <div className='space-y-4'>
             <FormInput
               label='رقم الهاتف'

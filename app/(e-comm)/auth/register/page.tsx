@@ -1,7 +1,7 @@
 import RegisterForm from './component/register-form';
+import { PageProps } from '@/types/commonTypes';
 
-function RegisterPage() {
-  return <RegisterForm />;
+export default async function RegisterPage({ searchParams }: PageProps<Record<string, never>, { redirect?: string }>) {
+  const resolvedSearchParams = await searchParams;
+  return <RegisterForm redirect={resolvedSearchParams?.redirect || '/'} />;
 }
-
-export default RegisterPage;

@@ -153,9 +153,6 @@ model User {
   cart          Cart?          // User's cart
   UserNotification  UserNotification[]
 
-  // Loyalty points (manual management)
-  loyaltyPoints Int @default(0)
-
   // Driver-specific fields
   vehicleType       VehicleType? // Type of vehicle for drivers
   vehiclePlateNumber String?     // Vehicle plate number

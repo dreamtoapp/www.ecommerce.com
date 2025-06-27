@@ -159,6 +159,9 @@ export default function LoginPe({ redirect = '/' }: LoginFormProps) {
           <LoginHeader />
 
           <form action={addAction} className="space-y-6">
+            {/* Hidden input for redirect */}
+            <input type="hidden" name="redirect" value={redirect} />
+
             <FormFields
               showPassword={showPassword}
               setShowPassword={setShowPassword}

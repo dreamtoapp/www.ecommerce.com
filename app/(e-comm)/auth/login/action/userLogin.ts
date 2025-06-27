@@ -9,28 +9,29 @@ export const userLogin = async (
 ): Promise<{ success: boolean; message: string } | null> => {
   const phone = formData.get('phone') as string;
   const password = formData.get('password') as string;
+  const redirect = formData.get('redirect') as string || '/';
+  
   // Validate input data
   if (!phone || !password) {
-    return { success: false, message: 'جميع الحقةل مطلوبة' };
+    return { success: false, message: 'جميع الحقول مطلوبة' };
   }
 
   // Check if the user already exists
   if (!phone) return null;
   const existingUser = await db.user.findUnique({ where: { phone } });
   if (!existingUser) {
-    return { success: false, message: 'المعلومات  غير صحيحية' };
+    return { success: false, message: 'المعلومات غير صحيحة' };
   }
 
   if (existingUser.password !== password) {
-    return { success: false, message: '... المعلومات  غير صحيحية' };
+    return { success: false, message: 'المعلومات غير صحيحة' };
   }
 
   await signIn('credentials', {
     phone,
     password,
-    // redirect: false,
-    redirectTo: '/',
+    redirectTo: redirect,
   });
 
-  return { success: true, message: 'تم التسجيل بنجاح' };
+  return { success: true, message: 'تم تسجيل الدخول بنجاح' };
 };
