@@ -72,6 +72,7 @@ export const orderIncludeRelation = {
   customer: true,
   driver: true,
   shift: true,
+  address: true,
 } satisfies Prisma.OrderInclude;
 
 export type Order = Prisma.OrderGetPayload<{

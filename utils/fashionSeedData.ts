@@ -1,1516 +1,531 @@
-// seedData.ts
-import { ORDER_STATUS } from '@/constant/order-status';
-import { faker } from '@faker-js/faker/locale/ar'; // Use Arabic locale for realistic names
-import {
-  Prisma,
-  Product,
-  User,
-  UserRole,
-  Shift,
-  OrderStatus,
-  NotificationType,
-} from '@prisma/client';
+// utils/fashionSeedData.ts
+// Enhanced Fashion E-commerce Realistic Data Simulation
+// Run with: pnpm tsx utils/fashionSeedData.ts
 
-import {
-  generateOrderNumber,
-} from '../app/(e-comm)/checkout/helpers/orderNumber';
+import { faker } from '@faker-js/faker/locale/ar';
 import db from '../lib/prisma';
-import { Slugify } from './slug';
+import { UserRole, OrderStatus, NotificationType } from '@prisma/client';
+import type { User, Supplier, Category, Product, Shift, Address, Order } from '@prisma/client';
+import { Slugify } from '../utils/slug';
 
-// Create multiple fashion suppliers for more realistic data
-async function createFashionSuppliers() {
-  const suppliers = [
-    {
-      name: 'Fashion Arabia',
-      slug: 'fashion-arabia',
-      logo: '/fallback/product-fallback.avif',
-      email: 'contact@fashionarabia.com',
-      phone: '+966500000000',
-      address: 'Riyadh, Saudi Arabia',
-      type: 'company',
-    },
-    {
-      name: 'Elegance Boutique',
-      slug: 'elegance-boutique',
-      logo: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=500&q=80',
-      email: 'info@eleganceboutique.com',
-      phone: '+966511111111',
-      address: 'Jeddah, Saudi Arabia',
-      type: 'boutique',
-    },
-    {
-      name: 'Urban Style',
-      slug: 'urban-style',
-      logo: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=500&q=80',
-      email: 'support@urbanstyle.com',
-      phone: '+966522222222',
-      address: 'Dammam, Saudi Arabia',
-      type: 'company',
-    },
-    {
-      name: 'Luxury Trends',
-      slug: 'luxury-trends',
-      logo: 'https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?w=500&q=80',
-      email: 'hello@luxurytrends.com',
-      phone: '+966533333333',
-      address: 'Mecca, Saudi Arabia',
-      type: 'premium',
-    },
-  ];
+// Import fashion data
+import { FASHION_CATEGORIES } from './fashionData/categories';
+import { FASHION_PRODUCT_TEMPLATES } from './fashionData/products';
+import { FASHION_SUPPLIERS } from './fashionData/suppliers';
+import { FASHION_OFFERS } from './fashionData/offers';
 
-  const createdSuppliers = [];
-  for (const supplier of suppliers) {
-    // Create the main supplier
-    const createdSupplier = await db.supplier.create({
-      data: {
-        ...supplier,
-        // Add translations for each supplier
-        translations: {
-          create: [
-            {
-              languageCode: 'ar-SA',
-              name: supplier.name + ' (عربي)',
-              address: supplier.address + ' (عربي)',
-            },
-            {
-              languageCode: 'en',
-              name: supplier.name,
-              address: supplier.address,
-            }
-          ]
-        }
-      },
-      include: {
-        translations: true
-      }
-    });
-    createdSuppliers.push(createdSupplier);
-  }
-
-  log(`Created ${createdSuppliers.length} fashion suppliers with translations`);
-  return createdSuppliers;
+// --- Logging Helpers (Enhanced) ---
+function logBanner(msg: string) {
+  console.log('\n' + '='.repeat(msg.length + 8));
+  console.log(`=== ${msg} ===`);
+  console.log('='.repeat(msg.length + 8));
+}
+function logStep(title: string) {
+  console.log(`\n🔷 ${title}...`);
+}
+function logDone(title: string, count: number, ids?: string[]) {
+  console.log(`✅ Done: ${title} (${count})${ids ? ' [' + ids.join(', ') + ']' : ''}`);
+}
+function logProgress(i: number, total: number, label: string, icon: string) {
+  console.log(`${icon} ${label}: ${i + 1}/${total}`);
+}
+function logStockStatus(productName: string, inStock: boolean) {
+  const status = inStock ? '✅ IN STOCK' : '❌ OUT OF STOCK';
+  console.log(`📦 ${productName} - ${status}`);
 }
 
-// High-quality fashion product images from Unsplash - expanded collection
-const fashionImages = {
-  menClothing: [
-    // Formal Wear
-    'https://images.unsplash.com/photo-1617137968427-85924c800a22?w=500&q=80', // Men's Suit
-    'https://images.unsplash.com/photo-1593032465175-481ac7f401a0?w=500&q=80', // Formal Shirt
-    'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=500&q=80', // Dress Pants
-    'https://images.unsplash.com/photo-1594938374182-a57061dba5a3?w=500&q=80', // Blazer
-    'https://images.unsplash.com/photo-1611505908502-5b67e53e3a76?w=500&q=80', // Tie
-
-    // Casual Wear
-    'https://images.unsplash.com/photo-1618001789159-ffffe6f96ef2?w=500&q=80', // Casual Shirt
-    'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=500&q=80', // Premium T-shirt
-    'https://images.unsplash.com/photo-1584865288642-42078afe6942?w=500&q=80', // Jeans
-    'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=500&q=80', // Jacket
-    'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500&q=80', // Hoodie
-
-    // Sportswear
-    'https://images.unsplash.com/photo-1581612129334-551ccd2c6a8a?w=500&q=80', // Athletic Shirt
-    '/fallback/product-fallback.avif', // Sports Shorts
-    'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=500&q=80', // Running Shoes
-    '/fallback/product-fallback.avif', // Track Pants
-    'https://images.unsplash.com/photo-1547638375-ebf04735d792?w=500&q=80', // Sports Jacket
-
-    // Traditional Wear
-    'https://images.unsplash.com/photo-1552642986-ccb41e7059e7?w=500&q=80', // Thobe
-    '/fallback/product-fallback.avif', // Bisht
-    '/fallback/product-fallback.avif', // Shemagh
-    'https://images.unsplash.com/photo-1591222566903-f9c4b9edf8ec?w=500&q=80', // Agal
-    'https://images.unsplash.com/photo-1598449426314-8b02525e8733?w=500&q=80', // Embroidered Vest
-  ],
-  womenClothing: [
-    // Dresses
-    '/fallback/product-fallback.avif', // Elegant Dress
-    'https://images.unsplash.com/photo-1612336307429-8a898d10e223?w=500&q=80', // Cocktail Dress
-    'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500&q=80', // Summer Dress
-    'https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=500&q=80', // Evening Gown
-    'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=500&q=80', // Maxi Dress
-
-    // Tops & Blouses
-    'https://images.unsplash.com/photo-1551163943-3f6a855d1153?w=500&q=80', // Blouse
-    'https://images.unsplash.com/photo-1554568218-0f1715e72254?w=500&q=80', // Silk Top
-    'https://images.unsplash.com/photo-1559334417-a57bd929f003?w=500&q=80', // Casual Top
-    'https://images.unsplash.com/photo-1503342394128-c104d54dba01?w=500&q=80', // Printed Shirt
-    'https://images.unsplash.com/photo-1533659828870-95ee305cee3e?w=500&q=80', // Cardigan
-
-    // Bottoms
-    'https://images.unsplash.com/photo-1587855049254-351f4e55fe02?w=500&q=80', // Skirt
-    'https://images.unsplash.com/photo-1584370848010-d7fe6bc767ec?w=500&q=80', // Pants
-    'https://images.unsplash.com/photo-1591369822096-ffd140ec948f?w=500&q=80', // Jeans
-    'https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=500&q=80', // Shorts
-    'https://images.unsplash.com/photo-1583846783214-7229a91b20ed?w=500&q=80', // Leggings
-
-    // Traditional & Modest Wear
-    'https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?w=500&q=80', // Hijab
-    'https://images.unsplash.com/photo-1548624149-f9293404c2da?w=500&q=80', // Abaya
-    'https://images.unsplash.com/photo-1578895101408-1a6a4f23795a?w=500&q=80', // Modest Dress
-    'https://images.unsplash.com/photo-1605025207886-1d741d3a4f1d?w=500&q=80', // Kaftan
-    'https://images.unsplash.com/photo-1577535967695-2c48bb5afae5?w=500&q=80', // Embroidered Shawl
-  ],
-  accessories: [
-    // Bags
-    'https://images.unsplash.com/photo-1590548784585-643d2b9f2925?w=500&q=80', // Handbag
-    'https://images.unsplash.com/photo-1591561954557-26941169b49e?w=500&q=80', // Tote Bag
-    'https://images.unsplash.com/photo-1575891467811-070df21bd04a?w=500&q=80', // Backpack
-    'https://images.unsplash.com/photo-1601369581450-d8a57076f2cb?w=500&q=80', // Clutch
-    'https://images.unsplash.com/photo-1622560480605-d83c853bc5c3?w=500&q=80', // Crossbody Bag
-
-    // Jewelry
-    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=500&q=80', // Necklace
-    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500&q=80', // Earrings
-    'https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=500&q=80', // Bracelet
-    'https://images.unsplash.com/photo-1589128777073-263566ae5e4d?w=500&q=80', // Ring
-    'https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=500&q=80', // Gold Jewelry
-
-    // Watches & Eyewear
-    '/fallback/product-fallback.aviv', // Watch
-    'https://images.unsplash.com/photo-1556306535-0f09a537f0a3?w=500&q=80', // Sunglasses
-    'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500&q=80', // Glasses
-    'https://images.unsplash.com/photo-1622434641406-a158123450f9?w=500&q=80', // Luxury Watch
-    'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=500&q=80', // Designer Sunglasses
-
-    // Other Accessories
-    'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=500&q=80', // Scarf
-    'https://images.unsplash.com/photo-1598532163257-ae3c6b2524b6?w=500&q=80', // Belt
-    'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&q=80', // Hat
-    'https://images.unsplash.com/photo-1613525850352-1e6f3fdf4b59?w=500&q=80', // Wallet
-    'https://images.unsplash.com/photo-1603487742131-4160ec999306?w=500&q=80', // Hair Accessories
-  ],
-  footwear: [
-    // Men's Footwear
-    'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=500&q=80', // Formal Shoes
-    'https://images.unsplash.com/photo-1600269452121-4f2416e55c28?w=500&q=80', // Sneakers
-    'https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=500&q=80', // Boots
-    'https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=500&q=80', // Athletic Shoes
-    'https://images.unsplash.com/photo-1564482565306-7b5aa35d2d9d?w=500&q=80', // Sandals
-
-    // Women's Footwear
-    'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=500&q=80', // Heels
-    '/fallback/product-fallback.avif', // Flats
-    'https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?w=500&q=80', // Boots
-    'https://images.unsplash.com/photo-1562273138-f46be4ebdf33?w=500&q=80', // Sandals
-    'https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=500&q=80', // Sneakers
-  ],
-};
-
-// Fashion categories with Arabic translations
-type CategoryType = 'menClothing' | 'womenClothing' | 'accessories' | 'footwear';
-
-interface CategoryInfo {
-  name: string;
-  nameEn: string;
-  type: CategoryType;
-  slug: string;
-  description: string;
-  descriptionEn: string;
-  metaTitle?: string;
-  metaDescription?: string;
-}
-
-// Expanded category information with SEO metadata
-const categoriesData: CategoryInfo[] = [
-  {
-    name: 'ملابس رجالية',
-    nameEn: "Men's Clothing",
-    type: 'menClothing',
-    slug: 'mens-clothing',
-    description: 'تشكيلة واسعة من الملابس الرجالية العصرية بأفضل الماركات والجودة العالية',
-    descriptionEn: 'A wide collection of modern men\'s clothing with the best brands and high quality',
-    metaTitle: 'ملابس رجالية فاخرة | تسوق أحدث التشكيلات',
-    metaDescription: 'تسوق أحدث تشكيلات الملابس الرجالية العصرية من أفضل الماركات العالمية. شحن سريع وضمان الجودة.'
-  },
-  {
-    name: 'ملابس نسائية',
-    nameEn: "Women's Clothing",
-    type: 'womenClothing',
-    slug: 'womens-clothing',
-    description: 'تشكيلة متنوعة من الملابس النسائية بأحدث الصيحات والتصاميم العالمية',
-    descriptionEn: 'A diverse collection of women\'s clothing with the latest trends and international designs',
-    metaTitle: 'ملابس نسائية | أزياء عصرية بأفضل الأسعار',
-    metaDescription: 'اكتشفي أجمل تشكيلات الملابس النسائية العصرية من أرقى الماركات. توصيل سريع وخدمة مميزة.'
-  },
-  {
-    name: 'إكسسوارات',
-    nameEn: 'Accessories',
-    type: 'accessories',
-    slug: 'accessories',
-    description: 'إكسسوارات مميزة تكمل إطلالتك بتصاميم أنيقة وخامات فاخرة',
-    descriptionEn: 'Distinctive accessories to complete your look with elegant designs and luxurious materials',
-    metaTitle: 'إكسسوارات فاخرة | مجوهرات وحقائب وأكثر',
-    metaDescription: 'اختر من تشكيلة واسعة من الإكسسوارات الأنيقة. حقائب، مجوهرات، أحزمة وأكثر بتصاميم عصرية.'
-  },
-  {
-    name: 'أحذية',
-    nameEn: 'Footwear',
-    type: 'footwear',
-    slug: 'footwear',
-    description: 'أحذية مريحة وأنيقة للرجال والنساء من أشهر الماركات العالمية',
-    descriptionEn: 'Comfortable and elegant footwear for men and women from the most famous international brands',
-    metaTitle: 'أحذية رجالية ونسائية | تشكيلة واسعة من الموديلات',
-    metaDescription: 'تسوق أحدث موديلات الأحذية الرجالية والنسائية من علامات تجارية عالمية. راحة واناقة في كل خطوة.'
-  },
-];
-
-// Brand names (mix of international and local)
-const fashionBrands = [
-  // International Luxury Brands
-  'جوتشي', // Gucci
-  'لويس فيتون', // Louis Vuitton
-  'برادا', // Prada
-  'شانيل', // Chanel
-  'ديور', // Dior
-  'فيرساتشي', // Versace
-  'بربري', // Burberry
-  'فندي', // Fendi
-
-  // International Casual Brands
-  'زارا', // Zara
-  'H&M',
-  'نايك', // Nike
-  'أديداس', // Adidas
-  'بوما', // Puma
-  'ريبوك', // Reebok
-  'مانجو', // Mango
-  'جاب', // Gap
-
-  // Local/Regional Brands
-  'نسك', // Nask
-  'فتيحي', // Fatihi
-  'الصايغ', // Al Sayegh
-  'بيت الكندورة', // Bait Al Kandora
-  'حجاب ستايل', // Hijab Style
-  'عبايتي', // Abayati
-  'الجابر', // Al Jaber
-  'الشماغ الملكي', // Royal Shemagh
-];
-
-// Get random image based on category type
-const getFashionImage = (type: CategoryType): string => {
-  return faker.helpers.arrayElement(fashionImages[type]);
-};
-
-// Generate realistic price ranges based on category and quality
-const generatePrice = (category: string, isLuxury: boolean): number => {
-  const luxuryMultiplier = isLuxury ? 2.5 : 1;
-
-  switch (category) {
-    case 'accessories':
-      return faker.number.int({ min: 50, max: 800 }) * luxuryMultiplier;
-    case 'menClothing':
-      return faker.number.int({ min: 100, max: 1200 }) * luxuryMultiplier;
-    case 'womenClothing':
-      return faker.number.int({ min: 150, max: 1500 }) * luxuryMultiplier;
-    case 'footwear':
-      return faker.number.int({ min: 200, max: 1000 }) * luxuryMultiplier;
-    default:
-      return faker.number.int({ min: 80, max: 500 }) * luxuryMultiplier;
-  }
-};
-
-// Generate realistic product sizes based on category
-const generateSizes = (category: CategoryType): string => {
-  switch (category) {
-    case 'menClothing':
-    case 'womenClothing':
-      return faker.helpers.arrayElement(['XS', 'S', 'M', 'L', 'XL', 'XXL']);
-    case 'footwear':
-      return faker.helpers.arrayElement([
-        '36',
-        '37',
-        '38',
-        '39',
-        '40',
-        '41',
-        '42',
-        '43',
-        '44',
-        '45',
-      ]);
-    case 'accessories':
-      return faker.helpers.arrayElement(['One Size', 'S', 'M', 'L']);
-    default:
-      return 'One Size';
-  }
-};
-
-// Generate detailed product description and specifications based on language
-const generateProductDetails = (
-  category: CategoryType,
-  brand: string,
-  isLuxury: boolean,
-  languageCode: string,
-): {
-  details: string;
-  material: string;
-  color: string;
-  features: string[];
-  careInstructions: string;
-} => {
-  // Temporarily set locale for generating language-specific text
-  // faker.locale = languageCode === 'ar-SA' ? 'ar' : 'en';
-
-  const quality = isLuxury
-    ? faker.helpers.arrayElement(['Premium', 'Luxury', 'High-end', 'Designer', 'Exclusive'])
-    : faker.helpers.arrayElement(['Quality', 'Standard', 'Classic', 'Everyday', 'Casual']);
-
-  const material =
-    category === 'footwear'
-      ? languageCode === 'ar-SA'
-        ? faker.helpers.arrayElement(['جلد', 'جلد صناعي', 'قماش', 'مطاط', 'نسيج'])
-        : faker.helpers.arrayElement(['Leather', 'Suede', 'Canvas', 'Synthetic', 'Textile'])
-      : languageCode === 'ar-SA'
-        ? faker.helpers.arrayElement(['قطن', 'حرير', 'كتان', 'بوليستر', 'صوف', 'كشمير', 'جينز'])
-        : faker.helpers.arrayElement([
-          'Cotton',
-          'Silk',
-          'Linen',
-          'Polyester',
-          'Wool',
-          'Cashmere',
-          'Denim',
-        ]);
-
-  const color = languageCode === 'ar-SA'
-    ? faker.helpers.arrayElement([
-      'أسود', 'أبيض', 'أزرق', 'أحمر', 'أخضر', 'رمادي', 'بني', 'وردي', 'بنفسجي', 'أصفر'
-    ])
-    : faker.helpers.arrayElement([
-      'Black', 'White', 'Blue', 'Red', 'Green', 'Gray', 'Brown', 'Pink', 'Purple', 'Yellow'
-    ]);
-
-  // Use the updated generateProductFeatures function
-  const generatedFeatures = generateProductFeatures(category, languageCode);
-
-  const careInstructions = languageCode === 'ar-SA'
-    ? faker.helpers.arrayElement([
-      'غسيل يدوي فقط',
-      'غسيل آلي بماء بارد',
-      'تنظيف جاف فقط',
-      'مسح بقطعة قماش مبللة',
-      'غسيل عادي',
-    ])
-    : faker.helpers.arrayElement([
-      'Machine washable',
-      'Hand wash only',
-      'Dry clean only',
-      'Wipe with damp cloth',
-      'Normal wash',
-    ]);
-
-  const description = languageCode === 'ar-SA'
-    ? `${quality} ${material} ${category === 'footwear' ? 'أحذية' : 'ملابس'} من ${brand}.
-الميزات: ${generatedFeatures.join(', ')}.
-${faker.commerce.productDescription()}
-تعليمات العناية: ${careInstructions}.`
-    : `${quality} ${material} ${category === 'footwear' ? 'footwear' : 'garment'} by ${brand}.
-Features: ${generatedFeatures.join(', ')}.
-${faker.commerce.productDescription()}
-Care instructions: ${careInstructions}.`;
-
-  // Reset locale to default (ar-SA as per import)
-  // faker.locale = 'ar-SA';
-
-  return {
-    details: description,
-    material: material,
-    color: color,
-    features: generatedFeatures,
-    careInstructions: careInstructions,
-  };
-};
-
-// Generate product features as array
-const generateProductFeatures = (category: CategoryType, languageCode: string): string[] => {
-  const features = [];
-  const featureCount = faker.number.int({ min: 3, max: 6 });
-
-  let featureList: string[];
-
-  if (languageCode === 'ar-SA') {
-    // Common features based on category in Arabic
-    if (category === 'footwear') {
-      featureList = [
-        'مريح',
-        'رياضي',
-        'عام',
-        'خفيف الوزن',
-        'مقاوم للماء',
-        'مقاوم للانزلاق',
-        'نعل مطاطي',
-        'بطانة ناعمة',
-        'تصميم عصري',
-        'مناسب للمشي اليومي',
-      ];
-    } else if (category === 'menClothing' || category === 'womenClothing') {
-      featureList = [
-        'قطن ناعم',
-        'قماش مريح',
-        'تصميم أنيق',
-        'خامة ممتازة',
-        'مناسب للمناسبات',
-        'سهل الغسيل',
-        'مقاوم للتجاعيد',
-        'ألوان ثابتة',
-        'تصميم عصري',
-        'قصة مميزة',
-      ];
-    } else {
-      // Accessories
-      featureList = [
-        'تصميم فريد',
-        'جودة عالية',
-        'مناسب للهدايا',
-        'سهل الاستخدام',
-        'متعدد الاستخدامات',
-        'خامات فاخرة',
-        'حجم مناسب',
-        'خفيف الوزن',
-        'متين',
-        'عملي',
-      ];
-    }
-  } else { // English
-    // Common features based on category in English
-    if (category === 'footwear') {
-      featureList = [
-        'Comfortable',
-        'Athletic',
-        'Casual',
-        'Lightweight',
-        'Waterproof',
-        'Non-slip sole',
-        'Rubber sole',
-        'Soft lining',
-        'Modern design',
-        'Suitable for daily walking',
-      ];
-    } else if (category === 'menClothing' || category === 'womenClothing') {
-      featureList = [
-        'Soft cotton',
-        'Comfortable fabric',
-        'Elegant design',
-        'Excellent material',
-        'Suitable for occasions',
-        'Easy to wash',
-        'Wrinkle-resistant',
-        'Colorfast',
-        'Modern design',
-        'Unique cut',
-      ];
-    } else {
-      // Accessories
-      featureList = [
-        'Unique design',
-        'High quality',
-        'Suitable for gifts',
-        'Easy to use',
-        'Versatile',
-        'Luxurious materials',
-        'Suitable size',
-        'Lightweight',
-        'Durable',
-        'Practical',
-      ];
-    }
-  }
-
-  for (let i = 0; i < featureCount; i++) {
-    features.push(faker.helpers.arrayElement(featureList));
-  }
-
-  // Remove duplicates
-  return [...new Set(features)];
-};
-
-// Generate SEO fields for products
-const generateSEOFields = (name: string, category: CategoryType, brand: string, languageCode: string): {
-  metaTitle: string,
-  metaDescription: string,
-  tags: string[]
-} => {
-  const categoryInfo = categoriesData.find(cat => cat.type === category);
-  const categoryName = languageCode === 'ar-SA' ? categoryInfo?.name || 'منتج' : categoryInfo?.nameEn || 'Product';
-
-  // Generate language-specific tags
-  let tags: string[];
-  if (languageCode === 'ar-SA') {
-    tags = [
-      brand, // Keep brand as is, it can be Arabic or English
-      categoryName,
-      faker.helpers.arrayElement(['عصري', 'أنيق', 'فاخر', 'حديث', 'كلاسيكي']),
-      faker.helpers.arrayElement(['وصول جديد', 'الأكثر مبيعاً', 'إصدار محدود', 'تخفيضات', 'مميز']),
-    ];
-  } else { // English
-    tags = [
-      brand, // Keep brand as is
-      categoryName,
-      faker.helpers.arrayElement(['Trendy', 'Stylish', 'Elegant', 'Modern', 'Classic']),
-      faker.helpers.arrayElement(['New Arrival', 'Best Seller', 'Limited Edition', 'Sale', 'Featured']),
-    ];
-  }
-
-
-  // Generate language-specific meta title and description
-  let metaTitle: string;
-  let metaDescription: string;
-
-  if (languageCode === 'ar-SA') {
-    metaTitle = `${name} | ${brand} - ${categoryName} فاخر`;
-    metaDescription = `تسوق ${name} من ${brand}. ${categoryName} عالي الجودة بتصميم فريد وخامات ممتازة. شحن سريع وإرجاع سهل.`;
-  } else { // English
-    metaTitle = `${name} | ${brand} - Premium ${categoryName}`;
-    metaDescription = `Shop ${name} from ${brand}. High-quality ${categoryName.toLowerCase()} with unique design and premium materials. Fast shipping and easy returns.`;
-  }
-
-
-  return {
-    metaTitle: metaTitle,
-    metaDescription: metaDescription,
-    tags: tags
-  };
-};
-
-// Utility logging function with timestamps
-const log = (message: string): void => {
-  console.warn(`[${new Date().toISOString()}] ${message}`);
-};
-
-// Helper: Parse command-line arguments with default values
-function getArgValue(argName: string, defaultValue: number): number {
-  const arg = process.argv.find((arg) => arg.startsWith(`--${argName}=`));
-  if (arg) {
-    const value = parseInt(arg.split('=')[1], 10);
-    if (!isNaN(value) && value > 0) {
-      return value;
-    }
-  }
-  return defaultValue;
-}
-
-// Create product categories with translations
-async function createProductCategories() {
-  log('Creating product categories with translations...');
-
-  const createdCategories = [];
-
-  for (const category of categoriesData) {
-    // Check if category already exists
-    const existingCategory = await db.category.findUnique({
-      where: { slug: category.slug }
-    });
-
-    if (existingCategory) {
-      log(`Category ${category.nameEn} already exists, skipping creation`);
-      createdCategories.push(existingCategory);
-      continue;
-    }
-
-    // Create category with translations
-    const createdCategory = await db.category.create({
-      data: {
-        name: category.name,
-        slug: category.slug,
-        description: category.description,
-        imageUrl: faker.helpers.arrayElement(fashionImages[category.type]),
-        translations: {
-          create: [
-            {
-              languageCode: 'ar-SA',
-              name: category.name,
-              description: category.description,
-            },
-            {
-              languageCode: 'en',
-              name: category.nameEn,
-              description: category.descriptionEn,
-            }
-          ]
-        }
-      },
-      include: {
-        translations: true
-      }
-    });
-
-    createdCategories.push(createdCategory);
-    log(`Created category: ${createdCategory.name} with translations`);
-  }
-
-  log(`Successfully created ${createdCategories.length} categories with translations`);
-  return createdCategories;
-}
-
-// Create drivers as users with role: 'DRIVER'
-async function createDrivers() {
-  // Generate realistic Arabic driver names
-  const driverNames = [
-    'أحمد محمد السالم',
-    'محمد عبدالله القحطاني', 
-    'عبدالرحمن سعد الغامدي',
-    'فهد خالد العتيبي',
-    'سعد عبدالعزيز المطيري',
-    'عبدالله أحمد الشهري',
-    'خالد محمد الدوسري',
-    'سلطان عبدالرحمن الحربي',
-    'ناصر فهد الزهراني',
-    'عبدالعزيز سعد القرشي'
-  ];
-
-  const driversData: Prisma.UserCreateInput[] = driverNames.map((name, index) => ({
-    name: name,
-    phone: `+96650000${(1111 + index).toString()}`,
-    password: 'driver123',
-    role: UserRole.DRIVER,
-    image: `/fallback/driver${(index % 3) + 1}.jpg`,
-  }));
-
-  const createdDrivers: User[] = [];
-  for (const driver of driversData) {
-    const created = await db.user.create({ data: driver });
-    createdDrivers.push(created);
-  }
-  log(`Created ${createdDrivers.length} drivers with realistic Arabic names`);
-  return createdDrivers;
-}
-
-// Generate fashion products with multiple suppliers
-async function generateFashionProducts(count: number, supplierId: string) {
-  log(`Generating ${count} fashion products...`);
-
-  // Get all suppliers if we want to distribute products among them
-  const suppliers = await db.supplier.findMany();
-
-  // Get all categories to assign products to them
-  const categories = await db.category.findMany();
-
-  if (categories.length === 0) {
-    log('No categories found. Creating categories first...');
-    await createProductCategories();
-    // Re-fetch categories
-    const newCategories = await db.category.findMany();
-    if (newCategories.length === 0) {
-      throw new Error('Failed to create categories');
-    }
-  }
-
-  const products = [];
-  for (let i = 0; i < count; i++) {
-    const categoryInfo = faker.helpers.arrayElement(categoriesData);
-    const category = await db.category.findFirst({
-      where: { slug: categoryInfo.slug }
-    });
-
-    if (!category) {
-      log(`Category ${categoryInfo.nameEn} not found, skipping product`);
-      continue;
-    }
-
-    const brand = faker.helpers.arrayElement(fashionBrands);
-    const isLuxury = fashionBrands.indexOf(brand) < 8; // First 8 brands are luxury
-    const price = generatePrice(categoryInfo.type, isLuxury);
-    const compareAtPrice = isLuxury ? price * 1.2 : null; // 20% higher original price for luxury items on sale
-    const costPrice = price * 0.6; // 60% of retail price as cost
-
-    // Create product name with brand and category
-    // Generate English name components
-    const adjectiveEn = faker.commerce.productAdjective(); // English adjective (default locale)
-    const nameEn = `${brand} ${adjectiveEn} ${categoryInfo.nameEn}`; // English base name
-
-    // Switch locale temporarily for Arabic adjective
-    // faker.locale = 'ar';
-    const adjectiveAr = faker.commerce.productAdjective(); // Arabic adjective
-    // faker.locale = 'ar-SA'; // Switch back to ar-SA locale
-
-    const nameAr = `${brand} ${adjectiveAr} ${categoryInfo.name}`; // Arabic name
-
-    // Randomly assign to a supplier (or use the provided supplierId)
-    const productSupplierId =
-      suppliers.length > 1 ? faker.helpers.arrayElement(suppliers).id : supplierId;
-
-    // Add initial rating and review count for some products
-    const hasInitialRating = faker.datatype.boolean(0.7); // 70% of products have initial ratings
-    const initialRating = hasInitialRating
-      ? faker.number.float({ min: 3.0, max: 5.0, fractionDigits: 1 })
-      : null;
-    const initialReviewCount = hasInitialRating ? faker.number.int({ min: 1, max: 10 }) : 0;
-
-    // Generate a unique slug using the Slugify function
-    const baseSlug = Slugify(nameAr);
-
-    // Add a short random string to ensure uniqueness
-    const uniqueSlug = `${baseSlug}-${faker.string.alphanumeric(4).toLowerCase()}`;
-
-    // Generate 2-5 additional images for the product
-    const additionalImagesCount = faker.number.int({ min: 2, max: 5 });
-    const mainImage = getFashionImage(categoryInfo.type);
-    const additionalImages = [mainImage]; // Include main image in the array
-
-    // Add additional images from the same category
-    for (let j = 0; j < additionalImagesCount; j++) {
-      const additionalImage = getFashionImage(categoryInfo.type);
-      // Avoid duplicate images
-      if (!additionalImages.includes(additionalImage)) {
-        additionalImages.push(additionalImage);
-      }
-    }
-
-    // Generate product code (SKU)
-    const productCode = faker.string.alphanumeric(8).toUpperCase();
-
-    // Generate dimensions for the product
-    const dimensions = faker.helpers.arrayElement([
-      '30x20x10 سم', '25x15x5 سم', '40x30x15 سم', '20x15x8 سم', '35x25x12 سم'
-    ]);
-
-    // Generate weight
-    const weight = faker.helpers.arrayElement([
-      '0.5 كغ', '0.8 كغ', '1.2 كغ', '0.3 كغ', '1.5 كغ', '2.0 كغ'
-    ]);
-
-    // Generate stock quantity
-    const manageInventory = faker.datatype.boolean(0.7); // 70% of products have inventory tracking
-    const stockQuantity = manageInventory ? faker.number.int({ min: 0, max: 100 }) : null;
-    const outOfStock = manageInventory && stockQuantity !== null ? stockQuantity === 0 : faker.datatype.boolean(0.15);
-
-    // Calculate shipping days based on stock
-    const shippingDays = outOfStock ? '7-14' : '3-5';
-
-    // Create the product with translations
-    // Generate English details and SEO fields
-    const detailsEn = generateProductDetails(categoryInfo.type, brand, isLuxury, 'en');
-    const seoFieldsEn = generateSEOFields(nameEn, categoryInfo.type, brand, 'en');
-
-    // Generate Arabic details and SEO fields
-    const detailsAr = generateProductDetails(categoryInfo.type, brand, isLuxury, 'ar-SA');
-
-
-    try {
-      const createdProduct = await db.product.create({
-        data: {
-          name: nameEn, // Base name is English
-          slug: uniqueSlug,
-          price: price,
-          compareAtPrice: compareAtPrice,
-          costPrice: costPrice,
-          size: generateSizes(categoryInfo.type), // Sizes are generic
-          details: detailsEn.details, // Use English details from the generated object
-          imageUrl: mainImage,
-          images: additionalImages,
-          supplierId: productSupplierId,
-          type: categoryInfo.type,
-          published: faker.datatype.boolean(0.9), // 90% chance to be published
-          outOfStock: outOfStock,
-          rating: initialRating,
-          reviewCount: initialReviewCount,
-
-          // Product specifications
-          productCode: productCode,
-          gtin: faker.string.numeric(13), // 13-digit EAN/barcode
-          material: detailsEn.material, // Use English material from the generated object
-          brand: brand, // Brand is from the list, can be Arabic or English
-          color: detailsEn.color, // Use English color from the generated object
-          dimensions: dimensions, // Dimensions are generic
-          weight: weight, // Weight is generic
-          features: detailsEn.features, // Use English features from the generated object
-
-          // Shipping and return info
-          requiresShipping: true,
-          shippingDays: shippingDays,
-          returnPeriodDays: 14,
-          hasQualityGuarantee: true,
-          careInstructions: detailsEn.careInstructions, // Use English care instructions from the generated object
-
-          // Inventory management
-          manageInventory: manageInventory,
-          stockQuantity: stockQuantity,
-
-          // SEO and organization (Base SEO fields are English)
-          tags: seoFieldsEn.tags, // Base tags are English
-
-          // Create translations inline
-          translations: {
-            create: [
-              {
-                languageCode: 'ar-SA',
-                name: nameAr, // Use the generated Arabic name
-                details: detailsAr.details, // Use Arabic details
-              },
-              {
-                languageCode: 'en',
-                name: nameEn, // Use the generated English name
-                details: detailsEn.details, // Use English details
-              }
-            ]
-          },
-
-          // Create category assignment
-          categoryAssignments: {
-            create: {
-              categoryId: category.id
-            }
-          }
-        }
-      });
-
-      products.push(createdProduct);
-
-      if ((i + 1) % 10 === 0) {
-        log(`Generated ${i + 1} products`);
-      }
-    } catch (error) {
-      log(`Error creating product ${i + 1}: ${error}`);
-      continue;
-    }
-  }
-
-  log(`Successfully created ${products.length} fashion products`);
-  return products;
-}
-
-// Helper to get a random date in the last N months
-function getRandomDateInLastMonths(months: number): Date {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth() - months + 1, 1);
-  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-  const randomTime = start.getTime() + Math.random() * (end.getTime() - start.getTime());
-  return new Date(randomTime);
-}
-
-// Helper to get a random date in the current month
-function getRandomDateInCurrentMonth(): Date {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth(), 1);
-  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-  const randomTime = start.getTime() + Math.random() * (end.getTime() - start.getTime());
-  return new Date(randomTime);
-}
-
-// Helper to get a random date today
-function getRandomDateToday(): Date {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-  const randomTime = start.getTime() + Math.random() * (end.getTime() - start.getTime());
-  return new Date(randomTime);
-}
-
-// Example usage in your product/order generation logic:
-// When creating an order or product, assign createdAt as follows:
-// - 60% of data: last 6 months
-// - 30% of data: current month
-// - 10% of data: today
-
-function getWeightedRandomDate() {
-  const r = Math.random();
-  if (r < 0.1) return getRandomDateToday();
-  if (r < 0.4) return getRandomDateInCurrentMonth();
-  return getRandomDateInLastMonths(6);
-}
-
-// Generate orders with realistic customer assignments
-async function generateFashionOrders(count: number, shifts: Shift[]) {
-  log(`Generating ${count} fashion orders...`);
-
-  // Get only CUSTOMER users for order assignment
-  const customers = await db.user.findMany({
-    where: { role: UserRole.CUSTOMER }
-  });
-  const products = await db.product.findMany();
-  // Get users with DRIVER role and properly type them
-  const drivers = await db.user.findMany({
-    where: { role: UserRole.DRIVER }
-  });
-
-  if (!customers.length || !products.length) {
-    throw new Error('No customers or products found. Please seed customers and products first.');
-  }
-
-  log(`Found ${customers.length} customers and ${drivers.length} drivers for order generation`);
-
-  // Group products by category to create realistic shopping patterns
-  const productsByCategory = products.reduce(
-    (acc, product) => {
-      const category = product.type || 'other';
-      if (!acc[category]) acc[category] = [];
-      acc[category].push(product);
-      return acc;
-    },
-    {} as Record<string, Product[]>,
-  );
-
-  const orders = [];
-  for (let i = 0; i < count; i++) {
-    // Generate order date within the year 2024 for better reporting analysis
-    const orderDate = faker.date.between({ from: '2024-01-01T00:00:00.000Z', to: '2024-12-31T23:59:59.999Z' });
-
-    // Determine shopping pattern (e.g., single category or mixed)
-    const isSingleCategoryOrder = faker.datatype.boolean(0.7); // 70% chance of buying from same category
-
-    let selectedProducts: Product[] = [];
-    if (isSingleCategoryOrder) {
-      // Select a random category and pick items from it
-      const category = faker.helpers.arrayElement(Object.keys(productsByCategory));
-      const categoryProducts = productsByCategory[category];
-      if (categoryProducts && categoryProducts.length) {
-        const itemCount = faker.number.int({ min: 1, max: 4 });
-        selectedProducts = faker.helpers.arrayElements(
-          categoryProducts,
-          Math.min(itemCount, categoryProducts.length),
-        );
-      }
-    } else {
-      // Mixed category order - pick random products
-      const itemCount = faker.number.int({ min: 2, max: 6 });
-      selectedProducts = faker.helpers.arrayElements(products, itemCount);
-    }
-
-    // If no products were selected (unlikely), skip this iteration
-    if (selectedProducts.length === 0) {
-      log(`Warning: No products selected for order ${i + 1}. Skipping.`);
-      continue;
-    }
-
-    // Create order items with realistic quantities
-    const items = selectedProducts.map((product) => {
-      // People often buy multiple of the same item in fashion (different sizes, colors, etc.)
-      const isMultipleQuantity = faker.datatype.boolean(0.3); // 30% chance of buying multiple
-      const quantity = isMultipleQuantity ? faker.number.int({ min: 2, max: 4 }) : 1;
-
-      return {
-        productId: product.id,
-        quantity: quantity,
-        price: product.price,
-      };
-    });
-
-    const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
-    try {
-      const orderNumber = await generateOrderNumber();
-      // Only assign to actual customers, not admins or drivers
-      const customer = faker.helpers.arrayElement(customers);
-
-      // Assign a driver randomly (if available)
-      const driverId = drivers.length > 0 ? faker.helpers.arrayElement(drivers).id : undefined;
-
-      // Assign a real shiftId from the seeded shifts
-      const shift = faker.helpers.arrayElement(shifts);
-      const shiftId = shift.id;
-
-      // Create more realistic order status distribution
-      const orderStatus = faker.helpers.weightedArrayElement([
-        { weight: 0.2, value: ORDER_STATUS.PENDING },
-        { weight: 0.15, value: ORDER_STATUS.IN_TRANSIT },
-        { weight: 0.5, value: ORDER_STATUS.DELIVERED },
-        { weight: 0.15, value: ORDER_STATUS.CANCELED },
-      ]);
-
-      const createdOrder = await db.order.create({
-        data: {
-          orderNumber,
-          customerId: customer.id,
-          driverId: driverId,
-          status: orderStatus,
-          amount: totalAmount,
-          items: {
-            create: items,
-          },
-          latitude: faker.location.latitude().toString(),
-          longitude: faker.location.longitude().toString(),
-          resonOfcancel:
-            orderStatus === 'CANCELED'
-              ? faker.helpers.arrayElement([
-                'Customer requested cancellation',
-                'Items out of stock',
-                'Delivery address issue',
-                'Payment problem',
-                'Order placed by mistake',
-              ])
-              : undefined,
-          shiftId: shiftId,
-          createdAt: getWeightedRandomDate(),
-          updatedAt: faker.date.between({ from: orderDate, to: new Date() }),
-          deliveredAt: orderStatus === ORDER_STATUS.DELIVERED ? faker.date.between({ from: orderDate, to: new Date() }) : undefined,
-        },
-      });
-
-      orders.push(createdOrder);
-
-      // If order is "InWay", create an OrderInWay record
-      if (orderStatus === ORDER_STATUS.IN_TRANSIT && driverId) {
-        // Check if the driver already has an 'InWay' order
-        const existingOrderInWay = await db.orderInWay.findUnique({
-          where: { driverId: driverId },
-        });
-
-        // Only create OrderInWay if the driver is not already assigned to one
-        if (!existingOrderInWay) {
-          await db.orderInWay.create({
-            data: {
-              orderId: createdOrder.id,
-              driverId: driverId,
-              orderNumber: orderNumber,
-              latitude: faker.location.latitude().toString(),
-              longitude: faker.location.longitude().toString(),
-            },
-          });
-        } else {
-          log(`Driver ${driverId} already has an 'IN_WAY' order. Skipping OrderInWay creation for order ${orderNumber}.`);
-        }
-      }
-
-      if ((i + 1) % 10 === 0) {
-        log(`Generated ${i + 1} orders`);
-      }
-    } catch (error) {
-      log(`Error creating order ${i + 1}: ${error}`);
-      continue;
-    }
-  }
-
-  log(`Successfully generated ${orders.length} fashion orders`);
-  return orders;
-}
-
-// Generate product reviews with realistic distribution
-async function generateProductReviews() {
-  log('Generating product reviews...');
-
-  try {
-    // Get all products and users
-    const products = await db.product.findMany({
-      where: { reviewCount: { gt: 0 } }, // Only products with reviewCount > 0
-    });
-    const users = await db.user.findMany();
-
-    if (!users.length) {
-      log('No users found. Skipping review generation.');
-      return;
-    }
-
-    let totalReviews = 0;
-    const reviews = [];
-
-    // For each product with reviewCount > 0, generate that many reviews (max 10)
-    for (const product of products) {
-      if (!product.reviewCount) continue;
-
-      // Get all orders containing this product to mark reviews as verified
-      const orderItems = await db.orderItem.findMany({
-        where: { productId: product.id },
-        include: { order: { include: { customer: true } } },
-      });
-
-      // Create a set of user IDs who have purchased this product
-      const purchaserIds = new Set(
-        orderItems
-          .filter((item) => item.order?.status === OrderStatus.DELIVERED)
-          .map((item) => item.order?.customerId)
-          .filter(Boolean),
-      );
-
-      // Limit reviews to a maximum of 10 per product
-      const maxReviews = Math.min(product.reviewCount, 5);
-
-      // Generate reviews up to the maxReviews
-      for (let i = 0; i < maxReviews; i++) {
-        // Try to use purchasers first, then fall back to random users
-        let userId: string;
-        let isVerified = false;
-
-        if (purchaserIds.size > 0 && i < purchaserIds.size) {
-          // Use a purchaser (verified review)
-          const purchaserId = Array.from(purchaserIds)[i];
-          if (purchaserId) {
-            userId = purchaserId;
-            isVerified = true;
-          } else {
-            // Fallback to random user if purchaserId is undefined
-            userId = faker.helpers.arrayElement(users).id;
-          }
-        } else {
-          // Use a random user (unverified review)
-          userId = faker.helpers.arrayElement(users).id;
-        }
-
-        // Generate a rating that's close to the product's average rating
-        const baseRating = product.rating || 4;
-        const variation = faker.number.int({ min: -1, max: 1 });
-        const rating = Math.max(1, Math.min(5, Math.round(baseRating + variation)));
-
-        // Generate review text based on rating
-        let comment;
-        if (rating >= 4) {
-          comment = faker.helpers.arrayElement([
-            `منتج رائع! ${faker.commerce.productAdjective()} جداً.`,
-            `أنا سعيد جداً بهذا المنتج. الجودة ممتازة.`,
-            `تجربة شراء ممتازة. سأشتري مرة أخرى.`,
-            `يستحق كل ريال. ${faker.commerce.productAdjective()} وعملي.`,
-            `أفضل ${product.type} اشتريته. أوصي به بشدة.`,
-          ]);
-        } else if (rating === 3) {
-          comment = faker.helpers.arrayElement([
-            `منتج جيد ولكن ليس رائعاً. ${faker.commerce.productAdjective()} ولكن هناك بعض العيوب.`,
-            `جودة معقولة مقابل السعر.`,
-            `منتج متوسط. يمكن أن يكون أفضل.`,
-            `يلبي الغرض ولكن لا يتجاوز التوقعات.`,
-            `تجربة مقبولة ولكن هناك مجال للتحسين.`,
-          ]);
-        } else {
-          comment = faker.helpers.arrayElement([
-            `لست راضياً عن هذا المنتج. ${faker.commerce.productAdjective()} ولكن الجودة سيئة.`,
-            `لا أوصي بهذا المنتج. خيبة أمل كبيرة.`,
-            `سعر مرتفع مقابل جودة منخفضة.`,
-            `لن أشتري مرة أخرى. تجربة سيئة.`,
-            `المنتج لا يطابق الوصف. غير راضٍ.`,
-          ]);
-        }
-
-        // Create the review object
-        const createdReview = await db.review.create({
-          data: {
-            productId: product.id,
-            userId: userId,
-            rating: rating,
-            comment: comment,
-            isVerified: isVerified,
-            createdAt: faker.date.between({ from: product.createdAt, to: new Date() }), // Review date after product creation
-          },
-        });
-
-        reviews.push(createdReview);
-        totalReviews++;
-
-        if (totalReviews % 50 === 0) {
-          log(`Generated ${totalReviews} reviews`);
-        }
-      }
-    }
-
-    log(`Successfully generated ${totalReviews} product reviews`);
-  } catch (error) {
-    log(`Error generating product reviews: ${error}`);
-    throw error;
-  }
-}
-
-// Step 1: Create Shifts
-async function createShifts() {
-  const shiftsData = [
-    { name: 'Morning', startTime: '06:00', endTime: '14:00' },
-    { name: 'Afternoon', startTime: '14:00', endTime: '22:00' },
-    { name: 'Night', startTime: '22:00', endTime: '06:00' },
-  ];
-  const createdShifts: Shift[] = [];
-  for (const shift of shiftsData) {
-    const created = await db.shift.create({ data: shift });
-    createdShifts.push(created);
-  }
-  log(`Created ${createdShifts.length} shifts`);
-  return createdShifts;
-}
-
-// Step 2: Create Users (all roles) with many more customers
-async function createUsers() {
-  // Create the main admin user and a few system users
-  const systemUsers: Prisma.UserCreateInput[] = [
-    // Main admin user (you)
-    {
-      name: 'khalid',
-      phone: '0545642264',
-      password: '123456',
-      role: UserRole.ADMIN,
-      image: '/fallback/admin.jpg',
-      email: 'khalid@example.com',
-    },
-    // Additional system user
-    {
-      name: 'مدير النظام',
-      phone: '+966500000001',
-      password: 'admin123',
-      role: UserRole.ADMIN,
-      image: '/fallback/admin.jpg',
-      email: 'admin@example.com',
-    },
-    // Marketer user
-    {
-      name: 'مسوق المتجر',
-      phone: '+966500000004',
-      password: 'marketer123',
-      role: UserRole.MARKETER,
-      image: '/fallback/marketer.jpg',
-      email: 'marketer@example.com',
-    },
-  ];
-
-  // Generate many realistic customers (50-100 customers)
-  const customerCount = 75;
-  const customerUsers: Prisma.UserCreateInput[] = [];
-  
-  for (let i = 0; i < customerCount; i++) {
-    // Generate realistic Saudi phone numbers
-    const phoneNumber = `+96656${faker.string.numeric(7)}`;
-    
-    customerUsers.push({
-      name: faker.person.fullName(),
-      phone: phoneNumber,
-      password: 'customer123',
-      role: UserRole.CUSTOMER,
-      image: '/fallback/customer.jpg',
-      email: `customer${i + 1}@example.com`,
-    });
-  }
-
-  // Combine system users and customers
-  const allUsers = [...systemUsers, ...customerUsers];
-  
-  const createdUsers: User[] = [];
-  for (const user of allUsers) {
-    if (!user.phone) continue; // skip if phone is null/undefined
-    const upserted = await db.user.upsert({
-      where: { phone: String(user.phone) },
-      update: {
-        name: user.name,
-        password: user.password,
-        role: user.role,
-        image: user.image,
-        email: user.email,
-      },
-      create: { ...user, phone: String(user.phone) },
-    });
-    createdUsers.push(upserted);
-  }
-  
-  const customerCount_final = createdUsers.filter(u => u.role === UserRole.CUSTOMER).length;
-  const adminCount = createdUsers.filter(u => u.role === UserRole.ADMIN).length;
-  const marketerCount = createdUsers.filter(u => u.role === UserRole.MARKETER).length;
-  
-  log(`Upserted ${createdUsers.length} users total:`);
-  log(`  - ${customerCount_final} customers with realistic names`);
-  log(`  - ${adminCount} admins`);
-  log(`  - ${marketerCount} marketers`);
-  
-  return createdUsers;
-}
-
-// Step 3: Create WishlistItems for real users and products
-async function createWishlistItems(users: User[], products: Product[]) {
-  if (!users.length || !products.length) {
-    log('No users or products for wishlist. Skipping.');
-    return [];
-  }
-  const wishlistItems = [];
-  // Each user will wishlist 2-4 random products
-  for (const user of users) {
-    const count = faker.number.int({ min: 2, max: 4 });
-    const selectedProducts = faker.helpers.arrayElements(products, count);
-    for (const product of selectedProducts) {
-      try {
-        const item = await db.wishlistItem.create({
-          data: {
-            userId: user.id,
-            productId: product.id,
-          },
-        });
-        wishlistItems.push(item);
-      } catch (e) {
-        // Ignore duplicates due to unique constraint
-      }
-    }
-  }
-  log(`Created ${wishlistItems.length} wishlist items for real users and products`);
-  return wishlistItems;
-}
-
-// --- NotificationType enum values for reference ---
-const notificationTypes = [
-  'WARNING', 'DESTRUCTIVE', 'INFO', 'SUCCESS', 'ORDER', 'PROMO', 'SYSTEM'
-];
-
-// Step X: Create UserNotifications for real users (with all types)
-async function createUserNotifications(users: User[]) {
-  if (!users.length) {
-    log('No users for notifications. Skipping.');
-    return [];
-  }
-  const notifications = [];
-  for (const user of users) {
-    // لكل مستخدم، أنشئ إشعارات من كل نوع لاختبار الواجهة
-    for (const type of notificationTypes) {
-      const notif = await db.userNotification.create({
-        data: {
-          userId: user.id,
-          title: faker.helpers.arrayElement([
-            'طلب جديد',
-            'تم تحديث حالة الطلب',
-            'عرض خاص',
-            'تنبيه أمني',
-            'تمت إضافة منتج جديد',
-            'نجاح العملية',
-            'رسالة من الإدارة',
-          ]),
-          body: faker.lorem.sentence(),
-          type: type as NotificationType,
-          read: faker.datatype.boolean(),
-          actionUrl: faker.helpers.arrayElement([
-            '/user/orders',
-            '/offers',
-            '/user/profile',
-            '/dashboard',
-            '/products',
-          ]),
-          icon: undefined, // now handled by type
-          channel: 'in-app',
-          createdAt: faker.date.recent({ days: 30 }),
-        },
-      });
-      notifications.push(notif);
-    }
-  }
-  log(`Created ${notifications.length} user notifications (all types)`);
-  return notifications;
-}
-
-// Step Y: Create Offers and assign products
-async function createOffersWithProducts(products: Product[]) {
-  if (!products.length) {
-    log('No products for offers. Skipping.');
-    return [];
-  }
-  const offersData = [
-    {
-      name: 'عرض الصيف الكبير',
-      slug: 'summer-sale',
-      description: 'خصومات تصل إلى 50% على جميع المنتجات الصيفية.',
-      bannerImage: '/fallback/product-fallback.avif',
-      isActive: true,
-      displayOrder: 1,
-      hasDiscount: true,
-      discountPercentage: 50,
-      header: 'تخفيضات الصيف',
-      subheader: 'لا تفوت الفرصة',
-    },
-    {
-      name: 'عرض العودة للمدارس',
-      slug: 'back-to-school',
-      description: 'عروض خاصة على ملابس وأحذية المدارس.',
-      bannerImage: '/fallback/product-fallback.avif',
-      isActive: true,
-      displayOrder: 2,
-      hasDiscount: true,
-      discountPercentage: 30,
-      header: 'العودة للمدارس',
-      subheader: 'جهز أطفالك بأفضل الأسعار',
-    },
-    {
-      name: 'عرض نهاية الأسبوع',
-      slug: 'weekend-offer',
-      description: 'خصومات حصرية في نهاية كل أسبوع.',
-      bannerImage: '/fallback/product-fallback.avif',
-      isActive: false,
-      displayOrder: 3,
-      hasDiscount: false,
-      discountPercentage: null,
-      header: 'عروض نهاية الأسبوع',
-      subheader: 'كل جمعة وسبت',
-    },
-  ];
-  const createdOffers = [];
-  for (const offer of offersData) {
-    const created = await db.offer.create({ data: offer });
-    // Assign 5 random products to each offer
-    const offerProducts = faker.helpers.arrayElements(products, 5);
-    for (const product of offerProducts) {
-      await db.offerProduct.create({
-        data: {
-          offerId: created.id,
-          productId: product.id,
-        },
-      });
-    }
-    createdOffers.push(created);
-  }
-  log(`Created ${createdOffers.length} offers and assigned products`);
-  return createdOffers;
-}
-
-// Utility: Clear all old data before seeding
+// --- Utility: Clear all data (order matters for relations) ---
 async function clearAllData() {
-  log('Clearing all old data...');
-  // Order of deletion matters due to relations
-  await db.orderInWay.deleteMany({});
+  logBanner('🧹 Clearing all data');
   await db.orderItem.deleteMany({});
-  await db.order.deleteMany({});
+  await db.orderInWay.deleteMany({});
+  await db.orderRating.deleteMany({});
   await db.review.deleteMany({});
   await db.wishlistItem.deleteMany({});
   await db.userNotification.deleteMany({});
-  await db.account.deleteMany({});
-  await db.locationHistory.deleteMany({});
+  await db.cartItem.deleteMany({});
+  await db.cart.deleteMany({});
   await db.offerProduct.deleteMany({});
   await db.offer.deleteMany({});
-  await db.productTranslation.deleteMany({});
   await db.categoryProduct.deleteMany({});
-  await db.categoryTranslation.deleteMany({});
   await db.product.deleteMany({});
   await db.category.deleteMany({});
-  await db.supplierTranslation.deleteMany({});
   await db.supplier.deleteMany({});
+  await db.order.deleteMany({});
+  await db.address.deleteMany({});
   await db.shift.deleteMany({});
   await db.user.deleteMany({});
-  log('All old data cleared.');
+  logBanner('✅ All data cleared');
 }
 
-// Main function to seed the database
-async function seedDatabase() {
-  try {
-    log('Seeding database...');
+// --- Enhanced Seeding Functions ---
+async function seedShifts() {
+  logStep('Seeding shifts');
+  const shifts = await Promise.all([
+    db.shift.create({ data: { name: 'Morning', startTime: '06:00', endTime: '14:00' } }),
+    db.shift.create({ data: { name: 'Afternoon', startTime: '14:00', endTime: '22:00' } }),
+    db.shift.create({ data: { name: 'Night', startTime: '22:00', endTime: '06:00' } }),
+  ]);
+  logDone('Shifts', shifts.length, shifts.map(s => s.id));
+  return shifts;
+}
 
-    // Clear all old data first
-    await clearAllData();
-
-    // Step 1: Shifts
-    const shifts = await createShifts();
-
-    // Step 2: Users
-    const users = await createUsers();
-
-    // Step X: UserNotifications (all types)
-    await createUserNotifications(users);
-
-    // Create suppliers
-    await createFashionSuppliers();
-
-    // Create categories
-    await createProductCategories();
-
-    // Create drivers
-    await createDrivers();
-
-    // Generate products
-    const products = await generateFashionProducts(getArgValue('productCount', 100), '');
-
-    // Step Y: Offers with products
-    await createOffersWithProducts(products);
-
-    // Step 3: WishlistItems (after products and users)
-    await createWishlistItems(users, products);
-
-    // Generate orders (pass shifts array)
-    await generateFashionOrders(getArgValue('orderCount', 100), shifts);
-
-    // Generate reviews
-    await generateProductReviews();
-
-    log('Database seeding completed successfully');
-  } catch (error) {
-    log(`Error seeding database: ${error}`);
-    throw error;
+async function seedUsers() {
+  logStep('Seeding users');
+  const users = [];
+  const total = 27;
+  for (let i = 0; i < total; i++) {
+    let user;
+    if (i === 0) {
+      user = await db.user.create({ data: { name: 'Admin', phone: '0500000000', password: 'admin123', role: UserRole.ADMIN, email: 'admin@example.com' } });
+    } else if (i === 1) {
+      user = await db.user.create({ data: { name: 'Marketer', phone: '0500000001', password: 'marketer123', role: UserRole.MARKETER, email: 'marketer@example.com' } });
+    } else if (i < 7) {
+      user = await db.user.create({ data: { name: faker.person.fullName(), phone: `05000010${i-2}`, password: 'driver123', role: UserRole.DRIVER } });
+    } else {
+      user = await db.user.create({ data: { name: faker.person.fullName(), phone: `05010010${i-7}`, password: 'customer123', role: UserRole.CUSTOMER, email: `customer${i-7}@example.com` } });
+    }
+    users.push(user);
+    console.log(`👤 User created: ${user.name} (${user.role}) [${user.id}]`);
+    logProgress(i, total, 'Users', '👤');
   }
+  logDone('Users', users.length);
+  return users;
 }
 
-// Run the seeding function
-seedDatabase();
+async function seedAddresses(users: User[]): Promise<Address[]> {
+  logStep('Seeding addresses');
+  const addresses = [];
+  const customers = users.filter(u => u.role === 'CUSTOMER');
+  for (let i = 0; i < customers.length; i++) {
+    const user = customers[i];
+    const address = await db.address.create({
+      data: {
+        userId: user.id,
+        label: 'المنزل',
+        district: faker.location.city(),
+        street: faker.location.street(),
+        buildingNumber: faker.string.numeric(2),
+        latitude: faker.location.latitude().toString(),
+        longitude: faker.location.longitude().toString(),
+        isDefault: true,
+      },
+    });
+    addresses.push(address);
+    console.log(`🏠 Address created for user ${user.name} [${address.id}]`);
+    logProgress(i, customers.length, 'Addresses', '🏠');
+  }
+  if (addresses.length === 0) {
+    console.warn('⚠️  No addresses were seeded!');
+  }
+  logDone('Addresses', addresses.length);
+  return addresses;
+}
+
+async function seedFashionSuppliers(): Promise<Supplier[]> {
+  logStep('Seeding fashion suppliers');
+  const suppliers = [];
+  for (let i = 0; i < FASHION_SUPPLIERS.length; i++) {
+    const supplierData = FASHION_SUPPLIERS[i];
+    const supplier = await db.supplier.create({
+      data: {
+        name: supplierData.name,
+        slug: supplierData.slug,
+        logo: supplierData.logo,
+        email: supplierData.email,
+        phone: supplierData.phone,
+        address: supplierData.address,
+        type: supplierData.type,
+      },
+    });
+    suppliers.push(supplier);
+    console.log(`🏢 Supplier created: ${supplier.name} [${supplier.id}]`);
+    logProgress(i, FASHION_SUPPLIERS.length, 'Suppliers', '🏢');
+  }
+  logDone('Suppliers', suppliers.length);
+  return suppliers;
+}
+
+async function seedFashionCategories(): Promise<Category[]> {
+  logStep('Seeding fashion categories');
+  const categories = [];
+  for (let i = 0; i < FASHION_CATEGORIES.length; i++) {
+    const categoryData = FASHION_CATEGORIES[i];
+    const category = await db.category.create({
+      data: {
+        name: categoryData.name,
+        slug: categoryData.slug,
+        description: categoryData.description,
+        imageUrl: categoryData.imageUrl,
+      },
+    });
+    categories.push(category);
+    console.log(`🏷️  Category created: ${category.name} [${category.id}]`);
+    logProgress(i, FASHION_CATEGORIES.length, 'Categories', '🏷️');
+  }
+  logDone('Categories', categories.length);
+  return categories;
+}
+
+async function seedFashionProducts(suppliers: Supplier[], categories: Category[]): Promise<Product[]> {
+  logStep('Seeding fashion products');
+  const products = [];
+  let productIndex = 0;
+  
+  for (const template of FASHION_PRODUCT_TEMPLATES) {
+    const category = categories.find(c => c.slug === template.categorySlug);
+    if (!category) {
+      console.warn(`⚠️  Category not found for template: ${template.categorySlug}`);
+      continue;
+    }
+    
+    const supplier = faker.helpers.arrayElement(suppliers);
+    const productCount = Math.floor(template.productCount * 0.8); // Generate 80% of suggested count
+    
+    for (let i = 0; i < productCount; i++) {
+      const name = faker.helpers.arrayElement(template.names);
+      // const nameEn = faker.helpers.arrayElement(template.namesEn);
+      const price = faker.number.int({ min: template.priceRange.min, max: template.priceRange.max });
+      const compareAtPrice = template.compareAtPriceRange 
+        ? faker.number.int({ min: template.compareAtPriceRange.min, max: template.compareAtPriceRange.max })
+        : undefined;
+      
+      // Smart stock management - some products out of stock
+      const inStock = Math.random() < template.stockChance;
+      const stockQuantity = inStock ? faker.number.int({ min: 5, max: 50 }) : 0;
+      
+      // Create unique slug using the existing Slugify helper
+      const baseSlug = Slugify(name);
+      const uniqueSlug = `${baseSlug}-${Date.now()}-${faker.string.alphanumeric(4).toLowerCase()}`;
+      
+      const product = await db.product.create({
+        data: {
+          name,
+          description: faker.helpers.arrayElement(template.features),
+          slug: uniqueSlug,
+          price,
+          compareAtPrice,
+          costPrice: price * 0.6, // 60% of selling price
+          size: faker.helpers.arrayElement(template.sizes),
+          details: faker.helpers.arrayElement(template.features),
+          imageUrl: faker.helpers.arrayElement(template.imageUrls),
+          images: template.imageUrls,
+          supplierId: supplier.id,
+          type: 'product',
+          productCode: `FASH-${faker.string.alphanumeric(6).toUpperCase()}`,
+          material: faker.helpers.arrayElement(template.materials),
+          brand: faker.helpers.arrayElement(template.brands),
+          color: faker.helpers.arrayElement(template.colors),
+          dimensions: 'Standard',
+          weight: 'Light',
+          features: template.features,
+          requiresShipping: true,
+          shippingDays: '3-5',
+          returnPeriodDays: 14,
+          hasQualityGuarantee: true,
+          careInstructions: 'Machine wash cold, tumble dry low',
+          published: true,
+          outOfStock: !inStock,
+          manageInventory: true,
+          stockQuantity,
+          rating: faker.number.float({ min: 3.5, max: 5.0, fractionDigits: 1 }),
+          reviewCount: faker.number.int({ min: 0, max: 25 }),
+          categoryAssignments: { create: [{ categoryId: category.id }] },
+        },
+      });
+      
+      products.push(product);
+      logStockStatus(product.name, inStock);
+      logProgress(productIndex, FASHION_PRODUCT_TEMPLATES.length * 20, 'Products', '📦');
+      productIndex++;
+    }
+  }
+  
+  logDone('Products', products.length);
+  return products;
+}
+
+async function seedFashionOffers(products: Product[]): Promise<void> {
+  logStep('Seeding fashion offers');
+  for (let i = 0; i < FASHION_OFFERS.length; i++) {
+    const offerData = FASHION_OFFERS[i];
+    const offer = await db.offer.create({
+      data: {
+        name: offerData.name,
+        slug: offerData.slug,
+        description: offerData.description,
+        bannerImage: offerData.bannerImage,
+        isActive: offerData.isActive,
+        displayOrder: offerData.displayOrder,
+        hasDiscount: offerData.hasDiscount,
+        discountPercentage: offerData.discountPercentage,
+        header: offerData.header,
+        subheader: offerData.subheader,
+      },
+    });
+    
+    // Assign products to offer based on category
+    const offerProducts = faker.helpers.arrayElements(products, offerData.productCount);
+    for (const product of offerProducts) {
+      await db.offerProduct.create({ data: { offerId: offer.id, productId: product.id } });
+    }
+    
+    console.log(`💸 Offer created: ${offer.name} [${offer.id}]`);
+    logProgress(i, FASHION_OFFERS.length, 'Offers', '💸');
+  }
+  logDone('Offers', FASHION_OFFERS.length);
+}
+
+async function seedOrders(users: User[], addresses: Address[], shifts: Shift[], products: Product[]): Promise<Order[]> {
+  logStep('Seeding orders');
+  const orders = [];
+  const customers = users.filter(u => u.role === 'CUSTOMER');
+  for (let i = 0; i < 30; i++) {
+    const customer = faker.helpers.arrayElement(customers);
+    const customerAddresses = addresses.filter(a => a.userId === customer.id);
+    if (!customerAddresses.length) {
+      console.warn(`⚠️  Skipping order for customer ${customer.id} (no addresses)`);
+      continue;
+    }
+    const address = faker.helpers.arrayElement(customerAddresses);
+    const shift = faker.helpers.arrayElement(shifts);
+    const status = faker.helpers.arrayElement(Object.values(OrderStatus));
+    const order = await db.order.create({
+      data: {
+        orderNumber: faker.string.alphanumeric(8).toUpperCase(),
+        customerId: customer.id,
+        addressId: address.id,
+        shiftId: shift.id,
+        status,
+        amount: faker.number.int({ min: 50, max: 2000 }),
+        paymentMethod: 'CASH',
+        createdAt: faker.date.past(),
+        updatedAt: faker.date.recent(),
+        deliveredAt: status === OrderStatus.DELIVERED ? faker.date.recent() : undefined,
+      },
+    });
+    // Add order items
+    const items = faker.helpers.arrayElements(products, faker.number.int({ min: 1, max: 4 }));
+    for (const product of items) {
+      await db.orderItem.create({
+        data: {
+          orderId: order.id,
+          productId: product.id,
+          quantity: faker.number.int({ min: 1, max: 3 }),
+          price: product.price,
+        },
+      });
+    }
+    orders.push(order);
+    console.log(`📝 Order created: ${order.orderNumber} [${order.id}]`);
+    logProgress(i, 30, 'Orders', '📝');
+  }
+  logDone('Orders', orders.length);
+  return orders;
+}
+
+async function seedReviews(users: User[], products: Product[]): Promise<void> {
+  logStep('Seeding reviews');
+  let reviewCount = 0;
+  for (let p = 0; p < products.length; p++) {
+    const product = products[p];
+    const count = faker.number.int({ min: 0, max: 5 });
+    for (let i = 0; i < count; i++) {
+      const user = faker.helpers.arrayElement(users);
+      const review = await db.review.create({
+        data: {
+          productId: product.id,
+          userId: user.id,
+          rating: faker.number.int({ min: 1, max: 5 }),
+          comment: faker.lorem.sentence(),
+          isVerified: faker.datatype.boolean(),
+          createdAt: faker.date.past(),
+        },
+      });
+      reviewCount++;
+      console.log(`⭐ Review created for product ${product.name} by user ${user.name} [${review.id}]`);
+      logProgress(reviewCount - 1, products.length * 5, 'Reviews', '⭐');
+    }
+  }
+  logDone('Reviews', reviewCount);
+}
+
+async function seedWishlistItems(users: User[], products: Product[]): Promise<void> {
+  logStep('Seeding wishlist items');
+  let count = 0;
+  for (let u = 0; u < users.length; u++) {
+    const user = users[u];
+    const items = faker.helpers.arrayElements(products, faker.number.int({ min: 0, max: 5 }));
+    for (let i = 0; i < items.length; i++) {
+      const product = items[i];
+      const wish = await db.wishlistItem.create({
+        data: {
+          userId: user.id,
+          productId: product.id,
+        },
+      });
+      count++;
+      console.log(`💜 Wishlist item: user ${user.name} -> product ${product.name} [${wish.id}]`);
+      logProgress(count - 1, users.length * 5, 'Wishlist', '💜');
+    }
+  }
+  logDone('Wishlist items', count);
+}
+
+async function seedNotifications(users: User[]): Promise<void> {
+  logStep('Seeding notifications');
+  let count = 0;
+  for (let i = 0; i < users.length; i++) {
+    const user = users[i];
+    const notif = await db.userNotification.create({
+      data: {
+        userId: user.id,
+        type: NotificationType.INFO,
+        title: 'Welcome!',
+        body: 'Thank you for joining our platform.',
+        read: false,
+      },
+    });
+    count++;
+    console.log(`🔔 Notification created for user ${user.name} [${notif.id}]`);
+    logProgress(i, users.length, 'Notifications', '🔔');
+  }
+  logDone('Notifications', count);
+}
+
+async function seedCarts(users: User[], products: Product[]): Promise<void> {
+  logStep('Seeding carts');
+  let count = 0;
+  for (let u = 0; u < users.length; u++) {
+    const user = users[u];
+    const cart = await db.cart.create({
+      data: {
+        userId: user.id,
+      },
+    });
+    const items = faker.helpers.arrayElements(products, faker.number.int({ min: 0, max: 3 }));
+    for (let i = 0; i < items.length; i++) {
+      const product = items[i];
+      const cartItem = await db.cartItem.create({
+        data: {
+          cartId: cart.id,
+          productId: product.id,
+          quantity: faker.number.int({ min: 1, max: 3 }),
+        },
+      });
+      count++;
+      console.log(`🛒 Cart item: user ${user.name} -> product ${product.name} [${cartItem.id}]`);
+      logProgress(count - 1, users.length * 3, 'Cart items', '🛒');
+    }
+  }
+  logDone('Cart items', count);
+}
+
+// --- Main Seed Function ---
+async function main() {
+  const start = Date.now();
+  logBanner('🌱 Starting Enhanced Fashion Database Seed');
+  try {
+    await clearAllData();
+  } catch (e) {
+    console.error('❌ Error clearing data:', e);
+    throw e;
+  }
+
+  let shifts, users, addresses, suppliers, categories, products;
+  try {
+    shifts = await seedShifts();
+  } catch (e) {
+    console.error('❌ Error seeding shifts:', e);
+    throw e;
+  }
+
+  try {
+    users = await seedUsers();
+  } catch (e) {
+    console.error('❌ Error seeding users:', e);
+    throw e;
+  }
+
+  try {
+    addresses = await seedAddresses(users);
+  } catch (e) {
+    console.error('❌ Error seeding addresses:', e);
+    throw e;
+  }
+
+  try {
+    suppliers = await seedFashionSuppliers();
+  } catch (e) {
+    console.error('❌ Error seeding suppliers:', e);
+    throw e;
+  }
+
+  try {
+    categories = await seedFashionCategories();
+  } catch (e) {
+    console.error('❌ Error seeding categories:', e);
+    throw e;
+  }
+
+  try {
+    products = await seedFashionProducts(suppliers, categories);
+  } catch (e) {
+    console.error('❌ Error seeding products:', e);
+    throw e;
+  }
+
+  try {
+    await seedFashionOffers(products);
+  } catch (e) {
+    console.error('❌ Error seeding offers:', e);
+    throw e;
+  }
+
+  try {
+    await seedOrders(users, addresses, shifts, products);
+  } catch (e) {
+    console.error('❌ Error seeding orders:', e);
+    throw e;
+  }
+
+  try {
+    await seedReviews(users, products);
+  } catch (e) {
+    console.error('❌ Error seeding reviews:', e);
+    throw e;
+  }
+
+  try {
+    await seedWishlistItems(users, products);
+  } catch (e) {
+    console.error('❌ Error seeding wishlist items:', e);
+    throw e;
+  }
+
+  try {
+    await seedNotifications(users);
+  } catch (e) {
+    console.error('❌ Error seeding notifications:', e);
+    throw e;
+  }
+
+  try {
+    await seedCarts(users, products);
+  } catch (e) {
+    console.error('❌ Error seeding carts:', e);
+    throw e;
+  }
+
+  logBanner('🎉 ENHANCED FASHION SEED COMPLETE!');
+  console.log(`⏱️  Total time: ${((Date.now() - start) / 1000).toFixed(1)}s`);
+  console.log(`📊 Generated ${products.length} fashion products with realistic stock management`);
+  console.log(`🏷️  Created ${categories.length} fashion categories with HD images`);
+  console.log(`🏢 Seeded ${suppliers.length} fashion suppliers with proper branding`);
+  console.log(`💸 Generated ${FASHION_OFFERS.length} promotional offers and campaigns`);
+}
+
+main().catch((e) => {
+  console.error('❌ Enhanced fashion seed failed:', e);
+  process.exit(1);
+});

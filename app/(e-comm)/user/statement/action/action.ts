@@ -2,28 +2,55 @@ import db from '../../../../../lib/prisma';
 
 export async function getUserStatement(userId: string) {
   if (!userId) {
-    // Prevent Prisma error if userId is undefined/null
+    console.error('getUserStatement: userId is required');
     return null;
   }
+
   try {
     const user = await db.user.findUnique({
       where: { id: userId },
       include: {
         customerOrders: {
-          include: {
-            items: true,
+          orderBy: {
+            createdAt: 'desc'
           },
+          include: {
+            items: {
+              include: {
+                product: {
+                  select: {
+                    name: true,
+                    imageUrl: true
+                  }
+                }
+              }
+            }
+          }
         },
       },
     });
 
     if (!user) {
-      throw new Error('User not found');
+      console.error(`getUserStatement: User not found with id ${userId}`);
+      return null;
     }
 
-    return user;
+    // Calculate order amounts if not already calculated
+    const ordersWithCalculatedAmounts = user.customerOrders.map(order => {
+      const calculatedAmount = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      return {
+        ...order,
+        amount: order.amount || calculatedAmount
+      };
+    });
+
+    return {
+      ...user,
+      customerOrders: ordersWithCalculatedAmounts
+    };
+
   } catch (error) {
-    // Removed console.error to keep build output clean
-    throw error;
+    console.error('getUserStatement: Database error:', error);
+    throw new Error('حدث خطأ أثناء جلب بيانات الحساب');
   }
 }

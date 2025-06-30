@@ -37,3 +37,84 @@ Whenever a component or file is no longer needed but might be required for futur
    ✅ Consistent indentation (2/4 spaces)  
    ✅ Existing API fields unchanged  
    ✅ New fields marked as optional (`newField?`)  
+
+# AI Function Rules for E-commerce Project
+
+## 🚨 URGENT TASK PROTOCOL
+When user says "urgent task" or indicates a critical feature:
+1. **NEVER write or update code immediately**
+2. **ALWAYS create comprehensive action plan first**
+3. **Discuss plan as a team before implementation**
+4. **Create MD file with detailed checklist**
+5. **Track progress and mark tasks as done**
+6. **Verify completion before marking as finished**
+
+## General Rules
+- Always use TypeScript with strict typing
+- Follow Next.js 15 App Router patterns
+- Use server components by default
+- Implement proper error handling
+- Follow RTL-first design principles
+- Use shadcn/ui components consistently
+- Implement proper authentication checks
+- Use Prisma for database operations
+- Follow the established folder structure
+- Use proper internationalization (next-intl)
+
+## Code Quality Standards
+- Write clean, readable, and maintainable code
+- Use meaningful variable and function names
+- Implement proper TypeScript types
+- Follow SOLID principles
+- Write minimal, focused functions
+- Use proper error boundaries
+- Implement loading states
+- Follow accessibility guidelines
+
+## Database & Security
+- Use Prisma Client for all database operations
+- Implement proper validation with Zod
+- Use environment variables for sensitive data
+- Implement proper authentication
+- Validate all user inputs
+- Use HTTPS in production
+- Implement proper CORS policies
+
+## UI/UX Standards
+- Use the established design system
+- Implement responsive design
+- Use proper color coding for features
+- Implement smooth animations
+- Use proper loading states
+- Follow RTL layout principles
+- Use consistent spacing with gap utilities
+- Implement proper hover effects
+
+## Performance & SEO
+- Optimize images with next/image
+- Implement proper meta tags
+- Use semantic HTML
+- Optimize bundle size
+- Implement proper caching
+- Monitor Core Web Vitals
+- Use server-side rendering where appropriate
+
+## Testing & Documentation
+- Write comprehensive documentation
+- Test all functionality thoroughly
+- Implement proper error logging
+- Use proper debugging tools
+- Document API endpoints
+- Test in multiple browsers
+- Test responsive design
+- Validate accessibility
+
+## Project Structure
+- Follow the established folder structure
+- Use route-specific components
+- Implement proper separation of concerns
+- Use shared utilities appropriately
+- Follow naming conventions
+- Organize code logically
+- Use proper imports/exports
+- Maintain clean architecture

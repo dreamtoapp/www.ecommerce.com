@@ -20,23 +20,28 @@ export default async function EcommerceLayout({ children }: { children: React.Re
   let fullUser = null;
   let notificationCount = 0;
   let wishlistIds: string[] = [];
+  let hasAddresses = false;
 
   if (user?.id) {
     fullUser = await userProfile(user.id);
     notificationCount = await getUnreadNotificationCount(user.id);
     const items = await db.wishlistItem.findMany({ where: { userId: user.id }, select: { productId: true } });
     wishlistIds = items.map((i) => i.productId);
+
+    // Check if user has addresses in AddressBook
+    const addressCount = await db.address.count({ where: { userId: user.id } });
+    hasAddresses = addressCount > 0;
   }
 
   const alerts = [];
   if (fullUser) {
-    if (!fullUser.address) {
+    if (!hasAddresses) {
       alerts.push({
-        id: 'location-alert',
+        id: 'address-alert',
         type: 'warning' as const,
-        title: 'أكمل ملفك الشخصي',
-        description: 'الرجاء إضافة عنوانك لتسهيل عملية التوصيل.',
-        href: '/user/profile?tab=address',
+        title: 'أضف عنوانك الأول',
+        description: 'الرجاء إضافة عنوان لتسهيل عملية التوصيل.',
+        href: '/user/addresses',
       });
     }
     if (!fullUser.emailVerified) {

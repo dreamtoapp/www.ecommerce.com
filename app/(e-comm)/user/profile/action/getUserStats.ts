@@ -27,7 +27,7 @@ export async function getUserStats(): Promise<UserStats | null> {
       }),
       db.wishlistItem.count({ where: { userId: user.id } }),
       db.review.count({ where: { userId: user.id } }),
-      db.user.findUnique({ where: { id: user.id }, select: { createdAt: true, loyaltyPoints: true } }),
+      db.user.findUnique({ where: { id: user.id }, select: { createdAt: true } }),
     ]);
     console.log('getUserStats: orderAgg', orderAgg);
     console.log('getUserStats: wishlistCount', wishlistCount);
@@ -46,13 +46,13 @@ export async function getUserStats(): Promise<UserStats | null> {
     const result = {
       totalOrders: orderAgg._count._all || 0,
       totalSpent: orderAgg._sum.amount || 0,
-      loyaltyPoints: userInfo?.loyaltyPoints ?? 0,
+      // loyaltyPoints: userInfo?.loyaltyPoints ?? 0,
       memberSince,
       wishlistCount,
       reviewsCount,
     };
     console.log('getUserStats: result', result);
-    return result;
+    return { ...result, loyaltyPoints: 0 };
   } catch (error) {
     console.error('getUserStats: Error fetching stats', error);
     return null;

@@ -26,10 +26,7 @@ async function ProfilePage() {
       name: userData.name ?? '',
       email: userData.email ?? '',
       phone: userData.phone ?? '',
-      address: userData.address ?? '',
       password: userData.password ?? '',
-      latitude: userData.latitude?.toString(),
-      longitude: userData.longitude?.toString(),
     }}
     isOtp={userData.isOtp}
   />;

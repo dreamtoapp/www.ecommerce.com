@@ -10,9 +10,6 @@ declare module 'next-auth' {
     email: string;
     phone: string;
     role: string;
-    address: string;
-    latitude: string;
-    longitude: string;
     image?: string | null;
     isOauth: boolean;
     isOtp: boolean;

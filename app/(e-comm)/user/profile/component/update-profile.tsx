@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,13 +13,12 @@ import {
   Phone,
   Lock,
   MapPin,
-  LocateFixed,
   CheckCircle,
   Shield,
   Camera,
   Award,
   Settings,
-  LogOut
+  LogOut,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -29,7 +28,6 @@ import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import useAccurateGeolocation from '@/hooks/use-geo';
 import { ActionAlert } from './ActionAlert';
 
 import { updateUserProfile } from '../action/update-user-profile';
@@ -322,109 +320,32 @@ function SecurityCard({ register, errors, isSubmitting }: {
   );
 }
 
-// Location Management Card Component (55 lines)
-function LocationCard({ register, errors, isSubmitting, setValue }: {
-  register: any;
-  errors: any;
-  isSubmitting: boolean;
-  setValue: any;
-}) {
-  const { latitude, longitude, accuracy, googleMapsLink, loading } = useAccurateGeolocation();
-  const [coordsApproved, setCoordsApproved] = useState(false);
-
-  const handleApproveCoords = () => {
-    if (latitude && longitude) {
-      setValue('latitude', latitude.toString());
-      setValue('longitude', longitude.toString());
-      toast.success('تم تحديث الإحداثيات تلقائياً');
-      setCoordsApproved(true);
-    }
-  };
+// Address Management Card Component
+function AddressManagementCard() {
+  const router = useRouter();
 
   return (
     <Card className="shadow-lg border-l-4 border-l-feature-suppliers card-hover-effect">
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2 text-xl">
           <MapPin className="h-5 w-5 text-feature-suppliers icon-enhanced" />
-          إدارة الموقع
+          إدارة العناوين
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-foreground">العنوان</label>
-          <div className="relative">
-            <Input
-              {...register('address')}
-              placeholder="أدخل عنوانك التفصيلي"
-              disabled={isSubmitting}
-              className="pl-10 h-12 border-2 focus:border-feature-suppliers transition-colors"
-            />
-            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          </div>
-          <FormError message={errors.address?.message} />
-        </div>
-
-        <div className="bg-feature-suppliers/5 p-4 rounded-lg space-y-3">
-          <div className="flex items-center gap-2">
-            <LocateFixed className="h-4 w-4 text-feature-suppliers" />
-            <span className="font-medium text-foreground">الموقع التلقائي</span>
-          </div>
-
-          {loading ? (
-            <Skeleton className="h-8 w-full rounded" />
-          ) : latitude && longitude ? (
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">
-                الإحداثيات: <span className="font-mono">{latitude.toFixed(6)}, {longitude.toFixed(6)}</span>
-                {accuracy && <span> (دقة: {accuracy.toFixed(0)} متر)</span>}
-              </p>
-              {googleMapsLink && (
-                <a
-                  href={googleMapsLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-feature-suppliers hover:underline text-sm block"
-                >
-                  عرض على خرائط Google ←
-                </a>
-              )}
-              {!coordsApproved && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleApproveCoords}
-                  className="btn-professional"
-                >
-                  استخدام هذا الموقع
-                </Button>
-              )}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">لم يتم العثور على الموقع</p>
-          )}
-        </div>
-
-        <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">خط العرض</label>
-            <Input
-              {...register('latitude')}
-              placeholder="24.7136"
-              disabled={isSubmitting}
-              className="h-11 sm:h-12 border-2 focus:border-feature-suppliers transition-colors"
-            />
-            <FormError message={errors.latitude?.message} />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">خط الطول</label>
-            <Input
-              {...register('longitude')}
-              placeholder="46.6753"
-              disabled={isSubmitting}
-              className="h-11 sm:h-12 border-2 focus:border-feature-suppliers transition-colors"
-            />
-            <FormError message={errors.longitude?.message} />
+        <div className="text-center space-y-3">
+          <div className="bg-feature-suppliers/5 p-4 rounded-lg">
+            <MapPin className="h-8 w-8 text-feature-suppliers mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground mb-3">
+              قم بإدارة عناوينك لتسهيل عملية التوصيل
+            </p>
+            <Button
+              type="button"
+              onClick={() => router.push('/user/addresses')}
+              className="btn-professional w-full"
+            >
+              إدارة العناوين
+            </Button>
           </div>
         </div>
       </CardContent>
@@ -633,7 +554,7 @@ function LogoutCard() {
 
 // Helper function
 function calculateProfileCompletion(userData: UserFormData): number {
-  const fields = ['name', 'email', 'phone', 'address', 'image'];
+  const fields = ['name', 'email', 'phone', 'image'];
   const completedFields = fields.filter(field => userData[field as keyof UserFormData]);
   return Math.round((completedFields.length / fields.length) * 100);
 }
@@ -647,11 +568,12 @@ export default function UserProfileForm({
   isOtp: boolean;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get('redirect');
   const { update } = useSession();
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors, isSubmitting },
     reset,
   } = useForm<UserFormData>({
@@ -662,10 +584,7 @@ export default function UserProfileForm({
       name: userData.name ?? '',
       phone: userData.phone ?? '',
       email: userData.email ?? '',
-      address: userData.address ?? '',
       password: userData.password ?? '',
-      latitude: userData.latitude?.toString() ?? '',
-      longitude: userData.longitude?.toString() ?? '',
       image: userData.image ?? '',
     },
   });
@@ -673,11 +592,14 @@ export default function UserProfileForm({
   const onSubmit = async (formData: UserFormData) => {
     try {
       const result = await updateUserProfile({ ...formData });
-
       if (result.ok) {
         toast.success(result.msg || 'تم تحديث المعلومات بنجاح');
         await update();
         router.refresh();
+        if (redirectTo) {
+          router.push(redirectTo);
+          return;
+        }
       } else {
         toast.error(result.msg || 'حدث خطأ يرجى المحاولة لاحقاً');
       }
@@ -693,25 +615,11 @@ export default function UserProfileForm({
       name: userData.name ?? '',
       email: userData.email ?? '',
       phone: userData.phone ?? '',
-      address: userData.address ?? '',
       password: '',
       image: userData.image ?? '',
-      latitude: userData.latitude?.toString() ?? '',
-      longitude: userData.longitude?.toString() ?? '',
     };
     reset(formValues);
     toast.info('تمت إعادة تعيين الحقول إلى قيمها الأصلية.');
-  };
-
-  const scrollToComponent = (elementId: string) => {
-    const element = document.getElementById(elementId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      element.classList.add('ring-2', 'ring-offset-2', 'ring-primary', 'transition-shadow', 'duration-300');
-      setTimeout(() => {
-        element.classList.remove('ring-2', 'ring-offset-2', 'ring-primary', 'transition-shadow', 'duration-300');
-      }, 2000);
-    }
   };
 
   return (
@@ -728,15 +636,6 @@ export default function UserProfileForm({
                 description='تفعيل حسابك مطلوب للوصول الكامل إلى ميزات التطبيق وتقديم الطلبات.'
                 buttonText='الانتقال إلى التفعيل'
                 onAction={() => router.push('/auth/verify')}
-              />
-            )}
-            {(!userData.latitude || !userData.longitude) && (
-              <ActionAlert
-                variant='warning'
-                title='الموقع الجغرافي مطلوب'
-                description='يرجى تحديث موقعك لإكمال ملفك الشخصي وتسهيل عملية توصيل الطلبات.'
-                buttonText='تحديث الموقع الآن'
-                onAction={() => scrollToComponent('location-card')}
               />
             )}
           </div>
@@ -756,12 +655,7 @@ export default function UserProfileForm({
             </div>
 
             <div className="space-y-2 sm:space-y-3">
-              <LocationCard
-                register={register}
-                errors={errors}
-                isSubmitting={isSubmitting}
-                setValue={setValue}
-              />
+              <AddressManagementCard />
               <PreferencesCard />
             </div>
           </div>

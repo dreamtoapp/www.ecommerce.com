@@ -1,14 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 
-type GeolocationOptions = {
+/**
+ * useGeolocation - Accurate, robust geolocation React hook for browser apps.
+ * @param options GeolocationOptions (accuracy, retries, etc.)
+ * @returns GeolocationResult (lat, lng, accuracy, status, error, googleMapsLink)
+ */
+export type GeolocationOptions = Readonly<{
   enableHighAccuracy?: boolean;
   timeout?: number;
   maximumAge?: number;
   accuracyThreshold?: number;
   maxRetries?: number;
-};
+}>;
 
-type GeolocationResult = {
+export type GeolocationResult = Readonly<{
   latitude: number | null;
   longitude: number | null;
   accuracy: number | null;
@@ -16,9 +21,22 @@ type GeolocationResult = {
   loading: boolean;
   statusMessage: string | null;
   errorMessage: string | null;
-};
+}>;
 
-const useAccurateGeolocation = (options: GeolocationOptions = {}): GeolocationResult => {
+const useGeolocation = (options: GeolocationOptions = {}): GeolocationResult => {
+  // SSR safety
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+    return {
+      latitude: null,
+      longitude: null,
+      accuracy: null,
+      googleMapsLink: null,
+      loading: false,
+      statusMessage: 'الموقع غير متاح في هذا السياق',
+      errorMessage: null,
+    };
+  }
+
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
   const [accuracy, setAccuracy] = useState<number | null>(null);
@@ -139,4 +157,6 @@ const useAccurateGeolocation = (options: GeolocationOptions = {}): GeolocationRe
   };
 };
 
-export default useAccurateGeolocation;
+export default useGeolocation;
+// For backward compatibility
+export { useGeolocation };

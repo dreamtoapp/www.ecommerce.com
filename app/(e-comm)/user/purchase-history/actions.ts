@@ -24,11 +24,11 @@ export type PurchaseHistoryItem = {
  */
 export async function getUserPurchaseHistory(userId: string): Promise<PurchaseHistoryItem[]> {
   try {
-    // Get all orders for this user
+    // Get all orders for this user (all statuses)
     const orders = await db.order.findMany({
       where: {
         customerId: userId,
-        status: "DELIVERED", // Only show delivered orders
+        // Removed status filter to show all orders (PENDING, ASSIGNED, IN_TRANSIT, DELIVERED, CANCELED)
       },
       orderBy: {
         createdAt: 'desc', // Most recent first

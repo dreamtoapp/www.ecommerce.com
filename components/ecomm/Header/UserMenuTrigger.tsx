@@ -89,19 +89,19 @@ export default function UserMenuTrigger({ user, isMobile, alerts }: UserMenuTrig
             category: "account"
         },
         {
-            href: `/user/purchase-history`,
-            label: "سجل المشتريات",
-            icon: <ShoppingBag className="w-5 h-5" />,
-            description: "تصفح مشترياتك وطلباتك",
+            href: `/user/account`,
+            label: "لوحة الحساب",
+            icon: <CreditCard className="w-5 h-5" />,
+            description: "سجل المشتريات والحركات المالية",
             badge: userStats?.totalOrders && userStats.totalOrders > 0 ? userStats.totalOrders.toString() : undefined,
             category: "commerce"
         },
         {
-            href: `/user/statement?id=${user.id}`,
-            label: "الحركات المالية",
-            icon: <CreditCard className="w-5 h-5" />,
-            description: "عرض تاريخ المعاملات",
-            category: "finance"
+            href: `/user/order-tracking`,
+            label: "متابعة الطلبات",
+            icon: <ShoppingBag className="w-5 h-5" />,
+            description: "تتبع حالة الطلبات الخاصة بك",
+            category: "commerce"
         },
         {
             href: `/user/ratings`,

@@ -129,6 +129,19 @@ This is a comprehensive e-commerce platform built with Next.js 15.2.1, supportin
   - Implement retry mechanism for failed uploads
   - Add upload queue for multiple images
 
+## TODO: Implement 'إعادة الطلب' (Reorder) Feature in Order History
+
+- Add a 'إعادة الطلب' (Reorder) button to each past order in the account dashboard.
+- On click, add all available items from that order to the user's cart.
+- Handle out-of-stock/unavailable products gracefully (show feedback to user).
+- Show loading and success/error feedback (toast/snackbar).
+- Secure server action: only allow reordering for the user's own orders.
+- Update cart state and optionally redirect or prompt to view cart.
+- Track reorder events for analytics.
+- Test for all edge cases (all in stock, some out of stock, all unavailable).
+
+> This feature is planned for a future release. See assistant's action plan for details and best practices.
+
 ---
 *Last updated: [Current Date]*
 *Next review: [Weekly]* 

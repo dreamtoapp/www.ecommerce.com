@@ -109,7 +109,7 @@ function ServicesSection() {
     { name: 'تواصل معنا', href: '/contact', icon: Phone },
     { name: 'المفضلة', href: '/user/wishlist', icon: Heart },
     { name: 'التقييمات', href: '/user/ratings', icon: Star },
-    { name: 'الطلبات', href: '/user/purchase-history', icon: CreditCard },
+    { name: 'لوحة الحساب', href: '/user/account', icon: CreditCard },
   ];
 
   const customerService = [

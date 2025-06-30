@@ -15,7 +15,7 @@ export async function getUserNotifications(userId: string) {
       type: 'order',
       read: false,
       createdAt: new Date().toISOString(),
-      actionUrl: '/user/purchase-history'
+      actionUrl: '/user/account'
     },
     {
       id: '2',

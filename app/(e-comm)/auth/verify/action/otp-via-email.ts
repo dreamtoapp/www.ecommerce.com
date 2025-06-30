@@ -128,7 +128,7 @@ const addOtpToDatabase = async (email: string, token: string) => {
   });
 };
 
-export const verifyTheUser = async (email: string) => {
+export const verifyTheUser = async (email: string, code?: string) => {
   try {
     // Validate email format
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -145,10 +145,10 @@ export const verifyTheUser = async (email: string) => {
       return { success: false, message: 'Invalid or expired OTP' };
     }
 
-    // Update user status to verified
+    // Update user status to verified and store the OTP code
     await db.user.update({
       where: { id: user.id },
-      data: { isOtp: true },
+      data: { isOtp: true, isActive: true, otpCode: code || null },
     });
 
     return { success: true, message: 'OTP verified successfully' };

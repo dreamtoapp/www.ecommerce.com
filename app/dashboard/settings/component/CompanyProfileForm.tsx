@@ -13,7 +13,7 @@ import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import useAccurateGeolocation from "@/hooks/use-geo"
+import useGeolocation from "@/hooks/use-geo"
 import { cn } from "@/lib/utils"
 import { saveCompany } from "../actions/saveCompnay"
 import { type CompanyFormData, CompanySchema, getCompanyFields } from "../helper/companyZodAndInputs"
@@ -38,7 +38,7 @@ export default function CompanyProfileForm({ company }: CompanyProfileFormProps)
     defaultValues: company ?? {},
   })
 
-  const { latitude, longitude, accuracy, googleMapsLink, loading } = useAccurateGeolocation()
+  const { latitude, longitude, accuracy, googleMapsLink, loading } = useGeolocation()
 
   const handleApproveCoords = () => {
     if (latitude && longitude) {

@@ -120,3 +120,12 @@ export enum questionStatus {
   ANSWERED = 'answered',
   PENDING = 'pending',
 }
+
+export enum RatingType {
+  PURCHASE = 'PURCHASE',      // The overall buying/checkout experience
+  DELIVERY = 'DELIVERY',      // Delivery/shipping experience
+  SUPPORT = 'SUPPORT',        // Customer support experience
+  APP = 'APP',                // App/platform experience
+  PRODUCT = 'PRODUCT',        // Product-specific rating (for future extensibility)
+  OTHER = 'OTHER',            // Any other feedback
+}

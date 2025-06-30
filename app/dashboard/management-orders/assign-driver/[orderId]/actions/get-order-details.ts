@@ -58,6 +58,20 @@ export async function getOrderDetails(orderId: string): Promise<OrderDetails | n
             email: true,
           },
         },
+        address: {
+          select: {
+            id: true,
+            label: true,
+            district: true,
+            street: true,
+            buildingNumber: true,
+            floor: true,
+            apartmentNumber: true,
+            landmark: true,
+            latitude: true,
+            longitude: true,
+          },
+        },
         items: {
           include: {
             product: {
@@ -98,10 +112,10 @@ export async function getOrderDetails(orderId: string): Promise<OrderDetails | n
         email: order.customer.email || undefined,
       } : null,
       location: {
-        address: 'عنوان غير محدد', // Default since address not in Order model
-        latitude: order.latitude ? parseFloat(order.latitude) : undefined,
-        longitude: order.longitude ? parseFloat(order.longitude) : undefined,
-        district: undefined,
+        address: order.address?.label || 'عنوان غير محدد',
+        latitude: order.address?.latitude ? parseFloat(order.address.latitude) : undefined,
+        longitude: order.address?.longitude ? parseFloat(order.address.longitude) : undefined,
+        district: order.address?.district,
         city: 'الرياض', // Default city
       },
       items: order.items?.map(item => ({

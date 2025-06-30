@@ -47,7 +47,6 @@ export default function CartIconClient() {
         };
     }, []);
 
-    // Refresh cart when popover/sheet opens
     useEffect(() => {
         if (isOpen) {
             fetchCart();

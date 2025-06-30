@@ -33,15 +33,17 @@ export default function ProductListWithScroll({
     // Refs for performance optimization
     const abortControllerRef = useRef<AbortController | null>(null);
     const lastFetchTimeRef = useRef<number>(0);
+    const isInitialLoadRef = useRef<boolean>(true);
 
-    // Debounce mechanism to prevent rapid successive calls
-    const FETCH_DEBOUNCE_MS = 300;
-    const MAX_RETRY_ATTEMPTS = 3;
+    // Optimized debounce and retry settings
+    const FETCH_DEBOUNCE_MS = 500; // Increased from 300ms
+    const MAX_RETRY_ATTEMPTS = 2; // Reduced from 3
+    // const MIN_SCROLL_THRESHOLD = 0.8; // Load when 80% scrolled
 
-    // Set up intersection observer with optimized settings
+    // Optimized intersection observer settings
     const { ref, inView } = useInView({
         threshold: 0.1,
-        rootMargin: '400px 0px', // Increased for better preloading
+        rootMargin: '200px 0px', // Reduced from 400px to prevent premature loading
         triggerOnce: false,
         initialInView: false,
     });
@@ -49,10 +51,11 @@ export default function ProductListWithScroll({
     // Memoized product IDs for efficient duplicate checking
     const productIds = useMemo(() => new Set(products.map(p => p.id)), [products]);
 
+    // Optimized fetch function with better error handling
     const fetchMoreProducts = useCallback(async (isRetry = false) => {
         const now = Date.now();
 
-        // Debounce rapid calls
+        // Enhanced debounce logic
         if (!isRetry && now - lastFetchTimeRef.current < FETCH_DEBOUNCE_MS) {
             return;
         }
@@ -100,9 +103,9 @@ export default function ProductListWithScroll({
 
             setError('فشل في تحميل المنتجات. يرجى المحاولة مرة أخرى.');
 
-            // Auto-retry with exponential backoff
+            // Optimized auto-retry with shorter delays
             if (retryCount < MAX_RETRY_ATTEMPTS) {
-                const retryDelay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s
+                const retryDelay = Math.pow(1.5, retryCount) * 1000; // 1s, 1.5s, 2.25s
                 setTimeout(() => {
                     setRetryCount(prev => prev + 1);
                     fetchMoreProducts(true);
@@ -123,7 +126,14 @@ export default function ProductListWithScroll({
         fetchMoreProducts(true);
     }, [fetchMoreProducts]);
 
+    // Optimized effect with better conditions
     useEffect(() => {
+        // Skip initial load to prevent immediate fetching
+        if (isInitialLoadRef.current) {
+            isInitialLoadRef.current = false;
+            return;
+        }
+
         if (inView && hasMore && !loading && !error) {
             fetchMoreProducts();
         }

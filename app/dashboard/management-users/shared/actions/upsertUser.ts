@@ -60,11 +60,7 @@ async function createUser(data: UserFormData, role: UserRole) {
       name: data.name,
       email: data.email,
       phone: data.phone,
-      address: data.address,
       password: data.password,
-      sharedLocationLink: data.sharedLocationLink || undefined,
-      latitude: data.latitude,
-      longitude: data.longitude,
       role,
       // Vehicle fields for drivers
       vehicleType: data.vehicleType as any,
@@ -103,11 +99,7 @@ async function updateUser(data: UserFormData, role: UserRole) {
       name: data.name,
       email: data.email,
       phone: data.phone,
-      address: data.address,
       password: data.password,
-      sharedLocationLink: data.sharedLocationLink || undefined,
-      latitude: data.latitude,
-      longitude: data.longitude,
       role,
       // Vehicle fields for drivers
       vehicleType: data.vehicleType as any,

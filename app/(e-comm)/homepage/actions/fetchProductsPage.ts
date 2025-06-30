@@ -2,12 +2,10 @@
 
 import db from '@/lib/prisma';
 import { Product } from '@/types/databaseTypes';;
-import { Prisma } from '@prisma/client'; // Import Prisma
-
-// Removed promotion imports
+import { Prisma } from '@prisma/client';
 
 /**
- * Server action to fetch a page of products with pagination
+ * Optimized server action to fetch a page of products with pagination
  *
  * @param slug - Category slug to filter products (optional)
  * @param page - Page number (starting from 1)
@@ -20,12 +18,21 @@ export async function fetchProductsPage(
   pageSize: number = 8,
 ): Promise<{ products: Product[]; hasMore: boolean }> {
   try {
+    // Validate inputs
+    if (page < 1) page = 1;
+    if (pageSize < 1 || pageSize > 50) pageSize = 8; // Limit page size for performance
+
     // Calculate how many items to skip
     const skip = (page - 1) * pageSize;
 
-    // Find supplier if slug is provided
-    const whereClause: Prisma.ProductWhereInput = { published: true }; // Use const
+    // Build optimized where clause
+    const whereClause: Prisma.ProductWhereInput = { 
+      published: true,
+      // Only fetch products with valid images to reduce load
+      imageUrl: { not: null }
+    };
 
+    // Add supplier filter if slug provided
     if (slug && slug.trim() !== '') {
       const supplier = await db.supplier.findFirst({
         where: { slug },
@@ -37,7 +44,7 @@ export async function fetchProductsPage(
       }
     }
 
-    // Request one extra item to determine if there are more pages
+    // Optimized query with reduced includes for better performance
     const products = await db.product.findMany({
       where: whereClause,
       skip,
@@ -76,24 +83,22 @@ export async function fetchProductsPage(
         rating: true,
         reviewCount: true,
         supplierId: true,
+        // Simplified supplier data for better performance
         supplier: {
           select: {
             id: true,
             name: true,
             slug: true,
             logo: true,
-            email: true,
-            phone: true,
-            address: true,
-            type: true,
-            createdAt: true,
-            updatedAt: true,
           },
         },
         createdAt: true,
         updatedAt: true,
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: [
+        { outOfStock: 'asc' }, // Show in-stock items first
+        { createdAt: 'desc' }
+      ],
     });
 
     // Check if there are more products
@@ -102,13 +107,17 @@ export async function fetchProductsPage(
     // Remove the extra item before returning
     const paginatedProducts = hasMore ? products.slice(0, pageSize) : products;
 
-    // Return products directly (promotions system removed)
     return {
       products: paginatedProducts as Product[],
       hasMore,
     };
   } catch (error) {
     console.error('Error fetching products page:', error);
-    return { products: [], hasMore: false };
+    
+    // Return empty result instead of throwing to prevent UI crashes
+    return { 
+      products: [], 
+      hasMore: false 
+    };
   }
 }

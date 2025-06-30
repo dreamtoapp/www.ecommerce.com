@@ -34,19 +34,14 @@ export default {
         if (!user) throw new Error('User not found');
         if (user.password !== password) throw new Error('Invalid password');
 
+        // Coerce required fields to string (never null)
         return {
-          id: user.id,
-          name: user.name || undefined,
-          email: user.email || undefined,
-          role: user.role || '',
+          ...user,
+          id: user.id || '',
+          name: user.name || '',
+          email: user.email || '',
           phone: user.phone || '',
-          address: user.address || '',
-          latitude: user.latitude?.toString() || '0',
-          longitude: user.longitude?.toString() || '0',
-          image: user.image || null,
-          emailVerified: user.emailVerified?.toISOString() || null,
-          isOauth: user.isOauth || false,
-          isOtp: user.isOtp || false,
+          role: user.role || '',
         };
       },
     }),

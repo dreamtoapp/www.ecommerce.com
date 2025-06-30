@@ -88,8 +88,6 @@ export async function getAvailableDrivers({
         phone: true,
         email: true,
         image: true,
-        latitude: true,
-        longitude: true,
         updatedAt: true,
         // Vehicle fields from database
         vehicleType: true,
@@ -110,11 +108,7 @@ export async function getAvailableDrivers({
         },
         _count: {
           select: {
-            driverOrders: {
-              where: {
-                status: 'DELIVERED',
-              },
-            },
+            driverOrders: true,
           },
         },
       },
@@ -124,7 +118,12 @@ export async function getAvailableDrivers({
     const driversWithMetrics: DriverDetails[] = await Promise.all(
       drivers.map(async (driver) => {
         // Calculate performance metrics
-        const totalDelivered = driver._count.driverOrders;
+        const totalDelivered = await prisma.order.count({
+          where: { 
+            driverId: driver.id,
+            status: 'DELIVERED'
+          },
+        });
         const totalOrders = await prisma.order.count({
           where: { driverId: driver.id },
         });
@@ -136,8 +135,9 @@ export async function getAvailableDrivers({
         
         // FIXED: Calculate distance from driver location to STORE (not customer)
         // This is correct because: Driver → Store → Customer
-        const driverLat = parseFloat(driver.latitude || '24.7136');
-        const driverLng = parseFloat(driver.longitude || '46.6753');
+        // TODO: Get driver location from a separate driver location tracking system
+        const driverLat = 24.7136; // Default driver location - should come from driver tracking
+        const driverLng = 46.6753; // Default driver location - should come from driver tracking
         
         const distanceFromStore = calculateDistance(driverLat, driverLng, storeLat, storeLng);
         
@@ -162,11 +162,11 @@ export async function getAvailableDrivers({
           // - If yes: mark as unavailable (on delivery)
           // - If no: mark as available
           status: 'available' as 'available' | 'busy' | 'offline', // Default status
-          location: driver.latitude && driver.longitude ? {
-            latitude: parseFloat(driver.latitude),
-            longitude: parseFloat(driver.longitude),
+          location: {
+            latitude: driverLat,
+            longitude: driverLng,
             lastUpdated: driver.updatedAt,
-          } : undefined,
+          },
           currentOrders: driver.driverOrders.length,
           maxOrders: driver.maxOrders || 3, // Use database value or default
           vehicle: {

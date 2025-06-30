@@ -1,7 +1,7 @@
 'use server';
 
 import db from '@/lib/prisma';
-import { Slugify } from '@/utils/slug';
+import { Slugify } from '../../../../utils/slug';
 
 import {
   SupplierFormData,

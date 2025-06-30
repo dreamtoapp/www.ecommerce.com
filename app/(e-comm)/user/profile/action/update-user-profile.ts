@@ -44,10 +44,7 @@ export async function updateUserProfile(formData: UserFormData) {
     const updateData: any = {
       name: data.name || undefined,
       email: data.email || undefined,
-      address: data.address || undefined,
       password: data.password || undefined,
-      latitude: data.latitude ? parseFloat(data.latitude) : undefined,
-      longitude: data.longitude ? parseFloat(data.longitude) : undefined,
     };
 
     // ✅ نفّذ التحديث

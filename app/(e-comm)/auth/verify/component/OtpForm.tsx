@@ -3,8 +3,9 @@ import {
   useEffect,
   useState,
 } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-import { Loader2, AlertTriangle } from 'lucide-react'; // Import AlertTriangle
+import { Loader2, AlertTriangle, CheckCircle, Phone, MessageCircle } from 'lucide-react';
 
 import Link from '@/components/link';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,6 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
 import {
   InputOTP,
@@ -21,48 +21,37 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from '@/components/ui/input-otp';
+import { Alert } from '@/components/ui/alert';
 
-import {
-  otpViaEmail,
-  verifyTheUser,
-} from '../action/otp-via-email';
+import { otpViaWhatsApp, verifyTheUser, resendOTP } from '../action/otp-via-whatsapp';
+import Swal from 'sweetalert2';
 
-export default function OtpForm({ phone, email }: { phone: string; email: string }) {
-  // const { data: session, status } = useSession() as { data: UserData; status: string };
+export default function OtpForm({ phone }: { phone: string }) {
   const [otp, setOtp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<React.ReactNode>('');
   const [success, setSuccess] = useState('');
   const [timer, setTimer] = useState(60);
-  const [selectedMethod, setSelectedMethod] = useState<'sms' | 'whatsapp' | 'email' | null>(null);
   const [isOTPSent, setIsOTPSent] = useState(false);
   const [otpFromBackEnd, setOtpFromBackEnd] = useState('');
 
-  const userEmail = email || '';
   const userPhone = phone || '';
 
-  // Validation functions
-  const isValidEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get('redirect') || '/';
 
-  const isValidPhone = (phone: string) => {
-    const phoneRegex = /^\+?[0-9]{10,15}$/;
-    return phoneRegex.test(phone);
-  };
-
-  const hasValidContact =
-    (userEmail && isValidEmail(userEmail)) || (userPhone && isValidPhone(userPhone));
+  // Check if user has a phone number for display
+  const hasPhoneNumber = userPhone && userPhone.trim() !== '';
 
   useEffect(() => {
-    if (status === 'authenticated' && !hasValidContact) {
+    if (!hasPhoneNumber) {
       setError(
         <div className='mb-4 rounded-lg border-l-4 border-yellow-500 bg-yellow-100 p-4 text-yellow-700'>
           <p className='flex items-center gap-2'>
-            <AlertTriangle className='h-5 w-5' /> {/* Replace inline SVG */}
+            <AlertTriangle className='h-5 w-5' />
             <span>
-              بيانات الاتصال غير مكتملة أو غير صالحة.
+              رقم الهاتف غير متوفر في الحساب.
               <Link href='/profile' className='ml-2 text-primary underline'>
                 تحديث البيانات الشخصية
               </Link>
@@ -71,83 +60,76 @@ export default function OtpForm({ phone, email }: { phone: string; email: string
         </div>,
       );
     }
-  }, [hasValidContact]);
+  }, [hasPhoneNumber]);
 
   const handleSendOTP = async () => {
     setError('');
     setSuccess('');
-
-    if (!selectedMethod) {
-      return setError('الرجاء اختيار طريقة الإرسال');
-    }
-
-    if (selectedMethod === 'email') {
-      if (!userEmail) {
-        return setError(
-          <>
-            البريد الإلكتروني غير مسجل.
-            <Link href='/profile' className='ml-2 text-primary underline'>
-              تحديث البريد
-            </Link>
-          </>,
-        );
-      }
-      if (!isValidEmail(userEmail)) {
-        return setError(
-          <>
-            البريد الإلكتروني غير صالح.
-            <Link href='/profile' className='ml-2 text-primary underline'>
-              تصحيح البريد
-            </Link>
-          </>,
-        );
-      }
-      const { token } = await otpViaEmail(userEmail);
-      setOtpFromBackEnd(token || '');
-    }
-
-    if (selectedMethod === 'sms' || selectedMethod === 'whatsapp') {
-      if (!userPhone) {
-        return setError(
-          <>
-            رقم الهاتف غير مسجل.
-            <Link href='/profile' className='ml-2 text-primary underline'>
-              تحديث الرقم
-            </Link>
-          </>,
-        );
-      }
-      if (!isValidPhone(userPhone)) {
-        return setError(
-          <>
-            رقم الهاتف غير صالح.
-            <Link href='/profile' className='ml-2 text-primary underline'>
-              تصحيح الرقم
-            </Link>
-          </>,
-        );
-      }
-    }
-
     setIsLoading(true);
 
     try {
-      // Simulate API call - Replace with actual OTP sending logic
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const result = await otpViaWhatsApp();
 
-      setIsOTPSent(true);
-      setSuccess(`تم إرسال الرمز إلى ${selectedMethod === 'email' ? userEmail : userPhone}`);
-      setTimer(60);
-    } catch {
+      if (result.success) {
+        if ('token' in result && result.token) {
+          setOtpFromBackEnd(result.token);
+        } else {
+          setOtpFromBackEnd('');
+        }
+        setIsOTPSent(true);
+        setSuccess('تم إرسال رمز التحقق عبر WhatsApp بنجاح');
+        setTimer(60);
+        // Show OTP in dev mode
+        if (
+          process.env.NODE_ENV === 'development' &&
+          'token' in result && result.token
+        ) {
+          await Swal.fire({
+            icon: 'info',
+            title: 'رمز التحقق (وضع التطوير)',
+            text: `OTP: ${result.token}`,
+            confirmButtonText: 'نسخ',
+            didOpen: () => {
+              navigator.clipboard.writeText(result.token);
+            }
+          });
+        }
+      } else {
+        setError(result.message || 'حدث خطأ أثناء الإرسال');
+      }
+    } catch (error) {
+      console.error('Error sending OTP:', error);
       setError('حدث خطأ أثناء الإرسال. حاول مرة أخرى');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleResend = () => {
-    setTimer(60);
-    handleSendOTP();
+  const handleResend = async () => {
+    setError('');
+    setSuccess('');
+    setIsLoading(true);
+
+    try {
+      const result = await resendOTP();
+
+      if (result.success) {
+        if ('token' in result && result.token) {
+          setOtpFromBackEnd(result.token);
+        } else {
+          setOtpFromBackEnd('');
+        }
+        setSuccess('تم إعادة إرسال رمز التحقق عبر WhatsApp');
+        setTimer(60);
+      } else {
+        setError(result.message || 'حدث خطأ أثناء إعادة الإرسال');
+      }
+    } catch (error) {
+      console.error('Error resending OTP:', error);
+      setError('حدث خطأ أثناء إعادة الإرسال');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -162,30 +144,33 @@ export default function OtpForm({ phone, email }: { phone: string; email: string
     setIsLoading(true);
 
     try {
-      // Simulate verification - Replace with actual API call
-      if (otp !== otpFromBackEnd) {
-        setError('رمز التحقق غير صحيح. حاول مرة أخرى');
-      }
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const result = await verifyTheUser(otp);
 
-      if (otp === otpFromBackEnd) {
-        await verifyTheUser(userEmail);
-        setSuccess('تم التحقق بنجاح! جاري التوجيه...');
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+      if (result.success) {
+        await Swal.fire({
+          icon: 'success',
+          title: 'تم التحقق بنجاح!',
+          text: 'جاري تحويلك...',
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+        });
+
         setError('');
         setSuccess('');
         setOtp('');
         setIsOTPSent(false);
         setTimer(0);
-        setSelectedMethod(null);
         setOtpFromBackEnd('');
         setIsLoading(false);
-        window.location.href = '/';
-      }
 
-      // Add redirect logic here
-    } catch {
-      setError('رمز التحقق غير صحيح. حاول مرة أخرى');
+        router.push(redirectTo);
+      } else {
+        setError(result.message || 'رمز التحقق غير صحيح');
+      }
+    } catch (error) {
+      console.error('Error verifying OTP:', error);
+      setError('حدث خطأ أثناء التحقق من الرمز');
     } finally {
       setIsLoading(false);
     }
@@ -200,150 +185,116 @@ export default function OtpForm({ phone, email }: { phone: string; email: string
     }
   }, [timer, isOTPSent]);
 
-  if (status === 'loading') {
-    return (
-      <div className='flex min-h-screen items-center justify-center'>
-        <Loader2 className='h-8 w-8 animate-spin text-primary' />
-      </div>
-    );
-  }
-
   return (
-    <div className='flex items-center justify-center' dir='rtl'>
-      <Card className='w-full max-w-md'>
-        {error && <div className='mb-4'>{error}</div>}
-
-        <CardHeader>
-          <CardTitle className='text-2xl'>تأكيد الرقم السري</CardTitle>
-          <CardDescription>
-            {isOTPSent
-              ? `أدخل الرمز المرسل إلى ${selectedMethod === 'email' ? 'بريدك الإلكتروني' : 'رقمك'}`
-              : 'اختر طريقة الإرسال'}
-          </CardDescription>
-        </CardHeader>
-
-        {!isOTPSent ? (
-          <CardContent className='space-y-4'>
-            <div className='flex gap-2'>
-              <Button
-                variant={selectedMethod === 'sms' ? 'default' : 'outline'}
-                onClick={() => setSelectedMethod('sms')}
-                className='flex-1'
-                disabled={!userPhone || !isValidPhone(userPhone)}
-              >
-                SMS
-                {!userPhone && <span className='mr-1 text-xs'>(غير متوفر)</span>}
-                {userPhone && !isValidPhone(userPhone) && (
-                  <span className='mr-1 text-xs'>(غير صالح)</span>
-                )}
-              </Button>
-              <Button
-                variant={selectedMethod === 'whatsapp' ? 'default' : 'outline'}
-                onClick={() => setSelectedMethod('whatsapp')}
-                className='flex-1'
-                disabled={!userPhone || !isValidPhone(userPhone)}
-              >
-                WhatsApp
-                {!userPhone && <span className='mr-1 text-xs'>(غير متوفر)</span>}
-                {userPhone && !isValidPhone(userPhone) && (
-                  <span className='mr-1 text-xs'>(غير صالح)</span>
-                )}
-              </Button>
-              <Button
-                variant={selectedMethod === 'email' ? 'default' : 'outline'}
-                onClick={() => setSelectedMethod('email')}
-                className='flex-1'
-                disabled={!userEmail || !isValidEmail(userEmail)}
-              >
-                Email
-                {!userEmail && <span className='mr-1 text-xs'>(غير متوفر)</span>}
-                {userEmail && !isValidEmail(userEmail) && (
-                  <span className='mr-1 text-xs'>(غير صالح)</span>
-                )}
-              </Button>
+    <>
+      <div className="flex items-center justify-center min-h-[80vh]">
+        <Card className="w-full max-w-sm shadow-lg border-l-4 border-feature-users card-hover-effect card-border-glow p-6 space-y-4">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2 mb-2">
+              <MessageCircle className="h-5 w-5 text-feature-users icon-enhanced" />
+              <span className="text-xl font-bold">تفعيل الحساب</span>
             </div>
-
-            {selectedMethod && (
-              <div className='rounded-lg bg-gray-100 p-4 text-center'>
-                <p className='font-medium'>سيتم الإرسال إلى:</p>
-                <p className='text-primary'>{selectedMethod === 'email' ? userEmail : userPhone}</p>
+            <CardDescription className="text-sm mb-2">
+              لأمان حسابك، يرجى إدخال رمز التحقق المرسل إلى واتساب.
+            </CardDescription>
+            <div className="flex items-center gap-2 justify-center bg-muted/60 rounded-md px-4 py-2 mb-2">
+              <Phone className="h-4 w-4 text-feature-users icon-enhanced" />
+              <span className="font-bold text-feature-users text-lg">{phone}</span>
+            </div>
+            <div className="text-xs text-muted-foreground">الخطوة 2 من 3</div>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {success && (
+              <Alert variant="default" className="flex items-center gap-2 border-l-4 border-green-500 bg-green-50 text-green-800">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <span>{success}</span>
+              </Alert>
+            )}
+            {error && (
+              <Alert variant="destructive" className="flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4" />
+                <span>{error}</span>
+              </Alert>
+            )}
+            {process.env.NODE_ENV === 'development' && isOTPSent && otpFromBackEnd && (
+              <div className="mt-2 text-xs text-muted-foreground p-2 bg-yellow-50 border border-yellow-200 rounded">
+                <span>رمز الاختبار (Dev): </span>
+                <span className="font-mono font-bold text-yellow-700">{otpFromBackEnd}</span>
               </div>
             )}
-
-            <Button
-              className='w-full'
-              onClick={handleSendOTP}
-              disabled={!selectedMethod || isLoading || !hasValidContact}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className='ml-2 h-4 w-4 animate-spin' />
-                  جاري الإرسال...
-                </>
-              ) : (
-                'إرسال الرمز'
-              )}
-            </Button>
-
-            {error && typeof error === 'string' && (
-              <p className='text-center text-sm text-red-500'>{error}</p>
-            )}
-            {success && <p className='text-center text-sm text-green-500'>{success}</p>}
-          </CardContent>
-        ) : (
-          <form onSubmit={handleSubmit}>
-            <CardContent className='space-y-6'>
-              <div className='flex items-center justify-center' dir='ltr'>
-                <InputOTP
-                  maxLength={4}
-                  value={otp}
-                  onChange={(value) => setOtp(value)}
-                  disabled={isLoading}
-                >
-                  <InputOTPGroup>
-                    <InputOTPSlot index={0} />
-                    <InputOTPSlot index={1} />
-                    <InputOTPSeparator />
-                    <InputOTPSlot index={2} />
-                    <InputOTPSlot index={3} />
-                  </InputOTPGroup>
-                </InputOTP>
-              </div>
-
-              <div className='text-center text-sm'>
-                لم تستلم الرمز؟{' '}
+            {!isOTPSent ? (
+              <>
+                <div className="text-xs text-muted-foreground mt-1 mb-1">سيتم إرسال رمز التحقق إلى رقم الهاتف المسجل في حسابك.</div>
                 <Button
-                  type='button'
-                  variant='link'
-                  className='p-0 text-primary'
-                  onClick={handleResend}
-                  disabled={timer > 0 || isLoading}
+                  className="w-full btn-add bg-feature-users hover:bg-feature-users/90 text-white text-base py-1.5"
+                  onClick={handleSendOTP}
+                  disabled={isLoading || !hasPhoneNumber}
                 >
-                  إعادة الإرسال {timer > 0 && `(${timer})`}
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                      جاري الإرسال...
+                    </>
+                  ) : (
+                    'إرسال الرمز عبر واتساب'
+                  )}
                 </Button>
-              </div>
-
-              {error && typeof error === 'string' && (
-                <p className='text-center text-sm text-red-500'>{error}</p>
-              )}
-              {success && <p className='text-center text-sm text-green-500'>{success}</p>}
-            </CardContent>
-
-            <CardContent>
-              <Button type='submit' className='w-full' disabled={isLoading || otp.length !== 4}>
-                {isLoading ? (
-                  <>
-                    <Loader2 className='ml-2 h-4 w-4 animate-spin' />
-                    جاري التحقق...
-                  </>
-                ) : (
-                  'تأكيد الرمز'
-                )}
-              </Button>
-            </CardContent>
-          </form>
-        )}
-      </Card>
-    </div>
+              </>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <label className="block text-sm font-medium mb-1">أدخل رمز التحقق</label>
+                <div className="flex items-center justify-center gap-2" dir="ltr">
+                  <InputOTP
+                    maxLength={4}
+                    value={otp}
+                    onChange={setOtp}
+                    disabled={isLoading}
+                    autoFocus
+                  >
+                    <InputOTPGroup>
+                      <InputOTPSlot index={0} className="h-12 w-12 text-xl border border-muted-foreground shadow-sm focus:ring-2 focus:ring-feature-users transition-all duration-200" />
+                      <InputOTPSlot index={1} className="h-12 w-12 text-xl border border-muted-foreground shadow-sm focus:ring-2 focus:ring-feature-users transition-all duration-200" />
+                      <InputOTPSeparator />
+                      <InputOTPSlot index={2} className="h-12 w-12 text-xl border border-muted-foreground shadow-sm focus:ring-2 focus:ring-feature-users transition-all duration-200" />
+                      <InputOTPSlot index={3} className="h-12 w-12 text-xl border border-muted-foreground shadow-sm focus:ring-2 focus:ring-feature-users transition-all duration-200" />
+                    </InputOTPGroup>
+                  </InputOTP>
+                </div>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-2 mt-6 w-full">
+                  <span className="text-sm text-muted-foreground">لم تستلم الرمز؟</span>
+                  <Button
+                    type="button"
+                    className="btn-view-outline w-full sm:w-auto"
+                    variant="outline"
+                    onClick={handleResend}
+                    disabled={timer > 0 || isLoading}
+                    aria-label="إعادة إرسال الرمز"
+                  >
+                    {timer > 0 ? `إعادة إرسال الرمز (${timer})` : 'إعادة إرسال الرمز'}
+                  </Button>
+                </div>
+                <Button
+                  type="submit"
+                  className="w-full btn-professional shadow-lg hover:scale-105 transition"
+                  disabled={isLoading || otp.length !== 4}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                      جاري التحقق...
+                    </>
+                  ) : (
+                    'تأكيد الرمز'
+                  )}
+                </Button>
+                <div className="flex justify-center mt-2">
+                  <a href="/contact" className="text-xs text-feature-users underline">مساعدة؟</a>
+                </div>
+              </form>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 }

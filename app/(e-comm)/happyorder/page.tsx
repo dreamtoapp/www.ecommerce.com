@@ -4,42 +4,12 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Confetti from 'react-confetti'; // Import Confetti
 import useWindowSize from 'react-use/lib/useWindowSize'; // For responsive confetti
-import { CheckCircle, MessageSquareText } from 'lucide-react'; // Import directly
-import { iconVariants } from '@/lib/utils'; // Import CVA variants
-
-// Removed Icon import: import { Icon } from '@/components/icons';
+import { CheckCircle, Star } from 'lucide-react'; // Import directly
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCartStore } from '@/store/cartStore';
-
-// Semantic Colors
-const SEMANTIC_COLORS = {
-  success: {
-    border: 'border-green-500',
-    bg: 'bg-background',
-    text: 'text-green-700',
-  },
-  warning: {
-    border: 'border-yellow-500',
-    bg: 'bg-yellow-50',
-    text: 'text-yellow-700',
-  },
-  error: { border: 'border-red-500', bg: 'bg-red-50', text: 'text-red-700' },
-  info: {
-    border: 'border-blue-500',
-    bg: 'bg-background',
-    text: 'text-blue-700',
-  },
-  default: {
-    border: 'border-gray-300',
-    bg: 'bg-blue-600',
-    text: 'text-white',
-  },
-};
-
-const WHATSAPP_NUMBER = '1234567890'; // Replace with your WhatsApp number
-const WHATSAPP_MESSAGE = 'مرحبًا! أريد متابعة حالة طلبي برقم الطلب:';
+import { RatingType } from '@/constant/enums';
 
 export default function OrderConfirmation() {
   const router = useRouter();
@@ -51,6 +21,12 @@ export default function OrderConfirmation() {
   // Use useSearchParams to get query parameters
   const searchParams = useSearchParams();
   const orderId = searchParams.get('orderid');
+
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
+  const [ratingSubmitted, setRatingSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!orderId) {
@@ -70,7 +46,33 @@ export default function OrderConfirmation() {
     router.push('/');
   };
 
-  const whatsappLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`${WHATSAPP_MESSAGE} ${orderId}`)}`;
+  const handleSubmitRating = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/order-rating', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId,
+          rating,
+          comment,
+          type: RatingType.PURCHASE,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || 'حدث خطأ أثناء إرسال التقييم.');
+        setLoading(false);
+        return;
+      }
+      setRatingSubmitted(true);
+    } catch (e) {
+      setError('حدث خطأ أثناء إرسال التقييم.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (!orderId) return null;
 
@@ -88,54 +90,69 @@ export default function OrderConfirmation() {
         />
       )}
 
-      <Card
-        className={`w-full max-w-md ${SEMANTIC_COLORS.success.border} ${SEMANTIC_COLORS.success.bg}`}
-      >
+      <Card className='w-full max-w-md border-feature-commerce bg-feature-commerce-soft'>
         <CardHeader className='text-center'>
-          <CheckCircle className={iconVariants({ size: 'xl', className: 'mx-auto text-green-500' })} /> {/* Use direct import + CVA (adjust size if needed) */}
-          <CardTitle className='text-2xl'>تم تأكيد الطلب!</CardTitle>
+          <CheckCircle className='mx-auto text-feature-commerce h-12 w-12 icon-enhanced' />
+          <CardTitle className='text-2xl text-feature-commerce'>تم تأكيد الطلب!</CardTitle>
         </CardHeader>
         <CardContent className='space-y-4'>
-          <Alert
-            className={`border-blue-200 bg-blue-50 ${SEMANTIC_COLORS.info.border} ${SEMANTIC_COLORS.info.bg}`}
-          >
-            <AlertTitle className='text-lg font-semibold'>رقم الطلب: #{orderId}</AlertTitle>
-            <AlertDescription>لقد تلقينا طلبك بنجاح.</AlertDescription>
+          <Alert className='border-feature-commerce bg-feature-commerce-soft'>
+            <AlertTitle className='text-lg font-semibold text-feature-commerce'>رقم الطلب: #{orderId}</AlertTitle>
+            <AlertDescription className='text-feature-commerce'>لقد تلقينا طلبك بنجاح.</AlertDescription>
           </Alert>
-          <div className='text-center'>
-            <Button asChild variant='outline' className='w-full'>
-              <a
-                href={whatsappLink}
-                target='_blank'
-                rel='noopener noreferrer'
-                className='flex items-center gap-2'
-              >
-                <MessageSquareText className={iconVariants({ size: 'xs' })} /> {/* Use direct import + CVA */}
-                تتبع الطلب عبر واتساب
-              </a>
-            </Button>
+          {/* Tracking Info Message */}
+          <div className='mt-4 p-3 rounded bg-feature-commerce-soft border border-feature-commerce text-feature-commerce text-center'>
+            <div className='font-bold mb-1'>تتبع حالة الطلب</div>
+            <div className='text-sm'>يمكنك تتبع حالة طلبك من صفحة <span className='font-semibold'>تقارير التتبع</span>.</div>
           </div>
           {showClearCartDialog && (
-            <div
-              className={`mt-6 rounded-lg p-4 ${SEMANTIC_COLORS.default.border} ${SEMANTIC_COLORS.default.bg}`}
-            >
-              <h3 className='mb-2 text-lg font-medium'>إفراغ سلة التسوق؟</h3>
-              <p className='mb-4 text-sm text-gray-100'>
-                هل ترغب في إفراغ السلة لشراء منتجات جديدة؟
-              </p>
+            <div className='mt-6 rounded-lg p-4 border-feature-commerce bg-feature-commerce-soft'>
+              <h3 className='mb-2 text-lg font-medium text-feature-commerce'>إفراغ سلة التسوق؟</h3>
+              <p className='mb-4 text-sm text-muted-foreground'>هل ترغب في إفراغ السلة لشراء منتجات جديدة؟</p>
               <div className='flex gap-2'>
-                <Button onClick={handleClearCart} className='flex-1 bg-red-500 hover:bg-red-600'>
-                  نعم، إفراغ السلة
-                </Button>
-                <Button onClick={handleKeepCart} variant='outline' className='flex-1'>
-                  الاحتفاظ بالعناصر
-                </Button>
+                <Button onClick={handleClearCart} className='flex-1 btn-delete'>نعم، إفراغ السلة</Button>
+                <Button onClick={handleKeepCart} variant='outline' className='flex-1 btn-cancel-outline'>الاحتفاظ بالعناصر</Button>
               </div>
             </div>
           )}
+
+          {/* Google-style Trip/Journey Rating */}
+          <div className='mt-6 p-4 rounded-lg bg-feature-commerce-soft border border-feature-commerce'>
+            <h3 className='text-lg font-bold mb-2 text-feature-commerce'>ما رأيك في تجربة الشراء؟</h3>
+            {!ratingSubmitted ? (
+              <>
+                <div className='flex items-center gap-1 justify-center mb-2'>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      className={`h-7 w-7 cursor-pointer icon-enhanced transition-colors ${rating >= star ? 'text-feature-commerce' : 'text-muted-foreground'}`}
+                      onClick={() => setRating(star)}
+                      fill={rating >= star ? 'currentColor' : 'none'}
+                    />
+                  ))}
+                </div>
+                <textarea
+                  className='w-full mt-2 rounded border border-feature-commerce p-2 text-sm focus:ring-2 focus:ring-feature-commerce'
+                  placeholder='أضف ملاحظاتك (اختياري)'
+                  value={comment}
+                  onChange={e => setComment(e.target.value)}
+                  dir='rtl'
+                  rows={3}
+                />
+                <Button className='btn-save mt-3 w-full' onClick={handleSubmitRating} disabled={rating === 0 || loading}>
+                  {loading ? 'جاري الإرسال...' : 'إرسال التقييم'}
+                </Button>
+                {error && <div className='mt-2 text-red-600 text-sm text-center'>{error}</div>}
+              </>
+            ) : (
+              <div className='text-center text-feature-commerce font-bold py-4'>
+                شكرًا لتقييمك! نسعد بخدمتك دائمًا.
+              </div>
+            )}
+          </div>
         </CardContent>
         <CardFooter className='mt-4 flex justify-center'>
-          <Button variant='link' onClick={() => router.push('/')} className='text-gray-600'>
+          <Button variant='link' onClick={() => router.push('/')} className='text-feature-commerce'>
             متابعة التسوق →
           </Button>
         </CardFooter>

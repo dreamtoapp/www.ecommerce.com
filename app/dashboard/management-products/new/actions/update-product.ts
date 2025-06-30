@@ -2,7 +2,7 @@
 import { revalidatePath } from 'next/cache';
 
 import db from '@/lib/prisma'; // Adjusted path
-import { Slugify } from '@/utils/slug';
+import { Slugify } from '../../../../../utils/slug';
  
 
 export interface UpdateProductInput {

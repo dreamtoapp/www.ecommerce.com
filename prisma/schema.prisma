@@ -113,6 +113,13 @@ model Product {
 
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
+
+  // Performance indexes for infinite scroll and filtering
+  @@index([published, outOfStock, createdAt])
+  @@index([supplierId, published, outOfStock])
+  @@index([imageUrl])
+  @@index([rating])
+  @@index([price])
 }
 
 // Model for Product Translations
@@ -139,11 +146,7 @@ model User {
   image         String? // moved from Driver (was imageUrl)
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
-  address       String? @default("")
   accounts      Account[]
-  latitude       String? 
-  longitude       String? 
-  sharedLocationLink String? @default("") // shared location via whatsapp
   role          UserRole @default(CUSTOMER) // Use enum for roles
   isOtp         Boolean @default(false)
   isOauth       Boolean   @default(false)
@@ -167,6 +170,8 @@ model User {
   customerOrders Order[] @relation("OrderCustomer")
   driverOrders   Order[] @relation("OrderDriver")
   driverInWays   OrderInWay[] @relation("OrderInWayDriver")
+  addresses      Address[]
+  orderRatings   OrderRating[] // Ratings submitted by this user
 }
 
 model Account {
@@ -206,8 +211,8 @@ model Order {
   customer      User    @relation("OrderCustomer", fields: [customerId], references: [id]) // Relation to the User model
   driverId      String? @db.ObjectId // Reference to User (was Driver)
   driver        User?   @relation("OrderDriver", fields: [driverId], references: [id]) // Updated to User, explicit relation name
-  latitude      String? 
-  longitude    String?  
+  addressId     String  @db.ObjectId
+  address       Address @relation("AddressOrders", fields: [addressId], references: [id])
   status        OrderStatus @default(PENDING)
   amount        Float   @default(0)
   resonOfcancel String? @default("")
@@ -220,6 +225,10 @@ model Order {
   shift         Shift       @relation(fields: [shiftId], references: [id])
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
+
+  // --- Added fields ---
+  deliveryInstructions String? // تعليمات التوصيل
+  ratings        OrderRating[] // Ratings for this order
 }
 
 model OrderItem {
@@ -619,4 +628,51 @@ model CartItem {
   updatedAt DateTime @updatedAt
 
   @@unique([cartId, productId])
+}
+
+model Address {
+  id                   String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId               String   @db.ObjectId
+  user                 User     @relation(fields: [userId], references: [id])
+  label                String   @default("المنزل") // e.g. المنزل، العمل
+  district             String
+  street               String
+  buildingNumber       String
+  floor                String?
+  apartmentNumber      String?
+  landmark             String?
+  deliveryInstructions String?
+  // 🗺️ CRITICAL: Coordinates for driver navigation
+  latitude             String?
+  longitude            String?
+  isDefault            Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  orders               Order[]  @relation("AddressOrders")
+}
+
+enum RatingType {
+  PURCHASE
+  DELIVERY
+  SUPPORT
+  APP
+  PRODUCT
+  OTHER
+}
+
+model OrderRating {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  orderId   String     @db.ObjectId
+  userId    String     @db.ObjectId
+  rating    Int
+  comment   String?
+  type      RatingType
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  // Relations
+  order     Order      @relation(fields: [orderId], references: [id])
+  user      User       @relation(fields: [userId], references: [id])
+
+  @@index([orderId, userId, type])
 }

@@ -248,9 +248,9 @@ const OrderContent = ({ order }: { order: Order }) => (
             </CardDescription>
             <CustomerCardAction
                 phone={order.customer.phone || ''}
-                address={order.customer.address || ''}
-                latitude={order.customer.latitude || ''}
-                longitude={order.customer.longitude || ''}
+                address={order.address?.label || ''}
+                latitude={order.address?.latitude || ''}
+                longitude={order.address?.longitude || ''}
             />
         </div>
 

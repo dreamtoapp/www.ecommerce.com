@@ -22,7 +22,9 @@ export async function GET() {
         name: true,
         email: true,
         phone: true,
-        address: true
+        image: true,
+        addresses: true,
+        isOtp: true,
       }
     });
 

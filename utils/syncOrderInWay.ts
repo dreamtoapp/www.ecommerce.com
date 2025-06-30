@@ -18,8 +18,8 @@ export async function syncOrderInWay() {
             orderId: order.id,
             driverId: order.driverId,
             orderNumber: order.orderNumber,
-            latitude: order.latitude ? order.latitude : '',
-            longitude: order.longitude ? order.longitude : '',
+            // Remove latitude/longitude since they no longer exist on Order model
+            // TODO: Get location from order.address if needed
           },
         });
         addedCount++;

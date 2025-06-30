@@ -1,4 +1,4 @@
-import RegisterForm from './component/register-form';
+import RegisterForm from './components/register-form';
 import { PageProps } from '@/types/commonTypes';
 
 export default async function RegisterPage({ searchParams }: PageProps<Record<string, never>, { redirect?: string }>) {

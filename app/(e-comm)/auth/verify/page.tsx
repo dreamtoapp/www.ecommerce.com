@@ -1,35 +1,50 @@
 import { auth } from '@/auth';
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-
+import BackButton from '@/components/BackButton';
 import OtpForm from './component/OtpForm';
+import Background from '@/components/ui/Background';
 
-async function page() {
+export default async function VerifyPage() {
   const seisson = await auth();
 
   if (!seisson) {
     return (
-      <div className='flex items-center justify-center'>
-        <Card className='w-full max-w-md'>
-          <CardHeader>
-            <CardTitle className='text-2xl'>يرجى تسجيل الدخول </CardTitle>
-            <CardDescription>يجب أن تكون مسجلاً الدخول للوصول إلى هذه الصفحة</CardDescription>
-          </CardHeader>
-        </Card>
-      </div>
+      <>
+        <Background
+          backgroundStyle="commerceIndigo"
+          showRadial={true}
+          showAccent={true}
+          minHeight="min-h-screen"
+          centerContent={true}
+          padding="p-8"
+          patternStyle="blobs"
+          patternOpacity={0.8}
+        >
+          <OtpForm phone={""} />
+        </Background>
+      </>
     );
   }
 
   const userData = {
     phone: seisson?.user?.phone,
-    email: seisson?.user?.email,
   };
 
-  return <OtpForm phone={userData.phone} email={userData.email || ''} />;
+  return (
+    <>
+      <BackButton variant="default" />
+      <Background
+        backgroundStyle="usersBlue"
+        showRadial={true}
+        showAccent={true}
+        minHeight="min-h-screen"
+        centerContent={true}
+        padding="p-8"
+        patternStyle="animate-wavyChaos"
+        patternOpacity={1}
+        patternAnimation={true}
+      >
+        <OtpForm phone={userData.phone} />
+      </Background>
+    </>
+  );
 }
-
-export default page;

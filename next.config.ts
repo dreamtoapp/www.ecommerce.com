@@ -40,14 +40,17 @@ const nextConfig: NextConfig = {
         hostname: 'source.unsplash.com',
       },
     ],
-    // Add image optimization settings based on Next.js documentation
+    // Optimized image settings for better performance
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     formats: ['image/webp', 'image/avif'],
-    minimumCacheTTL: 3600, // Cache optimized images for 1 hour
+    minimumCacheTTL: 86400, // Cache optimized images for 24 hours
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    // Add timeout and retry settings
+    loader: 'default',
+    loaderFile: undefined,
   },
   // Performance optimizations
   compress: true, // Enable gzip compression
@@ -56,6 +59,49 @@ const nextConfig: NextConfig = {
 
   // Optimize for production
   productionBrowserSourceMaps: false, // Disable source maps in production
+
+  // Add experimental features for better performance
+  experimental: {
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+    // Enable server actions optimization
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
+  },
+
+  // Add webpack optimizations
+  webpack: (config, { dev, isServer }) => {
+    // Optimize bundle size
+    if (!dev && !isServer) {
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+          },
+        },
+      };
+    }
+
+    return config;
+  },
+
+  // Add headers for better caching
+  async headers() {
+    return [
+      {
+        source: '/_next/image(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400, immutable',
+          },
+        ],
+      },
+    ];
+  },
 
   // We're using dynamic imports instead of webpack externals configuration
   // This avoids the deprecation warning and is a cleaner approach

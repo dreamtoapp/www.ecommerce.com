@@ -29,7 +29,17 @@ export async function getOrderByStatus(driverId: string, status: OrderStatus) {
           select: {
             phone: true,
             name: true,
-            address: true,
+          },
+        },
+        address: {
+          select: {
+            label: true,
+            district: true,
+            street: true,
+            buildingNumber: true,
+            floor: true,
+            apartmentNumber: true,
+            landmark: true,
             latitude: true,
             longitude: true,
           },

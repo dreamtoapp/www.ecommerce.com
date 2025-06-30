@@ -2,7 +2,7 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import Image from 'next/image';
 import { redirect } from 'next/navigation';
-import { Star, TrendingUp, Award, Filter, Search, Calendar, Package, Heart, MessageCircle, ExternalLink } from 'lucide-react';
+import { Star, TrendingUp, Award, Filter, Search, Calendar, Package, Heart, MessageCircle, ExternalLink, CreditCard } from 'lucide-react';
 import { Suspense } from 'react';
 
 import { auth } from '@/auth';
@@ -248,9 +248,9 @@ function EmptyState() {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <Button asChild className="btn-add">
-                        <Link href='/user/purchase-history'>
-                            <Package className="w-4 h-4 mr-2" />
-                            سجل المشتريات
+                        <Link href='/user/account'>
+                            <CreditCard className="w-4 h-4 mr-2" />
+                            لوحة الحساب
                         </Link>
                     </Button>
                     <Button variant="outline" asChild className="btn-view-outline">

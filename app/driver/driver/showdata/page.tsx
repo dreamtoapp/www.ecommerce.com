@@ -86,7 +86,7 @@ async function page({
             <CardContent className='space-y-3 p-4'>
               <div className='flex items-center gap-3 text-gray-600'>
                 <User className={iconVariants({ size: 'sm', variant: 'muted' })} /> {/* Use direct import + CVA (adjust size if needed) */}
-                <span className='font-medium'>العميل: {order.customer.name}</span>
+                <span className='font-medium'>العميل: {order.customer?.name || 'غير معروف'}</span>
               </div>
 
               <div className='flex items-center gap-3 text-gray-600'>
@@ -110,8 +110,8 @@ async function page({
                 <StartTrip
                   orderId={order.id}
                   driverId={driverId}
-                  latitude={order.customer.latitude ?? ''}
-                  longitude={order.customer.longitude ?? ''}
+                  latitude={order.address?.latitude ?? ''}
+                  longitude={order.address?.longitude ?? ''}
                   driverName={order?.driver?.name ?? ''}
                 />
               </CardFooter>

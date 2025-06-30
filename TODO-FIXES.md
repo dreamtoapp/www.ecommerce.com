@@ -99,6 +99,43 @@
 
 ---
 
+## 🗺️ **LOCATION & DELIVERY ENHANCEMENTS**
+
+### 9.1. **Delivery Cost Calculator Based on Location**
+- **Issue**: Fixed delivery cost regardless of distance/zone
+- **Solution**: Dynamic pricing based on user location:
+  - Zone-based delivery pricing
+  - Distance calculation using coordinates
+  - Real-time delivery cost updates
+  - Integration with delivery service APIs
+- **Expected Impact**: Optimized delivery costs, better profit margins
+- **Priority**: 🔥 **HIGH**
+- **Status**: ❌ **PENDING**
+
+### 9.2. **Address Validation Against Real Coordinates**
+- **Issue**: Address text doesn't match GPS coordinates
+- **Solution**: Reverse geocoding validation:
+  - Verify address components against coordinates
+  - Auto-correct street names and districts
+  - Validate building numbers and postal codes
+  - Integration with mapping services (Google Maps API)
+- **Expected Impact**: Reduced delivery errors, improved customer satisfaction
+- **Priority**: 🔥 **HIGH**
+- **Status**: ❌ **PENDING**
+
+### 9.3. **Favorite Locations & Location History**
+- **Issue**: Users need to re-enter locations repeatedly
+- **Solution**: Smart location management:
+  - Save frequently used locations
+  - Location history with quick access
+  - Smart suggestions based on patterns
+  - Location nicknames (Home, Work, etc.)
+- **Expected Impact**: Faster checkout, improved UX
+- **Priority**: 🔶 **MEDIUM**
+- **Status**: ❌ **PENDING**
+
+---
+
 ## 🎯 **USER EXPERIENCE ENHANCEMENTS**
 
 ### 10. **Advanced Search Functionality**
@@ -464,6 +501,23 @@
   - Content automation tools
 - **Priority**: 🔶 **MEDIUM**
 - **Status**: ❌ **PENDING**
+
+---
+
+## ⭐ Ratings System Enhancements
+
+### 1. Dashboard/Admin Display of All Ratings
+- [ ] Add dashboard/admin pages to view and filter all ratings by type (purchase, delivery, support, app, etc.)
+- [ ] Implement analytics and export for ratings data
+
+### 2. User Profile Ratings History
+- [ ] Extend user profile ratings page to show all rating types (not just product reviews)
+- [ ] Group ratings by type and allow filtering
+
+### 3. Delivery/Support/App Rating Flows
+- [ ] Add delivery rating flow (e.g., after order is delivered)
+- [ ] Add support rating flow (e.g., after support ticket is closed)
+- [ ] Add app/platform experience rating flow (periodic prompt)
 
 ---
 

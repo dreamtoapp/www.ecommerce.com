@@ -6,7 +6,7 @@ import { z } from 'zod';
 
 import db from '@/lib/prisma';
 import { prevState } from '@/types/commonType';
-import { Slugify } from '@/utils/slug';
+import { Slugify } from '../../../../utils/slug';
 
 const offerSchema = z.object({
   name: z.string().min(1, 'اسم المجموعة مطلوب'),

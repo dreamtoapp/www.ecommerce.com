@@ -31,10 +31,7 @@ export const {
           token.name = existingUser.name;
           token.email = existingUser.email;
           token.image = existingUser.image;
-          token.address = existingUser.address;
           token.phone = existingUser.phone;
-          token.latitude = existingUser.latitude;
-          token.longitude = existingUser.longitude;
           token.role = existingUser.role;
         }
         return token;
@@ -53,9 +50,6 @@ export const {
       token.email = existingUser.email;
       token.phone = existingUser.phone;
       token.image = existingUser.image;
-      token.latitude = existingUser.latitude;
-      token.longitude = existingUser.longitude;
-      token.address = existingUser.address;
       token.isOtp = existingUser.isOtp;
 
       return token;
@@ -71,9 +65,6 @@ export const {
           email: token.email as string | null | undefined,
           phone: token.phone as string | undefined,
           image: token.image as string | undefined,
-          latitude: token.latitude as number | undefined,
-          longitude: token.longitude as number | undefined,
-          address: token.address as string | undefined,
           isOtp: token.isOtp as boolean | undefined,
           isOauth: token.isOauth as boolean | undefined,
         },
