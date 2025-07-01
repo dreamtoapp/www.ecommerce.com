@@ -5,6 +5,7 @@ import { getStatusInfo, formatCurrency } from '../account/helpers';
 import Image from 'next/image';
 import { auth } from '@/auth';
 import { Clock, Package, TrendingUp, CheckCircle } from 'lucide-react';
+import CancelOrderButton from './components/CancelOrderButton';
 
 const STATUS_STEPS = [
     { key: 'PENDING', label: 'قيد الانتظار', icon: Clock },
@@ -62,7 +63,15 @@ export default async function OrderTrackingPage() {
                                         <span className="text-xs text-muted-foreground">طلب #{order.orderNumber}</span>
                                         <span className="text-xs text-muted-foreground">{(order.createdAt instanceof Date ? order.createdAt : new Date(order.createdAt)).toLocaleDateString('ar-EG')}</span>
                                     </div>
-                                    <span className={`rounded-full px-3 py-1 text-xs font-bold ${statusInfo.color} bg-white/10 border ${statusInfo.borderColor}`}>{statusInfo.label}</span>
+                                    <div className="flex items-center gap-2">
+                                        <span className={`rounded-full px-3 py-1 text-xs font-bold ${statusInfo.color} bg-white/10 border ${statusInfo.borderColor}`}>{statusInfo.label}</span>
+                                        <CancelOrderButton
+                                            orderId={order.id}
+                                            orderNumber={order.orderNumber}
+                                            orderCreatedAt={order.createdAt instanceof Date ? order.createdAt : new Date(order.createdAt)}
+                                            orderStatus={order.status}
+                                        />
+                                    </div>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="flex items-center gap-4 mb-4">
