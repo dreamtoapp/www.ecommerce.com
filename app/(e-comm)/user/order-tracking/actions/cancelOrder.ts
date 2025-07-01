@@ -86,7 +86,7 @@ export async function cancelOrderByCustomer(_prevState: any, formData: FormData)
 
     // Revalidate relevant paths
     revalidatePath('/user/order-tracking');
-    revalidatePath('/user/purchase-history');
+    // revalidatePath('/user/purchase-history'); // Removed: purchase-history route deleted
 
     return { 
       success: true, 
